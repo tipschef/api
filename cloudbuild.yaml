@@ -33,3 +33,4 @@ steps:
     entrypoint: bash
     args:
       - -c
+      - gcloud run services update-traffic gcr-tipschef-$_PROJECT_ENV-$_CLOUD_RUN_LOCATION-api --region=$_CLOUD_RUN_LOCATION --platform=managed --to-latest
