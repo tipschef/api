@@ -1,6 +1,9 @@
+import os
+
 import uvicorn
 from fastapi import FastAPI
 
+from app.helpers.secret_manager_engine import SecretManagerEngine
 from router.home_router import router as home_router
 from router.user_router import router as user_router
 
@@ -13,7 +16,10 @@ def setup_router() -> None:
 
 
 def configure() -> None:
+    project_id = os.getenv('PROJECT_ID')
+    env = os.getenv('PROJECT_ENV')
     setup_router()
+    secret_manager_engine = SecretManagerEngine(project_id, 'secret-api', env)
 
 
 configure()
