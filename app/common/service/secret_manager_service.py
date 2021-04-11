@@ -5,13 +5,13 @@ from dataclasses import dataclass, field
 from google.cloud import secretmanager
 from google.cloud.secretmanager_v1 import SecretManagerServiceClient
 
-from app.tools.exceptions import SecretManagerCannotBeReachedException
+from app.common.exception.exceptions import SecretManagerCannotBeReachedException
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
-class SecretManagerEngine:
+class SecretManagerService:
     project: str
     secret_manager_prefix: str
     environment: str
