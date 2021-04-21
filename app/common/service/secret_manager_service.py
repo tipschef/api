@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from dataclasses import dataclass, field
 
 from google.cloud import secretmanager
@@ -17,7 +18,7 @@ class SecretManagerService:
     environment: str
     secret_manager_client: SecretManagerServiceClient = field(init=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.secret_manager_client = secretmanager.SecretManagerServiceClient()
 
     def get_secret_json(self) -> dict:
@@ -34,3 +35,7 @@ class SecretManagerService:
     @staticmethod
     def _create_secret_version_path(project: str, secret: str, secret_version: str) -> str:
         return f'projects/{project}/secrets/{secret}/versions/{secret_version}'
+
+
+def get_secret_manager_service() -> SecretManagerService:
+    return SecretManagerService(os.getenv('PROJECT_ID'), 'secret-api', os.getenv('PROJECT_ENV'))
