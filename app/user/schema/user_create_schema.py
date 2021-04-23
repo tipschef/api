@@ -1,5 +1,5 @@
-from app.user.schema.user_base_schema import UserBase
+from app.user.schema.user_base_schema import UserBaseSchema
 
 
-class UserCreate(UserBase):
+class UserCreateSchema(UserBaseSchema):
     password: str

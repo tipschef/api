@@ -1,5 +1,5 @@
 from app.database.service.database import Base, engine
-from app.user.model.user_model import User
+from app.user.model.user_model import UserModel
 
 
 def init_database() -> None:
