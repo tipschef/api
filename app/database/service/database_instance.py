@@ -2,8 +2,8 @@ from app.database.service.database import SessionLocal
 
 
 def get_db():
-    db = SessionLocal()
+    database = SessionLocal()
     try:
-        yield db
+        yield database
     finally:
-        db.close()
+        database.close()

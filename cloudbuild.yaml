@@ -4,12 +4,50 @@ substitutions:
   _PROJECT_ID: tipschef-dev
 
 steps:
+  - id: Install Test dependencies
+    name: docker.io/library/python:3.8.6
+    entrypoint: bash
+    args:
+      - -c
+      - pip install -r requirements-test.txt --user
+  - id: Run test
+    name: docker.io/library/python:3.8.6
+    waitFor:
+      - 'Install Test dependencies'
+    entrypoint: bash
+    args:
+      - -c
+      - python3 -m pytest tests/
+  - id: Run pylint
+    name: docker.io/library/python:3.8.6
+    waitFor:
+      - 'Install Test dependencies'
+    entrypoint: bash
+    args:
+      - -c
+      - python -m pylint app/
+  - id: Run vulture
+    name: docker.io/library/python:3.8.6
+    waitFor:
+      - 'Install Test dependencies'
+    entrypoint: bash
+    args:
+      - -c
+      - python3 -m vulture --min-confidence 90 app/
+  - id: Run flake8
+    name: docker.io/library/python:3.8.6
+    waitFor:
+      - 'Install Test dependencies'
+    entrypoint: bash
+    args:
+      - -c
+      - python -m flake8 app/
   - id: Build Docker image
     name: gcr.io/cloud-builders/docker
     entrypoint: bash
     args:
       - -c
-      - docker image build -t eu.gcr.io/$PROJECT_ID/gcr/tipschef-$SHORT_SHA  .
+      - docker image build -t eu.gcr.io/$_PROJECT_ID/gcr/tipschef-$SHORT_SHA  .
   - id: Push to GCR
     name: gcr.io/cloud-builders/docker
     waitFor:
@@ -17,7 +55,7 @@ steps:
     entrypoint: bash
     args:
       - -c
-      - docker -- push eu.gcr.io/$PROJECT_ID/gcr/tipschef-$SHORT_SHA
+      - docker -- push eu.gcr.io/$_PROJECT_ID/gcr/tipschef-$SHORT_SHA
   - id: Deploy on Cloud Run
     name: 'gcr.io/cloud-builders/gcloud'
     waitFor:
@@ -25,7 +63,7 @@ steps:
     entrypoint: bash
     args:
       - -c
-      - gcloud run deploy gcr-tipschef-$_PROJECT_ENV-$_CLOUD_RUN_LOCATION-api --image eu.gcr.io/$PROJECT_ID/gcr/tipschef-$SHORT_SHA --platform managed --port 8080 --timeout=15m --memory=1536Mi --concurrency=10 --cpu=1 --region $_CLOUD_RUN_LOCATION --revision-suffix=$SHORT_SHA --allow-unauthenticated
+      - gcloud run deploy gcr-tipschef-$_PROJECT_ENV-$_CLOUD_RUN_LOCATION-api --image eu.gcr.io/$_PROJECT_ID/gcr/tipschef-$SHORT_SHA --platform managed --port 8080 --timeout=15m --memory=1536Mi --concurrency=10 --cpu=1 --region $_CLOUD_RUN_LOCATION --revision-suffix=$SHORT_SHA --allow-unauthenticated
   - id: Set up traffic in Cloud Run to latest revision
     name: 'gcr.io/cloud-builders/gcloud'
     waitFor:

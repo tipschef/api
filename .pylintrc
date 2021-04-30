@@ -1,0 +1,14 @@
+[MASTER]
+ignore=database_init.py
+
+[MESSAGES CONTROL]
+
+disable=missing-module-docstring,
+        too-few-public-methods,
+        missing-class-docstring,
+        missing-function-docstring,
+        no-name-in-module,
+        raise-missing-from,
+        line-too-long,
+        super-init-not-called,
+        fixme

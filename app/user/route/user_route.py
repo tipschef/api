@@ -16,9 +16,9 @@ async def user_route():
 
 
 @router.post("/", response_model=UserSchema)
-async def create_user_route(user: UserCreateSchema, db: Session = Depends(get_db)):
+async def create_user_route(user: UserCreateSchema, database: Session = Depends(get_db)):
     try:
-        created_user_model = UserService.create_user(db=db, user=user)
+        created_user_model = UserService.create_user(database=database, user=user)
         return UserSchema.from_user_model(created_user_model)
     except UserAlreadyExistsException as exception:
         raise HTTPException(status_code=400, detail=str(exception))

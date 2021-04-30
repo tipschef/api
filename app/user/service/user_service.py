@@ -12,9 +12,9 @@ from app.user.schema.user_create_schema import UserCreateSchema
 class UserService:
 
     @staticmethod
-    def create_user(db: Session, user: UserCreateSchema) -> UserModel:
-        db_user = UserRepository.get_user_by_email(db, email=user.email)
+    def create_user(database: Session, user: UserCreateSchema) -> UserModel:
+        db_user = UserRepository.get_user_by_email(database, email=user.email)
         if db_user:
             raise UserAlreadyExistsException(user.email)
 
-        return UserRepository.create_user(db, user)
+        return UserRepository.create_user(database, user)
