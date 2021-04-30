@@ -33,7 +33,7 @@ steps:
     entrypoint: bash
     args:
       - -c
-      - python3 -m vulture --min-confidence 90 app/
+      - python3 -m vulture --min-confidence 90 app/ --exclude app/database/service/database_instance.py
   - id: Run flake8
     name: docker.io/library/python:3.8.6
     waitFor:
