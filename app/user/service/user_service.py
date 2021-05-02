@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 
+from fastapi import Depends
 from sqlalchemy.orm import Session
 
+from app.authentication.schema.authentication_schema import AuthenticationSchema
+from app.authentication.service.authentication_service import AuthenticationService
 from app.user.exception.user_route_exceptions import UserAlreadyExistsException
 from app.user.model.user_model import UserModel
 from app.user.repository.user_repository import UserRepository
@@ -18,3 +21,7 @@ class UserService:
             raise UserAlreadyExistsException(user.email)
 
         return UserRepository.create_user(database, user)
+
+    @staticmethod
+    async def get_current_active_user(current_user: AuthenticationSchema = Depends(AuthenticationService.get_current_user)):
+        return current_user

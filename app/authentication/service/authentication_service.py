@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import timedelta, datetime
 from typing import Optional
 
@@ -21,21 +23,6 @@ SECRET_KEY = 'dsfljldfgjlksdfgjlksdfjglikfdg'
 
 PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token")
-
-
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get('sub')
-        if username is None:
-            raise Exception
-    except JWTError:
-        raise Exception
-    for database in get_db():
-        user = AuthenticationService.get_user(database, username)
-        if user is None:
-            raise Exception
-        return user
 
 
 class AuthenticationService:
@@ -73,5 +60,16 @@ class AuthenticationService:
         return AuthenticatedSchema(username=user.username, token=acces_token, token_type='Bearer')
 
     @staticmethod
-    async def get_current_active_user(current_user: AuthenticationSchema = Depends(get_current_user)):
-        return current_user
+    async def get_current_user(token: str = Depends(oauth2_scheme)):
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            username: str = payload.get('sub')
+            if username is None:
+                raise Exception
+        except JWTError:
+            raise Exception
+        for database in get_db():
+            user = AuthenticationService.get_user(database, username)
+            if user is None:
+                raise Exception
+            return user

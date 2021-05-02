@@ -4,11 +4,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.authentication.exception.authentication_service_exceptions import WrongCredentialException
-from app.authentication.schema.authenticated_schema import Token, AuthenticatedSchema
+from app.authentication.schema.authenticated_schema import Token
 from app.authentication.schema.authentication_schema import AuthenticationSchema
 from app.authentication.service.authentication_service import AuthenticationService
 from app.database.service.database_instance import get_db
 from fastapi.security import OAuth2PasswordRequestForm
+
+from app.user.service.user_service import UserService
 
 router = APIRouter(prefix='/auth')
 
@@ -27,6 +29,6 @@ async def authenticate_user(form_data: OAuth2PasswordRequestForm = Depends(), da
 
 
 @router.get('/', response_model=Any)
-async def authenticate_user(current_user: AuthenticationSchema = Depends(AuthenticationService.get_current_active_user)):
+async def authenticate_user(current_user: AuthenticationSchema = Depends(UserService.get_current_active_user)):
     return [{"item_id": "Foo", "owner": current_user.username}]
 
