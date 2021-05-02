@@ -1,8 +1,8 @@
-from pydantic import BaseModel, EmailStr, SecretStr, validator
+from pydantic import BaseModel, SecretStr, validator
 
 
 class AuthenticationSchema(BaseModel):
-    email: EmailStr
+    username: str
     password: SecretStr
 
     @classmethod

@@ -1,7 +1,9 @@
 from datetime import timedelta, datetime
 from typing import Optional
 
-from jose import jwt
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt, JWTError
 from passlib.context import CryptContext
 from pydantic import SecretStr
 from sqlalchemy.orm import Session
@@ -9,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.authentication.exception.authentication_service_exceptions import WrongCredentialException
 from app.authentication.schema.authenticated_schema import AuthenticatedSchema
 from app.authentication.schema.authentication_schema import AuthenticationSchema
+from app.database.service.database_instance import get_db
 from app.user.model.user_model import UserModel
 from app.user.repository.user_repository import UserRepository
 
@@ -17,13 +20,29 @@ ALGORITHM = 'HS256'
 SECRET_KEY = 'dsfljldfgjlksdfgjlksdfjglikfdg'
 
 PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token")
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get('sub')
+        if username is None:
+            raise Exception
+    except JWTError:
+        raise Exception
+    for database in get_db():
+        user = AuthenticationService.get_user(database, username)
+        if user is None:
+            raise Exception
+        return user
 
 
 class AuthenticationService:
 
     @staticmethod
-    def _does_user_exists(database: Session, user: AuthenticationSchema) -> Optional[UserModel]:
-        return UserRepository.get_user_by_email(database, user.email)
+    def get_user(database: Session, username: str) -> Optional[UserModel]:
+        return UserRepository.get_user_by_username(database, username)
 
     @staticmethod
     def _create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -38,19 +57,21 @@ class AuthenticationService:
 
     @staticmethod
     def _verify_password(plain_password: SecretStr, hashed_password: str):
-        print(plain_password.get_secret_value())
-        print(hashed_password)
         return PWD_CONTEXT.verify(plain_password.get_secret_value(), hashed_password)
 
     @staticmethod
     def authentifie_user(database: Session, user: AuthenticationSchema) -> AuthenticatedSchema:
-        user_already_exist = AuthenticationService._does_user_exists(database, user)
+        user_already_exist = AuthenticationService.get_user(database, user.username)
         if not user_already_exist:
             raise WrongCredentialException
         if not AuthenticationService._verify_password(user.password, user_already_exist.password):
             raise WrongCredentialException
 
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        acces_token = AuthenticationService._create_access_token(data={'sub': user.email},
+        acces_token = AuthenticationService._create_access_token(data={'sub': user.username},
                                                                  expires_delta=access_token_expires)
-        return AuthenticatedSchema(email=user.email, token=acces_token)
+        return AuthenticatedSchema(username=user.username, token=acces_token, token_type='Bearer')
+
+    @staticmethod
+    async def get_current_active_user(current_user: AuthenticationSchema = Depends(get_current_user)):
+        return current_user
