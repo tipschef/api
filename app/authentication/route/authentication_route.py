@@ -7,7 +7,7 @@ from app.authentication.exception.authentication_service_exceptions import Wrong
 from app.authentication.schema.authenticated_schema import Token
 from app.authentication.schema.authentication_schema import AuthenticationSchema
 from app.authentication.service.authentication_service import AuthenticationService
-from app.database.service.database_instance import get_db
+from app.database.service.database_instance import get_database
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.user.service.user_service import UserService
@@ -16,7 +16,7 @@ router = APIRouter(prefix='/auth')
 
 
 @router.post('/token', response_model=Token)
-async def authenticate_user(form_data: OAuth2PasswordRequestForm = Depends(), database: Session = Depends(get_db)):
+async def authenticate_user(form_data: OAuth2PasswordRequestForm = Depends(), database: Session = Depends(get_database)):
     try:
         user = AuthenticationSchema(username=form_data.username, password=form_data.password)
         reponse = AuthenticationService.authentifie_user(database, user)

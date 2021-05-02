@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.database.service.database_instance import get_db
+from app.database.service.database_instance import get_database
 from app.user.exception.user_route_exceptions import UserAlreadyExistsException
 from app.user.schema.user_create_schema import UserCreateSchema
 from app.user.schema.user_schema import UserSchema
@@ -16,7 +16,7 @@ async def user_route():
 
 
 @router.post("/", response_model=UserSchema)
-async def create_user_route(user: UserCreateSchema, database: Session = Depends(get_db)):
+async def create_user_route(user: UserCreateSchema, database: Session = Depends(get_database)):
     try:
         created_user_model = UserService.create_user(database=database, user=user)
         return UserSchema.from_user_model(created_user_model)

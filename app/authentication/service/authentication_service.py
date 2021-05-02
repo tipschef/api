@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from app.authentication.exception.authentication_service_exceptions import WrongCredentialException
 from app.authentication.schema.authenticated_schema import AuthenticatedSchema
 from app.authentication.schema.authentication_schema import AuthenticationSchema
-from app.database.service.database_instance import get_db
+from app.database.service.database_instance import get_database
 from app.user.model.user_model import UserModel
 from app.user.repository.user_repository import UserRepository
 
@@ -68,7 +68,7 @@ class AuthenticationService:
                 raise Exception
         except JWTError:
             raise Exception
-        for database in get_db():
+        for database in get_database():
             user = AuthenticationService.get_user(database, username)
             if user is None:
                 raise Exception
