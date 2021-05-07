@@ -3,6 +3,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
+from app.database.service.database_instance import get_database
 from app.user.model.user_model import UserModel
 from app.user.schema.user_create_schema import UserCreateSchema
 from passlib.context import CryptContext
@@ -18,8 +19,9 @@ class UserRepository:
         return database.query(UserModel).filter(UserModel.email == email).first()
 
     @staticmethod
-    def get_user_by_username(database: Session, username: str) -> Optional[UserModel]:
-        return database.query(UserModel).filter(UserModel.username == username).first()
+    def get_user_by_username(username: str) -> Optional[UserModel]:
+        for database in get_database():
+            return database.query(UserModel).filter(UserModel.username == username).first()
 
     @staticmethod
     def create_user(database: Session, user: UserCreateSchema) -> UserModel:

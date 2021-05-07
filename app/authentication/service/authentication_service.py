@@ -8,28 +8,27 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from pydantic import SecretStr
-from sqlalchemy.orm import Session
 
 from app.authentication.exception.authentication_service_exceptions import WrongCredentialException
 from app.authentication.schema.authenticated_schema import AuthenticatedSchema
 from app.authentication.schema.authentication_schema import AuthenticationSchema
-from app.database.service.database_instance import get_database
 from app.user.model.user_model import UserModel
 from app.user.repository.user_repository import UserRepository
+from app.user.schema.user_schema import UserSchema
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 ALGORITHM = 'HS256'
 SECRET_KEY = 'dsfljldfgjlksdfgjlksdfjglikfdg'
 
-PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token")
+PWD_CONTEXT = CryptContext(schemes=['bcrypt'], deprecated='auto')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/v1/auth/token')
 
 
 class AuthenticationService:
 
     @staticmethod
-    def get_user(database: Session, username: str) -> Optional[UserModel]:
-        return UserRepository.get_user_by_username(database, username)
+    def get_user(username: str) -> Optional[UserModel]:
+        return UserRepository.get_user_by_username(username)
 
     @staticmethod
     def _create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -47,8 +46,8 @@ class AuthenticationService:
         return PWD_CONTEXT.verify(plain_password.get_secret_value(), hashed_password)
 
     @staticmethod
-    def authentifie_user(database: Session, user: AuthenticationSchema) -> AuthenticatedSchema:
-        user_already_exist = AuthenticationService.get_user(database, user.username)
+    def authentifie_user(user: AuthenticationSchema) -> AuthenticatedSchema:
+        user_already_exist = AuthenticationService.get_user(user.username)
         if not user_already_exist:
             raise WrongCredentialException
         if not AuthenticationService._verify_password(user.password, user_already_exist.password):
@@ -60,16 +59,15 @@ class AuthenticationService:
         return AuthenticatedSchema(username=user.username, token=acces_token, token_type='Bearer')
 
     @staticmethod
-    async def get_current_user(token: str = Depends(oauth2_scheme)):
+    async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserSchema:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            username: str = payload.get('sub')
+            username = payload.get('sub')
             if username is None:
                 raise Exception
         except JWTError:
             raise Exception
-        for database in get_database():
-            user = AuthenticationService.get_user(database, username)
-            if user is None:
-                raise Exception
-            return user
+        user = UserSchema.from_user_model(AuthenticationService.get_user(username))
+        if user is None:
+            raise Exception
+        return user

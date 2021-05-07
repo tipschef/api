@@ -9,6 +9,7 @@ from app.user.exception.user_route_exceptions import UserAlreadyExistsException
 from app.user.model.user_model import UserModel
 from app.user.repository.user_repository import UserRepository
 from app.user.schema.user_create_schema import UserCreateSchema
+from app.user.schema.user_schema import UserSchema
 
 
 @dataclass
@@ -23,5 +24,5 @@ class UserService:
         return UserRepository.create_user(database, user)
 
     @staticmethod
-    async def get_current_active_user(current_user: AuthenticationSchema = Depends(AuthenticationService.get_current_user)):
+    async def get_current_active_user(current_user: UserSchema = Depends(AuthenticationService.get_current_user)) -> UserSchema:
         return current_user
