@@ -1,16 +1,24 @@
 import uvicorn
+from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
+from app.authentication.route.authentication_route import router as authentication_router
 from app.common.route.home_router import router as home_router
 from app.database.service.database_init import init_database
 from app.user.route.user_route import router as user_router
-from app.authentication.route.authentication_route import router as authentication_router
-from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
-
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 
 
 @app.exception_handler(RequestValidationError)

@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from typing import Optional
 
+from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from app.database.service.database_instance import get_database
 from app.user.model.user_model import UserModel
 from app.user.schema.user_create_schema import UserCreateSchema
-from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -26,7 +26,7 @@ class UserRepository:
     @staticmethod
     def create_user(database: Session, user: UserCreateSchema) -> UserModel:
         hashed_password = user.password.get_secret_value()
-        db_user = UserModel(email=user.email, password=pwd_context.hash(hashed_password))
+        db_user = UserModel(email=user.email, password=pwd_context.hash(hashed_password), username=user.username)
         database.add(db_user)
         database.commit()
         database.refresh(db_user)
