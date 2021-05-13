@@ -4,9 +4,9 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from app.common.route.home_router import router as home_router
-from app.database.service.database_init import init_database
-from app.user.route.user_route import router as user_router
+from common.route.home_router import router as home_router
+from database.service.database_init import init_database
+from user.route.user_route import router as user_router
 
 app = FastAPI()
 
