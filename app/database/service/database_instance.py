@@ -1,7 +1,7 @@
 from app.database.service.database import SessionLocal
 
 
-def get_db():
+def get_database():
     database = SessionLocal()
     try:
         yield database

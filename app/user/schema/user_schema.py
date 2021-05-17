@@ -7,7 +7,7 @@ class UserSchema(UserBaseSchema):
 
     @staticmethod
     def from_user_model(user: UserModel):
-        return UserSchema(id=user.id, email=user.email)
+        return UserSchema(id=user.id, email=user.email, username= user.username)
 
     class Config:
         orm_mode = True
