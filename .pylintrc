@@ -11,4 +11,5 @@ disable=missing-module-docstring,
         raise-missing-from,
         line-too-long,
         super-init-not-called,
-        fixme
+        fixme,
+        invalid-envvar-default

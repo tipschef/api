@@ -25,7 +25,7 @@ app.add_middleware(
 async def validation_exception_handler(_: Request, exc: RequestValidationError):
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
+        content=jsonable_encoder({'detail': exc.errors(), 'body': exc.body}),
     )
 
 
@@ -50,6 +50,7 @@ def configure() -> None:
     setup_router()
 
 
+configure()
+
 if __name__ == '__main__':
-    configure()
     uvicorn.run(app, host='127.0.0.1', port=5050)
