@@ -9,4 +9,5 @@ class UserCreateSchema(UserBaseSchema):
     @classmethod
     @validator('password')
     def encode_password(cls, value: str):
+        _ = cls
         return SecretStr(value)

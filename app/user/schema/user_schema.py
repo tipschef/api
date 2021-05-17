@@ -1,3 +1,5 @@
+from pydantic import EmailStr
+
 from app.user.model.user_model import UserModel
 from app.user.schema.user_base_schema import UserBaseSchema
 
@@ -7,7 +9,7 @@ class UserSchema(UserBaseSchema):
 
     @staticmethod
     def from_user_model(user: UserModel):
-        return UserSchema(id=user.id, email=user.email, username= user.username)
+        return UserSchema(id=user.id, email=EmailStr(user.email), username=user.username)
 
     class Config:
         orm_mode = True

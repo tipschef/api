@@ -8,7 +8,5 @@ class AuthenticationSchema(BaseModel):
     @classmethod
     @validator('password')
     def password_should_be_encoded(cls, value: str) -> SecretStr:
+        _ = cls
         return SecretStr(value)
-
-
-
