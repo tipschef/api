@@ -5,11 +5,10 @@ from app.recipe.schema.recipe_base_schema import RecipeBaseSchema
 
 
 class RecipeSchema(RecipeBaseSchema):
-    created_date: datetime
     creator_id: int
 
     @staticmethod
-    def from_recipe_base_schema(recipe: RecipeBaseSchema, created_date: datetime, creator_id: int):
+    def from_recipe_base_schema(recipe: RecipeBaseSchema, creator_id: int):
         return RecipeSchema(id=recipe.id,
                             min_tier=recipe.min_tier,
                             name=recipe.name,
@@ -18,7 +17,6 @@ class RecipeSchema(RecipeBaseSchema):
                             thumbnail_id=recipe.thumbnail_id,
                             video_id=recipe.video_id,
                             steps=recipe.steps,
-                            created_date=created_date,
                             creator_id=creator_id)
 
     @staticmethod
@@ -31,5 +29,4 @@ class RecipeSchema(RecipeBaseSchema):
                             thumbnail_id=recipe.thumbnail_id,
                             video_id=recipe.video_id,
                             steps=recipe.steps,
-                            created_date=recipe.created_date,
                             creator_id=recipe.creator_id)

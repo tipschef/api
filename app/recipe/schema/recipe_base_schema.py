@@ -1,8 +1,8 @@
-from datetime import datetime
 from typing import List
 
 from pydantic import BaseModel
 
+from app.recipe.schema.media_schema import MediaSchema
 from app.recipe.schema.step_schema import StepSchema
 
 
@@ -12,6 +12,6 @@ class RecipeBaseSchema(BaseModel):
     name: str
     description: str
     is_deleted: bool
-    thumbnail_id: int
-    video_id: int
+    thumbnail: MediaSchema
+    video: MediaSchema
     steps: List[StepSchema]
