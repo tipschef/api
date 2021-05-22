@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List
 
-from sqlalchemy import false
 from sqlalchemy.orm import Session
 
 from app.recipe.model.step_model import StepModel
@@ -37,4 +36,4 @@ class StepRepository:
 
     @staticmethod
     def delete_multiple_steps(database: Session, steps: List[StepModel]) -> None:
-        [StepRepository.delete_step_by_id(database, step.id) for step in steps]
+        _ = [StepRepository.delete_step_by_id(database, step.id) for step in steps]

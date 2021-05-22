@@ -1,11 +1,12 @@
 from datetime import datetime
+from typing import Optional
 
 from app.recipe.model.step_model import StepModel
 from app.recipe.schema.step_base_schema import StepBaseSchema
 
 
 class StepSchema(StepBaseSchema):
-    created_date: datetime
+    created_date: Optional[datetime]
     id: int
 
     @staticmethod

@@ -9,8 +9,8 @@ from app.recipe.schema.step_schema import StepSchema
 
 class RecipeResponseSchema(RecipeResponseBaseSchema):
     creator_id: int
-    last_updated: Optional[datetime]
-    created_at: Optional[datetime]
+    last_updated: Optional[datetime] = None
+    created_at: Optional[datetime] = None
 
     @staticmethod
     def from_recipe_model(recipe: RecipeModel, steps: List[StepSchema], thumbnail: MediaSchema, video: MediaSchema):

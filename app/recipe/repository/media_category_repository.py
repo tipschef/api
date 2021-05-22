@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import List
 
-from sqlalchemy import false
 from sqlalchemy.orm import Session
 
 

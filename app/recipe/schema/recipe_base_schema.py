@@ -13,6 +13,3 @@ class RecipeBaseSchema(BaseModel):
     thumbnail: MediaBaseSchema
     video: MediaBaseSchema
     steps: List[StepBaseSchema]
-
-
-

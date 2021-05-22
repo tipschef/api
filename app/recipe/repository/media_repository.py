@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from sqlalchemy import false
 from sqlalchemy.orm import Session
 
 from app.recipe.model.media_model import MediaModel
-from app.recipe.schema.media_schema import MediaBaseSchema, MediaSchema
+from app.recipe.schema.media_schema import MediaBaseSchema
 
 
 @dataclass
@@ -34,7 +33,3 @@ class MediaRepository:
             MediaModel.is_deleted.is_(False), MediaModel.id == media_id).update(
             {MediaModel.path: path})
         database.commit()
-
-
-
-

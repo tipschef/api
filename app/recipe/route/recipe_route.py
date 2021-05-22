@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -44,7 +43,7 @@ async def get_my_recipe(database: Session = Depends(get_database), current_user:
 
 
 @router.get('/{recipe_id}', response_model=RecipeResponseSchema, tags=['recipes'])
-async def get_a_recipe(recipe_id: int, database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) ->RecipeResponseSchema:
+async def get_a_recipe(recipe_id: int, database: Session = Depends(get_database), _: UserSchema = Depends(UserService.get_current_active_user)) -> RecipeResponseSchema:
     try:
         recipe = RecipeService.get_a_recipe_by_id(database, recipe_id)
         return recipe
@@ -56,22 +55,10 @@ async def get_a_recipe(recipe_id: int, database: Session = Depends(get_database)
 
 
 @router.delete('/{recipe_id}', response_model=dict, tags=['recipes'])
-async def delete_a_recipe(recipe_id: int, database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) ->dict:
+async def delete_a_recipe(recipe_id: int, database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
-        RecipeService.delete_a_recipe_by_id(database, recipe_id)
+        RecipeService.delete_a_recipe_by_id(database, recipe_id, current_user)
         return {'status': 'Done'}
-    except RecipeIdNotFoundException as exception:
-        raise HTTPException(status_code=404, detail=str(exception))
-    except Exception as exception:
-        print(exception)
-        raise HTTPException(status_code=500, detail='Server exception')
-
-
-@router.patch('/{recipe_id}', response_model=dict, tags=['recipes'])
-async def update_a_recipe(recipe_id: int, recipe: RecipeResponseSchema, database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
-    try:
-        RecipeService.update_a_recipe_by_id(database, recipe_id, current_user, recipe)
-        return {}
     except RecipeIdNotFoundException as exception:
         raise HTTPException(status_code=404, detail=str(exception))
     except CannotModifyOthersPeopleRecipeException as exception:
@@ -81,3 +68,15 @@ async def update_a_recipe(recipe_id: int, recipe: RecipeResponseSchema, database
         raise HTTPException(status_code=500, detail='Server exception')
 
 
+@router.patch('/{recipe_id}', response_model=dict, tags=['recipes'])
+async def update_a_recipe(recipe_id: int, recipe: RecipeResponseSchema, database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+    try:
+        RecipeService.update_a_recipe_by_id(database, recipe_id, current_user, recipe)
+        return {'status': 'Done'}
+    except RecipeIdNotFoundException as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
+    except CannotModifyOthersPeopleRecipeException as exception:
+        raise HTTPException(status_code=403, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')

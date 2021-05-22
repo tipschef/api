@@ -52,13 +52,15 @@ class RecipeService:
         return RecipeResponseSchema.from_recipe_model(recipe, steps=steps, thumbnail=thumbnail_media, video=video_media)
 
     @staticmethod
-    def delete_a_recipe_by_id(database: Session, recipe_id: int) -> bool:
+    def delete_a_recipe_by_id(database: Session, recipe_id: int, current_user: UserSchema) -> bool:
         recipe = RecipeRepository.get_recipe_by_id(database, recipe_id)
         if recipe is None:
             raise RecipeIdNotFoundException()
+        if recipe.creator_id != current_user.id:
+            raise CannotModifyOthersPeopleRecipeException()
         MediaRepository.delete_media_by_id(database, recipe.video_id)
         MediaRepository.delete_media_by_id(database, recipe.thumbnail_id)
-        [StepRepository.delete_step_by_id(database, step.id) for step in StepRepository.get_steps_by_recipe_id(database, recipe_id)]
+        _ = [StepRepository.delete_step_by_id(database, step.id) for step in StepRepository.get_steps_by_recipe_id(database, recipe_id)]
         RecipeRepository.delete_recipe_by_id(database, recipe_id)
         return True
 
@@ -69,23 +71,27 @@ class RecipeService:
 
         if recipe_from_db is None:
             raise RecipeIdNotFoundException()
-        elif recipe_from_db.creator_id != current_user.id:
+        if recipe_from_db.creator_id != current_user.id:
             raise CannotModifyOthersPeopleRecipeException()
 
+        # update thumbnail
         if recipe.thumbnail.id is not None and recipe.thumbnail.id == recipe_from_db.thumbnail_id:
             MediaRepository.update_media_by_id(database, recipe_from_db.thumbnail_id, recipe.thumbnail.path)
         else:
             MediaRepository.delete_media_by_id(database, recipe_from_db.thumbnail_id)
             recipe_to_update.thumbnail.id = MediaRepository.create_media(database, recipe.thumbnail).id
-
+        # update video
         if recipe.video.id is not None and recipe.video.id == recipe_from_db.video_id:
             MediaRepository.update_media_by_id(database, recipe_from_db.video_id, recipe.video.path)
         else:
             MediaRepository.delete_media_by_id(database, recipe_from_db.video_id)
             recipe_to_update.video.id = MediaRepository.create_media(database, recipe.video).id
 
+        # update recipe
         RecipeRepository.update_recipe_by_id(database, recipe_id, recipe_to_update)
 
+        _ = [StepRepository.delete_step_by_id(database, step.id) for step in StepRepository.get_steps_by_recipe_id(database, recipe_id)]
 
+        StepRepository.create_steps(database, recipe.steps, recipe_id)
 
-
+        return True
