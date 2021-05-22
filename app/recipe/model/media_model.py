@@ -10,6 +10,6 @@ class MediaModel(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     path = Column(String(255), index=True)
-    is_deleted = Column(Boolean, index=True)
+    is_deleted = Column(Boolean, index=True, default=False)
     created_date = Column(DateTime, default=datetime.datetime.utcnow, index=True)
     media_category_id = Column(Integer, ForeignKey('media_category.id'), index=True)

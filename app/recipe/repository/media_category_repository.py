@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from typing import List
 
+from sqlalchemy import false
 from sqlalchemy.orm import Session
+
 
 from app.recipe.model.media_category_model import MediaCategoryModel
 from app.recipe.schema.media_category_schema import MediaCategorySchema
@@ -12,11 +14,11 @@ class MediaCategoryRepository:
 
     @staticmethod
     def get_all_media_category(database: Session) -> List[MediaCategoryModel]:
-        return database.query(MediaCategoryModel).filter(MediaCategoryModel.is_deleted is False).all()
+        return database.query(MediaCategoryModel).filter(MediaCategoryModel.is_deleted.is_(False)).all()
 
     @staticmethod
     def get_one_media_category(database: Session, media_category_id: int) -> List[MediaCategoryModel]:
-        return database.query(MediaCategoryModel).filter(MediaCategoryModel.is_deleted is False and MediaCategoryModel.id == media_category_id).all()
+        return database.query(MediaCategoryModel).filter(MediaCategoryModel.is_deleted.is_(False), MediaCategoryModel.id == media_category_id).all()
 
     @staticmethod
     def create_media_category(database: Session, media_category: MediaCategorySchema) -> MediaCategoryModel:
@@ -29,15 +31,12 @@ class MediaCategoryRepository:
 
     @staticmethod
     def delete_media_category(database: Session, media_category_id: int) -> None:
-        database.query(MediaCategoryModel).filter(MediaCategoryModel.is_deleted is False and MediaCategoryModel.id == media_category_id).update({MediaCategoryModel.is_deleted: True})
+        database.query(MediaCategoryModel).filter(MediaCategoryModel.is_deleted.is_(False), MediaCategoryModel.id == media_category_id).update({MediaCategoryModel.is_deleted: True})
         database.commit()
 
     @staticmethod
     def update_media_category(database: Session, media_category_id: int, media_category: MediaCategorySchema) -> None:
-        m = database.query(MediaCategoryModel).filter(
-            MediaCategoryModel.is_deleted is False and MediaCategoryModel.id == media_category_id).update(
+        database.query(MediaCategoryModel).filter(
+            MediaCategoryModel.is_deleted.is_(False), MediaCategoryModel.id == media_category_id).update(
             {MediaCategoryModel.name: media_category.name, MediaCategoryModel.description: media_category.description})
-        print(m)
         database.commit()
-        database.refresh(media_category)
-        return None

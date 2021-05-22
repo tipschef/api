@@ -2,16 +2,17 @@ from typing import List
 
 from pydantic import BaseModel
 
-from app.recipe.schema.media_schema import MediaSchema
-from app.recipe.schema.step_schema import StepSchema
+from app.recipe.schema.media_base_schema import MediaBaseSchema
+from app.recipe.schema.step_base_schema import StepBaseSchema
 
 
 class RecipeBaseSchema(BaseModel):
-    id: int
     min_tier: int
     name: str
     description: str
-    is_deleted: bool
-    thumbnail: MediaSchema
-    video: MediaSchema
-    steps: List[StepSchema]
+    thumbnail: MediaBaseSchema
+    video: MediaBaseSchema
+    steps: List[StepBaseSchema]
+
+
+

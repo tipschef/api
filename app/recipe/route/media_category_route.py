@@ -12,7 +12,7 @@ from app.user.service.user_service import UserService
 router = APIRouter(prefix='/media_category')
 
 
-@router.get('/', response_model=List[MediaCategoryResponseSchema])
+@router.get('/', response_model=List[MediaCategoryResponseSchema], tags=['media_categories'])
 async def get_all_media_category(database: Session = Depends(get_database),
                                  current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
     MediaCategoryResponseSchema]:
@@ -24,7 +24,7 @@ async def get_all_media_category(database: Session = Depends(get_database),
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.post('/', response_model=MediaCategoryResponseSchema)
+@router.post('/', response_model=MediaCategoryResponseSchema, tags=['media_categories'])
 async def create_media_category(media_category: MediaCategorySchema, database: Session = Depends(get_database),
                                 current_user: UserSchema = Depends(
                                     UserService.get_current_active_user)) -> MediaCategoryResponseSchema:
@@ -36,24 +36,24 @@ async def create_media_category(media_category: MediaCategorySchema, database: S
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.post('/{media_category_id}', response_model=dict)
+@router.delete('/{media_category_id}', response_model=dict, tags=['media_categories'])
 async def delete_media_category(media_category_id: int, database: Session = Depends(get_database),
                                 current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
-        media_category = MediaCategoryService.delete_media_category(database, media_category_id)
+        MediaCategoryService.delete_media_category(database, media_category_id)
         return {'status': 'Done'}
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.post('/{media_category_id}', response_model=dict)
+@router.patch('/{media_category_id}', response_model=dict, tags=['media_categories'])
 async def update_media_category(media_category_id: int, media_category: MediaCategorySchema,
                                 database: Session = Depends(get_database),
                                 current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
         MediaCategoryService.update_media_category(database, media_category_id, media_category)
-        return {}
+        return {'status': 'Done'}
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

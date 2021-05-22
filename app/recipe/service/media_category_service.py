@@ -25,7 +25,6 @@ class MediaCategoryService:
         return True
 
     @staticmethod
-    def update_media_category(database: Session, media_category_id: int, media_category: MediaCategorySchema) -> None:
-        media_category = MediaCategoryRepository.update_media_category(database, media_category_id, media_category)
-        # return MediaCategoryResponseSchema.from_media_category_model(media_category)
-        return None
+    def update_media_category(database: Session, media_category_id: int, media_category: MediaCategorySchema) -> bool:
+        MediaCategoryRepository.update_media_category(database, media_category_id, media_category)
+        return True

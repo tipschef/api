@@ -10,12 +10,12 @@ from app.user.service.user_service import UserService
 router = APIRouter(prefix='/users')
 
 
-@router.get("/")
+@router.get("/", tags=['users'])
 async def user_route():
     return {"message": "User route"}
 
 
-@router.post("/", response_model=UserSchema)
+@router.post("/", response_model=UserSchema, tags=['users'])
 async def create_user_route(user: UserCreateSchema, database: Session = Depends(get_database)):
     try:
         created_user_model = UserService.create_user(database=database, user=user)

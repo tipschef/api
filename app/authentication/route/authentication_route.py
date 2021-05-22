@@ -11,7 +11,7 @@ from app.user.service.user_service import UserService
 router = APIRouter(prefix='/auth')
 
 
-@router.post('/token', response_model=Token)
+@router.post('/token', response_model=Token, tags=['authentication'])
 async def authenticate_user(form_data: OAuth2PasswordRequestForm = Depends()):
     try:
         user = AuthenticationSchema(username=form_data.username, password=form_data.password)
@@ -24,6 +24,6 @@ async def authenticate_user(form_data: OAuth2PasswordRequestForm = Depends()):
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.get('/', response_model=dict)
+@router.get('/', response_model=dict, tags=['authentication'])
 async def get_user_data(current_user: UserSchema = Depends(UserService.get_current_active_user)):
     return current_user.dict()

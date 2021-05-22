@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List
 
+from sqlalchemy import false
 from sqlalchemy.orm import Session
 
 from app.recipe.model.step_model import StepModel
@@ -13,18 +14,27 @@ class StepRepository:
 
     @staticmethod
     def create_step(database: Session, step: StepSchema, recipe_id: int) -> StepModel:
-        db_step = StepModel(content=step.description, is_deleted=False, recipe_id=recipe_id,
-                            created_date=datetime.now())
+        db_step = StepModel(content=step.content, recipe_id=recipe_id, created_date=datetime.now(), order=step.order)
         database.add(db_step)
         database.commit()
         database.refresh(db_step)
         return db_step
 
     @staticmethod
-    def create_steps(database: Session, steps: List[StepSchema], recipe_id: int) -> List[StepSchema]:
-        db_step_list = [StepModel(content=step.description, is_deleted=False, recipe_id=recipe_id,
-                                  created_date=datetime.now()) for step in steps]
+    def create_steps(database: Session, steps: List[StepSchema], recipe_id: int) -> None:
+        db_step_list = [StepModel(content=step.content, recipe_id=recipe_id, order=step.order) for step in steps]
         database.bulk_save_objects(db_step_list)
         database.commit()
-        database.refresh(db_step_list)
-        return db_step_list
+
+    @staticmethod
+    def get_steps_by_recipe_id(database: Session, recipe_id: int) -> List[StepModel]:
+        return database.query(StepModel).filter(StepModel.recipe_id == recipe_id, StepModel.is_deleted.is_(False)).all()
+
+    @staticmethod
+    def delete_step_by_id(database: Session, step_id: int) -> None:
+        database.query(StepModel).filter(StepModel.is_deleted.is_(False), StepModel.id == step_id).update({StepModel.is_deleted: True})
+        database.commit()
+
+    @staticmethod
+    def delete_multiple_steps(database: Session, steps: List[StepModel]) -> None:
+        [StepRepository.delete_step_by_id(database, step.id) for step in steps]

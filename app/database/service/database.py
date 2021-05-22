@@ -8,7 +8,7 @@ from app.common.service.secret_manager_service import get_secret_manager_service
 
 secret_manager_service = get_secret_manager_service()
 secret_content = secret_manager_service.get_secret_json()
-DATABASE_NAME = 'tipschef'
+DATABASE_NAME = 'tipschef_bastien'
 
 localhost = os.getenv('LOCALHOST', False)
 if localhost:
