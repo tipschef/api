@@ -10,7 +10,7 @@ from app.user.exception.user_route_exceptions import UserAlreadyExistsException,
 from app.user.model.user_model import UserModel
 from app.user.repository.follow_repository import FollowRepository
 from app.user.repository.user_repository import UserRepository
-from app.user.schema.UserDetailedSchema import UserDetailedSchema
+from app.user.schema.user_detailed_schema import UserDetailedSchema
 from app.user.schema.user_create_schema import UserCreateSchema
 from app.user.schema.user_schema import UserSchema
 

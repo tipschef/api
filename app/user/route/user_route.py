@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.database.service.database_instance import get_database
 from app.user.exception.user_route_exceptions import UserAlreadyExistsException, UsernameAlreadyExistsException, \
     UserNotFoundException
-from app.user.schema.UserDetailedSchema import UserDetailedSchema
+from app.user.schema.user_detailed_schema import UserDetailedSchema
 from app.user.schema.user_create_schema import UserCreateSchema
 from app.user.schema.user_schema import UserSchema
 from app.user.service.follow_service import FollowService
@@ -44,7 +44,7 @@ async def get_user_by_id(user_id: int, database: Session = Depends(get_database)
 
 
 @router.get('/{user_id}/follow', response_model=dict, tags=['users', 'follow'])
-async def follow_user_by_id(user_id: int, database: Session = Depends(get_database), current_user : UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+async def follow_user_by_id(user_id: int, database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
         if FollowService.follow_someone_by_id(database, current_user, user_id):
             return {'Status': 'Done'}
@@ -55,7 +55,7 @@ async def follow_user_by_id(user_id: int, database: Session = Depends(get_databa
 
 
 @router.get('/{user_id}/unfollow', response_model=dict, tags=['users', 'follow'])
-async def unfollow_user_by_id(user_id: int, database: Session = Depends(get_database), current_user : UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+async def unfollow_user_by_id(user_id: int, database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
 
         if FollowService.unfollow_someone_by_id(database, current_user, user_id):
