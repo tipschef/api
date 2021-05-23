@@ -33,11 +33,20 @@ async def create_recipe(recipe: RecipeBaseSchema, database: Session = Depends(ge
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.get('/me', response_model=List[RecipeSchema], tags=['recipes'])
-async def get_my_recipe(database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)):
+@router.get('/me', response_model=List[RecipeResponseSchema], tags=['recipes'])
+async def get_my_recipe(database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseSchema]:
     try:
         recipe_list = RecipeService.get_all_recipe_for_specific_user(database, current_user.id)
         return recipe_list
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/wall', response_model=List[RecipeResponseSchema], tags=['recipes', 'wall'])
+async def get_my_wall(database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseSchema]:
+    try:
+        return RecipeService.get_my_wall(database, current_user)
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

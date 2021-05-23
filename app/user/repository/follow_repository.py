@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy.orm import Session
 
@@ -29,3 +29,7 @@ class FollowRepository:
     def unfollow(database: Session, followed_id: int, follower_id: int) -> None:
         database.query(FollowModel).filter(FollowModel.followed_id == followed_id, FollowModel.follower_id == follower_id).delete()
         database.commit()
+
+    @staticmethod
+    def get_follow_by_follower_id(database: Session, follower_id: int) -> List[FollowModel]:
+        return database.query(FollowModel).filter(FollowModel.follower_id == follower_id).all()

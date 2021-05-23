@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.recipe.model.recipe_model import RecipeModel
 from app.recipe.schema.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe_schema import RecipeSchema
+from app.user.model.follow_model import FollowModel
 
 
 @dataclass
@@ -48,3 +49,9 @@ class RecipeRepository:
                                             RecipeModel.video_id: recipe.video.id,
                                             RecipeModel.thumbnail_id: recipe.thumbnail.id})
         database.commit()
+
+    @staticmethod
+    def get_followed_recipes(database: Session, user_id: int) -> List[RecipeModel]:
+        sub_query = database.query(FollowModel.followed_id).filter(FollowModel.follower_id == user_id)
+        return database.query(RecipeModel).filter(RecipeModel.creator_id.in_(sub_query), RecipeModel.is_deleted.is_(False)).all()
+
