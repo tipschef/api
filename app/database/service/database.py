@@ -11,7 +11,7 @@ secret_content = secret_manager_service.get_secret_json()
 
 localhost = os.getenv('LOCALHOST', False)
 if localhost:
-    DATABASE_NAME = 'tipschef_bastien'
+    DATABASE_NAME = 'tipschef'
     SQLALCHEMY_DATABASE_URL = f'mysql+pymysql://{secret_content.get("mysql_account")}:{secret_content.get("mysql_password")}@{secret_content.get("mysql_hostname")}/{DATABASE_NAME}'
 else:
     DATABASE_NAME = 'tipschef'

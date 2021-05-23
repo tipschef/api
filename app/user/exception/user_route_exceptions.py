@@ -18,3 +18,14 @@ class UsernameAlreadyExistsException(Exception):
 
     def __str__(self):
         return f"'{self.username}' already used."
+
+
+class UserNotFoundException(Exception):
+    id: int
+
+    def __init__(self, id: int):
+
+        self.id = id
+
+    def __str__(self):
+        return f"User with id='{self.id}' not found."

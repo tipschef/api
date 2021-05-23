@@ -31,3 +31,7 @@ class UserRepository:
         database.commit()
         database.refresh(db_user)
         return db_user
+
+    @staticmethod
+    def get_user_by_id(database: Session, user_id: int) -> Optional[UserModel]:
+        return database.query(UserModel).filter(UserModel.id == user_id).first()

@@ -4,9 +4,13 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from app.authentication.service.authentication_service import AuthenticationService
-from app.user.exception.user_route_exceptions import UserAlreadyExistsException, UsernameAlreadyExistsException
+from app.recipe.repository.like_repository import LikeRepository
+from app.user.exception.user_route_exceptions import UserAlreadyExistsException, UsernameAlreadyExistsException, \
+    UserNotFoundException
 from app.user.model.user_model import UserModel
+from app.user.repository.follow_repository import FollowRepository
 from app.user.repository.user_repository import UserRepository
+from app.user.schema.UserDetailedSchema import UserDetailedSchema
 from app.user.schema.user_create_schema import UserCreateSchema
 from app.user.schema.user_schema import UserSchema
 
@@ -30,3 +34,12 @@ class UserService:
     async def get_current_active_user(
             current_user: UserSchema = Depends(AuthenticationService.get_current_user)) -> UserSchema:
         return current_user
+
+    @staticmethod
+    def get_user_by_id(database: Session, user_id: int) -> UserDetailedSchema:
+        user = UserRepository.get_user_by_id(database, user_id)
+        if user is None:
+            raise UserNotFoundException(user_id)
+        count_follower = FollowRepository.get_count_followers_by_followed_id(database, user_id)
+        count_likes = LikeRepository.get_count_like_by_user_id(database, user_id)
+        return UserDetailedSchema.from_user_model(user, count_likes, count_follower)

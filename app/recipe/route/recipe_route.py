@@ -9,6 +9,7 @@ from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundExcep
 from app.recipe.schema.recipe_base_schema import RecipeBaseSchema
 from app.recipe.schema.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe_schema import RecipeSchema
+from app.recipe.service.like_service import LikeService
 from app.recipe.service.recipe_service import RecipeService
 from app.user.schema.user_schema import UserSchema
 from app.user.service.user_service import UserService
@@ -77,6 +78,28 @@ async def update_a_recipe(recipe_id: int, recipe: RecipeResponseSchema, database
         raise HTTPException(status_code=404, detail=str(exception))
     except CannotModifyOthersPeopleRecipeException as exception:
         raise HTTPException(status_code=403, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/{recipe_id}/like', response_model=dict, tags=['recipes', 'like'])
+async def like_a_recipe(recipe_id: int, database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+    try:
+        if LikeService.like_someone_by_id(database, current_user, recipe_id):
+            return {'Status': 'Done'}
+        return {'Status': 'You already Liked this recipe'}
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/{recipe_id}/dislike', response_model=dict, tags=['recipes', 'like'])
+async def dislike_a_recipe(recipe_id: int, database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+    try:
+        if LikeService.dislike_someone_by_id(database, current_user, recipe_id):
+            return {'Status': 'Done'}
+        return {'Status': 'You have not liked this recipe'}
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

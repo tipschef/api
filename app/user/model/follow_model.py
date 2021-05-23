@@ -12,4 +12,3 @@ class FollowModel(Base):
     follower_id = Column(Integer, ForeignKey('user.id'), index=True)
     followed_id = Column(Integer, ForeignKey('user.id'), index=True)
     created_date = Column(DateTime, default=datetime.datetime.utcnow, index=True)
-    stop_date = Column(DateTime, index=True)
