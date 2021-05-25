@@ -14,6 +14,7 @@ from app.authentication.schema.authenticated_schema import AuthenticatedSchema
 from app.authentication.schema.authentication_schema import AuthenticationSchema
 from app.user.model.user_model import UserModel
 from app.user.repository.user_repository import UserRepository
+from app.user.schema.user_auth_schema import UserAuthSchema
 from app.user.schema.user_schema import UserSchema
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -59,7 +60,7 @@ class AuthenticationService:
         return AuthenticatedSchema(username=user.username, token=acces_token, token_type='Bearer')
 
     @staticmethod
-    async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserSchema:
+    async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserAuthSchema:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             username = payload.get('sub')
@@ -67,7 +68,7 @@ class AuthenticationService:
                 raise Exception
         except JWTError:
             raise Exception
-        user = UserSchema.from_user_model(AuthenticationService.get_user(username))
+        user = UserAuthSchema.from_user_model(AuthenticationService.get_user(username))
         if user is None:
             raise Exception
         return user
