@@ -54,4 +54,3 @@ class RecipeRepository:
     def get_followed_recipes(database: Session, user_id: int) -> List[RecipeModel]:
         sub_query = database.query(FollowModel.followed_id).filter(FollowModel.follower_id == user_id)
         return database.query(RecipeModel).filter(RecipeModel.creator_id.in_(sub_query), RecipeModel.is_deleted.is_(False)).all()
-

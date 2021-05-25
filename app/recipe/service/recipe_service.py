@@ -12,7 +12,6 @@ from app.recipe.schema.media_schema import MediaSchema
 from app.recipe.schema.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe_schema import RecipeSchema
 from app.recipe.schema.step_schema import StepSchema
-from app.user.repository.follow_repository import FollowRepository
 from app.user.schema.user_schema import UserSchema
 
 
@@ -105,5 +104,5 @@ class RecipeService:
             video_media = MediaSchema.from_media_model(MediaRepository.get_media_by_id(database, recipe.video_id))
             thumbnail_media = MediaSchema.from_media_model(MediaRepository.get_media_by_id(database, recipe.thumbnail_id))
             steps = [StepSchema.from_step_model(step) for step in StepRepository.get_steps_by_recipe_id(database, recipe.id)]
-            recipes.append(RecipeResponseSchema.from_recipe_model(recipe, steps=steps, thumbnail=thumbnail_media,video=video_media))
+            recipes.append(RecipeResponseSchema.from_recipe_model(recipe, steps=steps, thumbnail=thumbnail_media, video=video_media))
         return recipes
