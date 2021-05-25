@@ -15,7 +15,6 @@ from app.authentication.schema.authentication_schema import AuthenticationSchema
 from app.user.model.user_model import UserModel
 from app.user.repository.user_repository import UserRepository
 from app.user.schema.user_auth_schema import UserAuthSchema
-from app.user.schema.user_schema import UserSchema
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 ALGORITHM = 'HS256'
@@ -47,7 +46,7 @@ class AuthenticationService:
         return PWD_CONTEXT.verify(plain_password.get_secret_value(), hashed_password)
 
     @staticmethod
-    def authentifie_user(user: AuthenticationSchema) -> AuthenticatedSchema:
+    def authenticate_user(user: AuthenticationSchema) -> AuthenticatedSchema:
         user_already_exist = AuthenticationService.get_user(user.username)
         if not user_already_exist:
             raise WrongCredentialException
@@ -55,9 +54,9 @@ class AuthenticationService:
             raise WrongCredentialException
 
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        acces_token = AuthenticationService._create_access_token(data={'sub': user.username},
-                                                                 expires_delta=access_token_expires)
-        return AuthenticatedSchema(username=user.username, token=acces_token, token_type='Bearer')
+        access_token = AuthenticationService._create_access_token(data={'sub': user.username},
+                                                                  expires_delta=access_token_expires)
+        return AuthenticatedSchema(username=user.username, token=access_token, token_type='Bearer')
 
     @staticmethod
     async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserAuthSchema:

@@ -13,7 +13,6 @@ from app.user.repository.user_repository import UserRepository
 from app.user.schema.user_auth_schema import UserAuthSchema
 from app.user.schema.user_detailed_schema import UserDetailedSchema
 from app.user.schema.user_create_schema import UserCreateSchema
-from app.user.schema.user_schema import UserSchema
 
 
 @dataclass
