@@ -1,11 +1,11 @@
 import os
 from dataclasses import dataclass, field
 from typing import List, Optional
+from typing import IO
 
 from fastapi import UploadFile
 from google.cloud import storage
 from google.cloud.storage import Client
-from typing.io import IO
 
 
 @dataclass
