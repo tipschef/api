@@ -7,8 +7,10 @@ from sqlalchemy.orm import Session
 from app.common.service.bucket_manager_service import get_bucket_manager_service
 from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundException, \
     CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException
+from app.recipe.model.media_model import MediaModel
 from app.recipe.repository.media_category_repository import MediaCategoryRepository
 from app.recipe.repository.media_repository import MediaRepository
+from app.recipe.repository.recipe_medias_repository import RecipeMediasRepository
 from app.recipe.repository.recipe_repository import RecipeRepository
 from app.recipe.repository.step_repository import StepRepository
 from app.recipe.schema.media_base_schema import MediaBaseSchema
@@ -107,8 +109,9 @@ class RecipeService:
         return recipes
 
     @staticmethod
-    def add_media_to_recipe(database: Session, creator_id: int, recipe_id: int, medias: List[UploadFile]):
+    def add_media_to_recipe(database: Session, creator_id: int, recipe_id: int, medias: List[UploadFile]) -> List[MediaSchema]:
         recipe = RecipeRepository.get_recipe_by_id(database, recipe_id)
+        created_media_ids = []
         created_medias = []
         if recipe is None:
             raise RecipeIdNotFoundException()
@@ -118,8 +121,15 @@ class RecipeService:
         for media in medias:
             media_category = MediaCategoryRepository.get_media_category_by_name(database, media.content_type.split('/')[0])
             if media_category is None:
-                media_category = MediaCategoryRepository.create_media_category(database, MediaCategorySchema(media.content_type.split('/')[0], media.content_type.split('/')[0]))
-            created_media = MediaRepository.create_media(database, MediaBaseSchema('', media_category))
-            filename = get_bucket_manager_service().save_file(f'{creator_id}/{recipe_id}/{created_media.id}', media.file)
+                media_category = MediaCategoryRepository.create_media_category(database, MediaCategorySchema(name=media.content_type.split('/')[0],description=media.content_type.split('/')[0]))
+            media_schema = MediaBaseSchema(path='temp', media_category_id=media_category.id)
+            created_media = MediaRepository.create_media(database, media_schema)
+            filename = get_bucket_manager_service().save_file(f'{creator_id}/{recipe_id}/{created_media.id}_{media.filename}', media.file)
+            created_media.path = filename
             MediaRepository.update_media_by_id(database, created_media.id, filename)
-            created_medias.append(created_media.id)
+            created_media_ids.append(created_media.id)
+
+            created_medias.append(MediaSchema.from_media_model(created_media))
+
+        RecipeMediasRepository.create_medias(database, created_media_ids, recipe_id)
+        return created_medias

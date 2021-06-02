@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 
 from app.database.service.database_instance import get_database
 from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundException, \
-    CannotModifyOthersPeopleRecipeException
+    CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException
+from app.recipe.schema.media_schema import MediaSchema
 from app.recipe.schema.recipe_base_schema import RecipeBaseSchema
 from app.recipe.schema.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe_schema import RecipeSchema
@@ -34,12 +35,16 @@ async def create_recipe(recipe: RecipeBaseSchema, database: Session = Depends(ge
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.post('/{recipe_id}/media', response_model=dict, tags=['recipes'])
-async def create_recipe(recipe_id: int, files: List[UploadFile] = File(...), database: Session = Depends(get_database),
-                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
-    print(recipe_id)
-    print(files)
-    print(files[0].file, files[0].filename, files[0].content_type)
+@router.post('/{recipe_id}/media', response_model=List[MediaSchema], tags=['recipes'])
+async def add_medias_to_recipe(recipe_id: int, files: List[UploadFile] = File(...), database: Session = Depends(get_database),
+                               current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[MediaSchema]:
+    try:
+        medias = RecipeService.add_media_to_recipe(database, current_user.id, recipe_id, files)
+        return medias
+    except RecipeIdNotFoundException as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
+    except NotRecipeOwnerException as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
 
 
 @router.get('/me', response_model=List[RecipeResponseSchema], tags=['recipes'])
