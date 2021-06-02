@@ -12,7 +12,7 @@ from app.recipe.model.media_category_model import MediaCategoryModel
 from app.recipe.model.media_model import MediaModel
 from app.recipe.model.recipe_ingredients_model import RecipeIngredientsModel
 from app.recipe.model.recipe_model import RecipeModel
-from app.recipe.model.recipe_pictures_model import RecipePicturesModel
+from app.recipe.model.recipe_medias_model import RecipeMediasModel
 from app.recipe.model.step_model import StepModel
 
 from app.book.model.book_model import BookModel
