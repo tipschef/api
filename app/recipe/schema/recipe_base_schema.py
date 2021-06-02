@@ -10,6 +10,4 @@ class RecipeBaseSchema(BaseModel):
     min_tier: int
     name: str
     description: str
-    thumbnail: MediaBaseSchema
-    video: MediaBaseSchema
     steps: List[StepBaseSchema]

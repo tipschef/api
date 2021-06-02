@@ -3,7 +3,6 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
-
 from app.recipe.model.media_category_model import MediaCategoryModel
 from app.recipe.schema.media_category_schema import MediaCategorySchema
 
@@ -17,7 +16,13 @@ class MediaCategoryRepository:
 
     @staticmethod
     def get_one_media_category(database: Session, media_category_id: int) -> List[MediaCategoryModel]:
-        return database.query(MediaCategoryModel).filter(MediaCategoryModel.is_deleted.is_(False), MediaCategoryModel.id == media_category_id).all()
+        return database.query(MediaCategoryModel).filter(MediaCategoryModel.is_deleted.is_(False),
+                                                         MediaCategoryModel.id == media_category_id).all()
+
+    @staticmethod
+    def get_media_category_by_name(database: Session, media_category_name: str) -> List[MediaCategoryModel]:
+        return database.query(MediaCategoryModel).filter(MediaCategoryModel.is_deleted.is_(False),
+                                                         MediaCategoryModel.name == media_category_name).all()
 
     @staticmethod
     def create_media_category(database: Session, media_category: MediaCategorySchema) -> MediaCategoryModel:
@@ -30,7 +35,9 @@ class MediaCategoryRepository:
 
     @staticmethod
     def delete_media_category(database: Session, media_category_id: int) -> None:
-        database.query(MediaCategoryModel).filter(MediaCategoryModel.is_deleted.is_(False), MediaCategoryModel.id == media_category_id).update({MediaCategoryModel.is_deleted: True})
+        database.query(MediaCategoryModel).filter(MediaCategoryModel.is_deleted.is_(False),
+                                                  MediaCategoryModel.id == media_category_id).update(
+            {MediaCategoryModel.is_deleted: True})
         database.commit()
 
     @staticmethod
