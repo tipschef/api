@@ -22,7 +22,7 @@ class MediaCategoryRepository:
     @staticmethod
     def get_media_category_by_name(database: Session, media_category_name: str) -> MediaCategoryModel:
         return database.query(MediaCategoryModel).filter(MediaCategoryModel.is_deleted.is_(False),
-                                                         MediaCategoryModel.name == media_category_name).one()
+                                                         MediaCategoryModel.name == media_category_name).first()
 
     @staticmethod
     def create_media_category(database: Session, media_category: MediaCategorySchema) -> MediaCategoryModel:

@@ -19,4 +19,5 @@ class RecipeSchema(RecipeBaseSchema):
                             name=recipe.name,
                             description=recipe.description,
                             steps=recipe.steps,
+                            ingredients=recipe.ingredients,
                             creator_id=creator_id)

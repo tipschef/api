@@ -8,8 +8,11 @@ from app.common.service.bucket_manager_service import get_bucket_manager_service
 from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundException, \
     CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException
 from app.recipe.model.media_model import MediaModel
+from app.recipe.repository.ingredient_repository import IngredientRepository
+from app.recipe.repository.ingredient_unit_repository import IngredientUnitRepository
 from app.recipe.repository.media_category_repository import MediaCategoryRepository
 from app.recipe.repository.media_repository import MediaRepository
+from app.recipe.repository.recipe_ingredients_repository import RecipeIngredientsRepository
 from app.recipe.repository.recipe_medias_repository import RecipeMediasRepository
 from app.recipe.repository.recipe_repository import RecipeRepository
 from app.recipe.repository.step_repository import StepRepository
@@ -31,6 +34,17 @@ class RecipeService:
         recipe_created = RecipeRepository.create_recipe(database, recipe)
         # create steps
         StepRepository.create_steps(database, recipe.steps, recipe_created.id)
+
+        for ingredient_bloc in recipe.ingredients:
+            ingredient = IngredientRepository.get_ingredient_by_name(database, ingredient_bloc.ingredient_name)
+            if ingredient is None:
+                ingredient = IngredientRepository.create_ingredient(database, ingredient_bloc.ingredient_name)
+
+            ingredient_unit = IngredientUnitRepository.get_ingredient_unit_by_name(database, ingredient_bloc.ingredient_unit)
+            if ingredient_unit is None:
+                ingredient_unit = IngredientUnitRepository.create_ingredient_unit(database, ingredient_bloc.ingredient_unit)
+
+            RecipeIngredientsRepository.create_recipe_ingredients(database, recipe_created.id, ingredient.id, ingredient_unit.id, ingredient_bloc.quantity)
         return recipe_created.id
 
     @staticmethod
