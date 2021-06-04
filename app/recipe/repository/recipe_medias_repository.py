@@ -11,11 +11,11 @@ class RecipeMediasRepository:
 
     @staticmethod
     def create_media(database: Session, recipe_id: int, media_id: int) -> RecipeMediasModel:
-        db_media = RecipeMediasModel(recipe_id=recipe_id, media_id=media_id)
-        database.add(db_media)
+        db_recipe_media = RecipeMediasModel(recipe_id=recipe_id, media_id=media_id)
+        database.add(db_recipe_media)
         database.commit()
-        database.refresh(db_media)
-        return db_media
+        database.refresh(db_recipe_media)
+        return db_recipe_media
 
     @staticmethod
     def create_medias(database: Session, media_ids: List[int], recipe_id: int) -> None:

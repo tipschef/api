@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from app.common.service.bucket_manager_service import get_bucket_manager_service
 from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundException, \
     CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException
-from app.recipe.model.media_model import MediaModel
 from app.recipe.repository.ingredient_repository import IngredientRepository
 from app.recipe.repository.ingredient_unit_repository import IngredientUnitRepository
 from app.recipe.repository.media_category_repository import MediaCategoryRepository
@@ -135,7 +134,7 @@ class RecipeService:
         for media in medias:
             media_category = MediaCategoryRepository.get_media_category_by_name(database, media.content_type.split('/')[0])
             if media_category is None:
-                media_category = MediaCategoryRepository.create_media_category(database, MediaCategorySchema(name=media.content_type.split('/')[0],description=media.content_type.split('/')[0]))
+                media_category = MediaCategoryRepository.create_media_category(database, MediaCategorySchema(name=media.content_type.split('/')[0], description=media.content_type.split('/')[0]))
             media_schema = MediaBaseSchema(path='temp', media_category_id=media_category.id)
             created_media = MediaRepository.create_media(database, media_schema)
             filename = get_bucket_manager_service().save_file(f'{creator_id}/{recipe_id}/{created_media.id}_{media.filename}', media.file)
