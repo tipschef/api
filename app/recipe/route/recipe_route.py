@@ -3,13 +3,13 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
+from app.database.service.database_init import init_data
 from app.database.service.database_instance import get_database
 from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundException, \
     CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
 from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
-from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.recipe.service.like_service import LikeService
 from app.recipe.service.recipe_service import RecipeService
 from app.user.schema.user_schema import UserSchema
@@ -27,8 +27,7 @@ async def recipe_route_home():
 async def create_recipe(recipe: RecipeBaseSchema, database: Session = Depends(get_database),
                         current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
-        recipe_to_create = RecipeSchema.from_recipe_base_schema(recipe, current_user.id)
-        created_recipe_id = RecipeService.create_recipe(database, recipe_to_create)
+        created_recipe_id = RecipeService.create_recipe(database, recipe, current_user.id)
         return {'recipe_id': created_recipe_id, 'status': 'Created'}
     except Exception as exception:
         print(exception)
@@ -36,8 +35,10 @@ async def create_recipe(recipe: RecipeBaseSchema, database: Session = Depends(ge
 
 
 @router.post('/{recipe_id}/media', response_model=List[MediaSchema], tags=['recipes'])
-async def add_medias_to_recipe(recipe_id: int, files: List[UploadFile] = File(...), database: Session = Depends(get_database),
-                               current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[MediaSchema]:
+async def add_medias_to_recipe(recipe_id: int, files: List[UploadFile] = File(...),
+                               database: Session = Depends(get_database),
+                               current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
+    MediaSchema]:
     try:
         medias = RecipeService.add_media_to_recipe(database, current_user.id, recipe_id, files)
         return medias
@@ -49,7 +50,8 @@ async def add_medias_to_recipe(recipe_id: int, files: List[UploadFile] = File(..
 
 @router.get('/me', response_model=List[RecipeResponseSchema], tags=['recipes'])
 async def get_my_recipe(database: Session = Depends(get_database),
-                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseSchema]:
+                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
+    RecipeResponseSchema]:
     try:
         recipe_list = RecipeService.get_all_recipe_for_specific_user(database, current_user.id)
         return recipe_list
@@ -58,9 +60,22 @@ async def get_my_recipe(database: Session = Depends(get_database),
         raise HTTPException(status_code=500, detail='Server exception')
 
 
+@router.post('/init', response_model=dict, tags=['recipes', 'admin'])
+async def init_database(database: Session = Depends(get_database),
+                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+    # TODO : Vérifier que l'utilsateur courant est un administrateur
+    try:
+        init_data(database)
+        return {'message': 'Done'}
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
 @router.get('/wall', response_model=List[RecipeResponseSchema], tags=['recipes', 'wall'])
 async def get_my_wall(database: Session = Depends(get_database),
-                      current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseSchema]:
+                      current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
+    RecipeResponseSchema]:
     try:
         return RecipeService.get_my_wall(database, current_user)
     except Exception as exception:

@@ -18,8 +18,8 @@ from app.recipe.repository.step.step_repository import StepRepository
 from app.recipe.schema.media.media_base_schema import MediaBaseSchema
 from app.recipe.schema.media.media_category_schema import MediaCategorySchema
 from app.recipe.schema.media.media_schema import MediaSchema
+from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
 from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
-from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.recipe.schema.step.step_schema import StepSchema
 from app.user.schema.user_schema import UserSchema
 
@@ -28,9 +28,9 @@ from app.user.schema.user_schema import UserSchema
 class RecipeService:
 
     @staticmethod
-    def create_recipe(database: Session, recipe: RecipeSchema) -> int:
+    def create_recipe(database: Session, recipe: RecipeBaseSchema, creator_id: int) -> int:
         # create recipe
-        recipe_created = RecipeRepository.create_recipe(database, recipe)
+        recipe_created = RecipeRepository.create_recipe(database, recipe, creator_id)
         # create steps
         StepRepository.create_steps(database, recipe.steps, recipe_created.id)
 

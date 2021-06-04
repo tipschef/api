@@ -5,8 +5,8 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from app.recipe.model.recipe.recipe_model import RecipeModel
+from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
 from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
-from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.user.model.follow_model import FollowModel
 
 
@@ -14,11 +14,22 @@ from app.user.model.follow_model import FollowModel
 class RecipeRepository:
 
     @staticmethod
-    def create_recipe(database: Session, recipe: RecipeSchema) -> RecipeModel:
+    def create_recipe(database: Session, recipe: RecipeBaseSchema, creator_id: int) -> RecipeModel:
         db_recipe = RecipeModel(min_tier=recipe.min_tier,
                                 name=recipe.name,
                                 description=recipe.description,
-                                creator_id=recipe.creator_id)
+                                recipe_cooking_type_id=recipe.recipe_cooking_type_id,
+                                portion_number=recipe.portion_number,
+                                portion_unit=recipe.portion_unit,
+                                preparation_hours=recipe.preparation_hours,
+                                preparation_minutes=recipe.preparation_minutes,
+                                cooking_hours=recipe.cooking_hours,
+                                cooking_minutes=recipe.cooking_minutes,
+                                resting_hours=recipe.resting_hours,
+                                resting_minutes=recipe.resting_minutes,
+                                difficulty=recipe.difficulty,
+                                cost=recipe.cost,
+                                creator_id=creator_id)
         database.add(db_recipe)
         database.commit()
         database.refresh(db_recipe)
