@@ -14,12 +14,10 @@ from app.user.model.follow_model import FollowModel
 class RecipeRepository:
 
     @staticmethod
-    def create_recipe(database: Session, recipe: RecipeSchema, video_id: int, thumbnail_id: int) -> RecipeModel:
+    def create_recipe(database: Session, recipe: RecipeSchema) -> RecipeModel:
         db_recipe = RecipeModel(min_tier=recipe.min_tier,
                                 name=recipe.name,
                                 description=recipe.description,
-                                thumbnail_id=thumbnail_id,
-                                video_id=video_id,
                                 creator_id=recipe.creator_id)
         database.add(db_recipe)
         database.commit()

@@ -5,6 +5,7 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from app.recipe.model.step_model import StepModel
+from app.recipe.schema.step_base_schema import StepBaseSchema
 from app.recipe.schema.step_schema import StepSchema
 
 
@@ -20,7 +21,7 @@ class StepRepository:
         return db_step
 
     @staticmethod
-    def create_steps(database: Session, steps: List[StepSchema], recipe_id: int) -> None:
+    def create_steps(database: Session, steps: List[StepBaseSchema], recipe_id: int) -> None:
         db_step_list = [StepModel(content=step.content, recipe_id=recipe_id, order=step.order) for step in steps]
         database.bulk_save_objects(db_step_list)
         database.commit()

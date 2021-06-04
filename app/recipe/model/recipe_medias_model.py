@@ -5,8 +5,8 @@ from sqlalchemy import Column, DateTime, Integer, ForeignKey
 from app.database.service.database import Base
 
 
-class RecipePicturesModel(Base):
-    __tablename__ = "recipe_pictures"
+class RecipeMediasModel(Base):
+    __tablename__ = "recipe_medias"
 
     id = Column(Integer, primary_key=True, index=True)
     media_id = Column(Integer, ForeignKey('media.id'), index=True)
