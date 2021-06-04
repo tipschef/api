@@ -9,8 +9,7 @@ from app.recipe.model.ingredient.ingredient_model import IngredientModel
 class IngredientRepository:
     @staticmethod
     def get_ingredient_by_name(database: Session, ingredient_name: str) -> IngredientModel:
-        return database.query(IngredientModel).filter(IngredientModel.is_deleted.is_(False),
-                                                      IngredientModel.name == ingredient_name).first()
+        return database.query(IngredientModel).filter(IngredientModel.name == ingredient_name).first()
 
     @staticmethod
     def create_ingredient(database: Session, name: str) -> IngredientModel:
