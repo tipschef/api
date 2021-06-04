@@ -2,8 +2,8 @@ from typing import List
 
 from pydantic import BaseModel
 
-from app.recipe.schema.media_schema import MediaSchema
-from app.recipe.schema.step_schema import StepSchema
+from app.recipe.schema.media.media_schema import MediaSchema
+from app.recipe.schema.step.step_schema import StepSchema
 
 
 class RecipeResponseBaseSchema(BaseModel):

@@ -3,8 +3,8 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from app.recipe.model.media_model import MediaModel
-from app.recipe.schema.media_schema import MediaBaseSchema
+from app.recipe.model.media.media_model import MediaModel
+from app.recipe.schema.media.media_schema import MediaBaseSchema
 
 
 @dataclass

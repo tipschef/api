@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import Optional
 
-from app.recipe.model.media_model import MediaModel
-from app.recipe.schema.media_base_schema import MediaBaseSchema
+from app.recipe.model.media.media_model import MediaModel
+from app.recipe.schema.media.media_base_schema import MediaBaseSchema
 
 
 class MediaSchema(MediaBaseSchema):

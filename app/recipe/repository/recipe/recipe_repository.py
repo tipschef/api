@@ -4,9 +4,9 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
-from app.recipe.model.recipe_model import RecipeModel
-from app.recipe.schema.recipe_response_schema import RecipeResponseSchema
-from app.recipe.schema.recipe_schema import RecipeSchema
+from app.recipe.model.recipe.recipe_model import RecipeModel
+from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
+from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.user.model.follow_model import FollowModel
 
 

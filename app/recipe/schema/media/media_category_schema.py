@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from app.recipe.model.media_category_model import MediaCategoryModel
+from app.recipe.model.media.media_category_model import MediaCategoryModel
 
 
 class MediaCategorySchema(BaseModel):

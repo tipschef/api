@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 
-from app.recipe.schema.recipe_base_schema import RecipeBaseSchema
+from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
 
 
 class RecipeSchema(RecipeBaseSchema):

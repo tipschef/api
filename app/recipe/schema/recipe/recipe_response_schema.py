@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import List, Optional
 
-from app.recipe.model.recipe_model import RecipeModel
-from app.recipe.schema.media_schema import MediaSchema
-from app.recipe.schema.recipe_response_base_schema import RecipeResponseBaseSchema
-from app.recipe.schema.step_schema import StepSchema
+from app.recipe.model.recipe.recipe_model import RecipeModel
+from app.recipe.schema.media.media_schema import MediaSchema
+from app.recipe.schema.recipe.recipe_response_base_schema import RecipeResponseBaseSchema
+from app.recipe.schema.step.step_schema import StepSchema
 
 
 class RecipeResponseSchema(RecipeResponseBaseSchema):

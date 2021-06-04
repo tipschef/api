@@ -3,7 +3,7 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
-from app.recipe.model.recipe_medias_model import RecipeMediasModel
+from app.recipe.model.recipe.recipe_medias_model import RecipeMediasModel
 
 
 @dataclass

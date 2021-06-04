@@ -2,8 +2,8 @@ from typing import List
 
 from pydantic import BaseModel
 
-from app.recipe.schema.ingredient_base_schema import IngredientBaseSchema
-from app.recipe.schema.step_base_schema import StepBaseSchema
+from app.recipe.schema.ingredient.ingredient_base_schema import IngredientBaseSchema
+from app.recipe.schema.step.step_base_schema import StepBaseSchema
 
 
 class RecipeBaseSchema(BaseModel):

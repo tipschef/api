@@ -4,9 +4,9 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
-from app.recipe.model.step_model import StepModel
-from app.recipe.schema.step_base_schema import StepBaseSchema
-from app.recipe.schema.step_schema import StepSchema
+from app.recipe.model.step.step_model import StepModel
+from app.recipe.schema.step.step_base_schema import StepBaseSchema
+from app.recipe.schema.step.step_schema import StepSchema
 
 
 @dataclass

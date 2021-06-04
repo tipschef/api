@@ -7,20 +7,20 @@ from sqlalchemy.orm import Session
 from app.common.service.bucket_manager_service import get_bucket_manager_service
 from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundException, \
     CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException
-from app.recipe.repository.ingredient_repository import IngredientRepository
-from app.recipe.repository.ingredient_unit_repository import IngredientUnitRepository
-from app.recipe.repository.media_category_repository import MediaCategoryRepository
-from app.recipe.repository.media_repository import MediaRepository
-from app.recipe.repository.recipe_ingredients_repository import RecipeIngredientsRepository
-from app.recipe.repository.recipe_medias_repository import RecipeMediasRepository
-from app.recipe.repository.recipe_repository import RecipeRepository
-from app.recipe.repository.step_repository import StepRepository
-from app.recipe.schema.media_base_schema import MediaBaseSchema
-from app.recipe.schema.media_category_schema import MediaCategorySchema
-from app.recipe.schema.media_schema import MediaSchema
-from app.recipe.schema.recipe_response_schema import RecipeResponseSchema
-from app.recipe.schema.recipe_schema import RecipeSchema
-from app.recipe.schema.step_schema import StepSchema
+from app.recipe.repository.ingredient.ingredient_repository import IngredientRepository
+from app.recipe.repository.ingredient.ingredient_unit_repository import IngredientUnitRepository
+from app.recipe.repository.media.media_category_repository import MediaCategoryRepository
+from app.recipe.repository.media.media_repository import MediaRepository
+from app.recipe.repository.recipe.recipe_ingredients_repository import RecipeIngredientsRepository
+from app.recipe.repository.recipe.recipe_medias_repository import RecipeMediasRepository
+from app.recipe.repository.recipe.recipe_repository import RecipeRepository
+from app.recipe.repository.step.step_repository import StepRepository
+from app.recipe.schema.media.media_base_schema import MediaBaseSchema
+from app.recipe.schema.media.media_category_schema import MediaCategorySchema
+from app.recipe.schema.media.media_schema import MediaSchema
+from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
+from app.recipe.schema.recipe.recipe_schema import RecipeSchema
+from app.recipe.schema.step.step_schema import StepSchema
 from app.user.schema.user_schema import UserSchema
 
 

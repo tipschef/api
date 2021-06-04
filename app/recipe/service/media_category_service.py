@@ -3,8 +3,8 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
-from app.recipe.repository.media_category_repository import MediaCategoryRepository
-from app.recipe.schema.media_category_schema import MediaCategorySchema, MediaCategoryResponseSchema
+from app.recipe.repository.media.media_category_repository import MediaCategoryRepository
+from app.recipe.schema.media.media_category_schema import MediaCategorySchema, MediaCategoryResponseSchema
 
 
 @dataclass

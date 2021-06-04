@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
-from app.recipe.model.ingredient_unit_model import IngredientUnitModel
+from app.recipe.model.ingredient.ingredient_unit_model import IngredientUnitModel
 
 
 @dataclass
