@@ -12,4 +12,5 @@ disable=missing-module-docstring,
         line-too-long,
         super-init-not-called,
         fixme,
-        invalid-envvar-default
+        invalid-envvar-default,
+        duplicate-code
