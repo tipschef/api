@@ -63,7 +63,7 @@ class RecipeService:
 
             can_be_seen = current_user.id == asking_user.id or recipe.min_tier == 0 or (subscription is not None and recipe.min_tier <= subscription.tier)
             print(can_be_seen)
-            recipes_list_response.append(RecipeResponseExtendedSchema.from_recipe_model(recipe, steps=steps, thumbnail=thumbnail_media,video=video_media, can_be_seen=can_be_seen))
+            recipes_list_response.append(RecipeResponseExtendedSchema.from_recipe_model(recipe, steps=steps, thumbnail=thumbnail_media, video=video_media, can_be_seen=can_be_seen))
         return recipes_list_response
 
     @staticmethod

@@ -13,4 +13,5 @@ disable=missing-module-docstring,
         super-init-not-called,
         fixme,
         invalid-envvar-default,
-        duplicate-code
+        duplicate-code,
+        arguments-differ

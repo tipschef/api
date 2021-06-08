@@ -1,11 +1,10 @@
-from typing import Any, List
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database.service.database_instance import get_database
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
-from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.service.recipe_service import RecipeService
 from app.user.exception.user_route_exceptions import UserAlreadyExistsException, UsernameAlreadyExistsException, \
     UserNotFoundException
@@ -104,7 +103,7 @@ async def unsubscribe_by_username(username: str, database: Session = Depends(get
 
 
 @router.get('/{username}/subscribe/{receiver}', response_model=dict, tags=['users', 'subscribe'])
-async def unsubscribe_by_username(username: str, receiver: str, tier: int, database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+async def gift_a_subscription_by_username(username: str, receiver: str, tier: int, database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
         if SubscriptionService.gift_a_subscription_to_someone_by_username(database, current_user, username, receiver, tier):
             return {'Status': 'Done'}
