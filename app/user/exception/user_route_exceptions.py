@@ -21,11 +21,11 @@ class UsernameAlreadyExistsException(Exception):
 
 
 class UserNotFoundException(Exception):
-    user_id: int
+    username: int
 
-    def __init__(self, user_id: int):
+    def __init__(self, username: str):
 
-        self.user_id = user_id
+        self.username = username
 
     def __str__(self):
-        return f"User with id='{self.user_id}' not found."
+        return f"User with username='{self.username}' not found."

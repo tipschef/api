@@ -36,10 +36,10 @@ class UserService:
         return current_user
 
     @staticmethod
-    def get_user_by_id(database: Session, user_id: int) -> UserDetailedSchema:
-        user = UserRepository.get_user_by_id(database, user_id)
+    def get_user_by_username(database: Session, username: str) -> UserDetailedSchema:
+        user = UserRepository.get_user_by_username(username)
         if user is None:
-            raise UserNotFoundException(user_id)
-        count_follower = FollowRepository.get_count_followers_by_followed_id(database, user_id)
-        count_likes = LikeRepository.get_count_like_by_user_id(database, user_id)
+            raise UserNotFoundException(username)
+        count_follower = FollowRepository.get_count_followers_by_followed_username(database, user.id)
+        count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
         return UserDetailedSchema.from_user_model(user, count_likes, count_follower)
