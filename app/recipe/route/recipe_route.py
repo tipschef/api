@@ -34,7 +34,7 @@ async def create_recipe(recipe: RecipeBaseSchema, database: Session = Depends(ge
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.post('/{recipe_id}/media', response_model=List[MediaSchema], tags=['recipes'])
+@router.post('/media/{recipe_id}', response_model=List[MediaSchema], tags=['recipes'])
 async def add_medias_to_recipe(recipe_id: int, files: List[UploadFile] = File(...),
                                database: Session = Depends(get_database),
                                current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[MediaSchema]:
