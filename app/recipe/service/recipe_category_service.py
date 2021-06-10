@@ -4,7 +4,7 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from app.recipe.repository.recipe.recipe_category_repository import RecipeCategoryRepository
-from app.recipe.schema.recipe.recipe_category_schema import RecipeCategorySchema, RecipeCategoryResponseSchema
+from app.recipe.schema.recipe.recipe_category_schema import RecipeCategoryResponseSchema
 
 
 @dataclass

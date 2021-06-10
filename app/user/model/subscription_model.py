@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, Integer, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, DateTime, ForeignKey, Boolean, String
 
 from app.database.service.database import Base
 
