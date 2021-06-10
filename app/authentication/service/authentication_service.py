@@ -5,7 +5,7 @@ from typing import Optional
 
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
+from jose import jwt, JWTError, ExpiredSignatureError
 from passlib.context import CryptContext
 from pydantic import SecretStr
 
@@ -65,6 +65,12 @@ class AuthenticationService:
             username = payload.get('sub')
             if username is None:
                 raise Exception
+        except ExpiredSignatureError:
+            username = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={'verify_exp': False}).get('sub')
+            user = UserAuthSchema.from_user_model(AuthenticationService.get_user(username))
+            if user is None:
+                raise Exception
+            return user
         except JWTError:
             raise Exception
         user = UserAuthSchema.from_user_model(AuthenticationService.get_user(username))

@@ -11,6 +11,8 @@ class MediaSchema(MediaBaseSchema):
 
     @staticmethod
     def from_media_model(media_model: MediaModel):
+        if media_model is None:
+            return None
         return MediaSchema(id=media_model.id,
                            created_date=media_model.created_date,
                            path=media_model.path,

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -11,6 +11,6 @@ class RecipeResponseBaseSchema(BaseModel):
     min_tier: int
     name: str
     description: str
-    thumbnail: MediaSchema
-    video: MediaSchema
+    thumbnail: Optional[MediaSchema]
+    video: Optional[MediaSchema]
     steps: List[StepSchema]

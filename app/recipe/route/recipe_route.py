@@ -51,7 +51,7 @@ async def add_medias_to_recipe(recipe_id: int, files: List[UploadFile] = File(..
 async def get_my_recipe(database: Session = Depends(get_database),
                         current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseSchema]:
     try:
-        recipe_list = RecipeService.get_all_recipe_for_specific_user(database, current_user.id)
+        recipe_list = RecipeService.get_all_recipe_for_specific_user(database, current_user, current_user.username)
         return recipe_list
     except Exception as exception:
         print(exception)

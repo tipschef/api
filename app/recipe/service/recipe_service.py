@@ -19,8 +19,11 @@ from app.recipe.schema.media.media_base_schema import MediaBaseSchema
 from app.recipe.schema.media.media_category_schema import MediaCategorySchema
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
+from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.step.step_schema import StepSchema
+from app.user.repository.subscription_repository import SubscriptionRepository
+from app.user.repository.user_repository import UserRepository
 from app.user.schema.user_schema import UserSchema
 
 
@@ -47,18 +50,20 @@ class RecipeService:
         return recipe_created.id
 
     @staticmethod
-    def get_all_recipe_for_specific_user(database: Session, user_id: int) -> List[RecipeResponseSchema]:
+    def get_all_recipe_for_specific_user(database: Session, current_user: UserSchema, asking_username: str) -> List[RecipeResponseExtendedSchema]:
+        asking_user = UserRepository.get_user_by_username(asking_username)
+        subscription = SubscriptionRepository.get_subscription(database, asking_user.id, current_user.id)
+
         recipes_list_response = []
-        recipes_list = RecipeRepository.get_all_recipe_for_user(database, user_id)
+        recipes_list = RecipeRepository.get_all_recipe_for_user(database, asking_user.id)
         for recipe in recipes_list:
             video_media = MediaSchema.from_media_model(MediaRepository.get_media_by_id(database, recipe.video_id))
-            thumbnail_media = MediaSchema.from_media_model(
-                MediaRepository.get_media_by_id(database, recipe.thumbnail_id))
-            steps = [StepSchema.from_step_model(step) for step in
-                     StepRepository.get_steps_by_recipe_id(database, recipe.id)]
-            recipes_list_response.append(
-                RecipeResponseSchema.from_recipe_model(recipe, steps=steps, thumbnail=thumbnail_media,
-                                                       video=video_media))
+            thumbnail_media = MediaSchema.from_media_model(MediaRepository.get_media_by_id(database, recipe.thumbnail_id))
+            steps = [StepSchema.from_step_model(step) for step in StepRepository.get_steps_by_recipe_id(database, recipe.id)]
+
+            can_be_seen = current_user.id == asking_user.id or recipe.min_tier == 0 or (subscription is not None and recipe.min_tier <= subscription.tier)
+            print(can_be_seen)
+            recipes_list_response.append(RecipeResponseExtendedSchema.from_recipe_model(recipe, steps=steps, thumbnail=thumbnail_media, video=video_media, can_be_seen=can_be_seen))
         return recipes_list_response
 
     @staticmethod
