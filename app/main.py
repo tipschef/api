@@ -8,21 +8,13 @@ from fastapi.responses import JSONResponse
 from app.authentication.route.authentication_route import router as authentication_router
 from app.common.route.home_router import router as home_router
 from app.database.service.database_init import init_database
-from app.user.route.user_route import router as user_router
-from app.recipe.route.recipe_route import router as recipe_route
+from app.recipe.route.media_category_route import router as media_category_route
 from app.recipe.route.recipe_category_route import router as recipe_category_route
 from app.recipe.route.recipe_cooking_type_route import router as recipe_cooking_type_route
-from app.recipe.route.media_category_route import router as media_category_route
+from app.recipe.route.recipe_route import router as recipe_route
+from app.user.route.user_route import router as user_router
 
 app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=['*'],
-    allow_credentials=True,
-    allow_methods=['*'],
-    allow_headers=['*'],
-)
 
 
 @app.exception_handler(RequestValidationError)
@@ -59,6 +51,14 @@ def configure() -> None:
 
 
 configure()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
 
 if __name__ == '__main__':
     uvicorn.run(app, host='127.0.0.1', port=5050)
