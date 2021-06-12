@@ -21,6 +21,7 @@ from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
+from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.recipe.schema.step.step_schema import StepSchema
 from app.user.repository.subscription_repository import SubscriptionRepository
 from app.user.repository.user_repository import UserRepository
@@ -93,7 +94,7 @@ class RecipeService:
 
     @staticmethod
     def update_a_recipe_by_id(database: Session, recipe_id: int, current_user: UserSchema,
-                              recipe: RecipeResponseSchema) -> bool:
+                              recipe: RecipeSchema) -> bool:
         recipe_to_update = recipe
         recipe_from_db = RecipeRepository.get_recipe_by_id(database, recipe_id)
 
@@ -107,6 +108,19 @@ class RecipeService:
 
         _ = [StepRepository.delete_step_by_id(database, step.id) for step in
              StepRepository.get_steps_by_recipe_id(database, recipe_id)]
+
+        RecipeIngredientsRepository.delete_recipe_ingredients_by_recipe_id(database, recipe.id)
+
+        for ingredient_bloc in recipe_to_update.ingredients:
+            ingredient = IngredientRepository.get_ingredient_by_name(database, ingredient_bloc.ingredient_name)
+            if ingredient is None:
+                ingredient = IngredientRepository.create_ingredient(database, ingredient_bloc.ingredient_name)
+
+            ingredient_unit = IngredientUnitRepository.get_ingredient_unit_by_name(database, ingredient_bloc.ingredient_unit)
+            if ingredient_unit is None:
+                ingredient_unit = IngredientUnitRepository.create_ingredient_unit(database, ingredient_bloc.ingredient_unit)
+
+            RecipeIngredientsRepository.create_recipe_ingredients(database, recipe_to_update.id, ingredient.id, ingredient_unit.id, ingredient_bloc.quantity)
 
         StepRepository.create_steps(database, recipe.steps, recipe_id)
 

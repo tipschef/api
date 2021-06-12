@@ -10,6 +10,7 @@ from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundExcep
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
 from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
+from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.recipe.service.like_service import LikeService
 from app.recipe.service.recipe_service import RecipeService
 from app.user.schema.user_schema import UserSchema
@@ -108,7 +109,7 @@ async def delete_a_recipe(recipe_id: int, database: Session = Depends(get_databa
 
 
 @router.patch('/{recipe_id}', response_model=dict, tags=['recipes'])
-async def update_a_recipe(recipe_id: int, recipe: RecipeResponseSchema, database: Session = Depends(get_database),
+async def update_a_recipe(recipe_id: int, recipe: RecipeSchema, database: Session = Depends(get_database),
                           current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
         RecipeService.update_a_recipe_by_id(database, recipe_id, current_user, recipe)

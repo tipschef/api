@@ -22,3 +22,9 @@ class RecipeMediasRepository:
         db_step_list = [RecipeMediasModel(recipe_id=recipe_id, media_id=media_id) for media_id in media_ids]
         database.bulk_save_objects(db_step_list)
         database.commit()
+
+    @staticmethod
+    def delete_recipe_medias_by_recipe_id(database: Session, recipe_id: int) -> None:
+        database.query(RecipeMediasModel).filter(RecipeMediasModel.recipe_id == recipe_id).delete()
+        database.commit()
+

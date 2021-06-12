@@ -14,3 +14,8 @@ class RecipeIngredientsRepository:
         database.commit()
         database.refresh(db_recipe_ingredients)
         return db_recipe_ingredients
+
+    @staticmethod
+    def delete_recipe_ingredients_by_recipe_id(database: Session, recipe_id: int) -> None:
+        database.query(RecipeIngredientsModel).filter(RecipeIngredientsModel.recipe_id == recipe_id).delete()
+        database.commit()
