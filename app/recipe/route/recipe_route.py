@@ -45,6 +45,9 @@ async def add_medias_to_recipe(recipe_id: int, files: List[UploadFile] = File(..
         raise HTTPException(status_code=404, detail=str(exception))
     except NotRecipeOwnerException as exception:
         raise HTTPException(status_code=400, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
 
 
 @router.get('/me', response_model=List[RecipeResponseSchema], tags=['recipes'])

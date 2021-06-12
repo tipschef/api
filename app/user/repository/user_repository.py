@@ -35,3 +35,15 @@ class UserRepository:
     @staticmethod
     def get_user_by_id(database: Session, user_id: int) -> Optional[UserModel]:
         return database.query(UserModel).filter(UserModel.id == user_id).first()
+
+    @staticmethod
+    def update_profile_picture(database: Session, user_id: int, profile_media_id: int):
+        database.query(UserModel).filter(UserModel.id == user_id).update(
+            {UserModel.profile_media_id: profile_media_id})
+        database.commit()
+
+    @staticmethod
+    def update_background_picture(database: Session, user_id: int, background_media_id: int):
+        database.query(UserModel).filter(UserModel.id == user_id).update(
+            {UserModel.background_media_id: background_media_id})
+        database.commit()
