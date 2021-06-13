@@ -20,7 +20,7 @@ from app.recipe.schema.media.media_base_schema import MediaBaseSchema
 from app.recipe.schema.media.media_category_schema import MediaCategorySchema
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
-from app.recipe.schema.recipe.recipe_full_schema import RecipeFullSchema
+from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.recipe.schema.step.step_schema import StepSchema
@@ -78,7 +78,7 @@ class RecipeService:
         return recipes_list_response
 
     @staticmethod
-    def get_a_recipe_by_id(database: Session, recipe_id: int) -> RecipeFullSchema:
+    def get_a_recipe_by_id(database: Session, recipe_id: int) -> RecipeResponseSchema:
         recipe = RecipeRepository.get_recipe_by_id(database, recipe_id)
         if recipe is None:
             raise RecipeIdNotFoundException()
@@ -93,7 +93,7 @@ class RecipeService:
         medias = [MediaSchema.from_media_model(media[1]) for
                   media in RecipeMediasRepository.get_all_recipe_medias_data_by_recipe_id(database, recipe_id)]
 
-        return RecipeFullSchema.from_recipe_models(recipe, steps=steps, ingredients=ingredients, medias=medias)
+        return RecipeResponseSchema.from_recipe_models(recipe, steps=steps, ingredients=ingredients, medias=medias)
 
     @staticmethod
     def delete_a_recipe_by_id(database: Session, recipe_id: int, current_user: UserSchema) -> bool:
@@ -152,7 +152,7 @@ class RecipeService:
         return True
 
     @staticmethod
-    def get_my_wall(database: Session, user: UserSchema) -> List[RecipeFullSchema]:
+    def get_my_wall(database: Session, user: UserSchema) -> List[RecipeResponseSchema]:
         recipes = []
         recipes_list = RecipeRepository.get_followed_recipes(database, user.id)
         for recipe in recipes_list:
@@ -189,7 +189,7 @@ class RecipeService:
         return created_medias
 
     @staticmethod
-    def get_all_creator_recipe(database: Session, creator_id: int) -> List[RecipeFullSchema]:
+    def get_all_creator_recipe(database: Session, creator_id: int) -> List[RecipeResponseSchema]:
         recipes = []
         recipes_list = RecipeRepository.get_all_recipe_for_user(database, creator_id)
         for recipe in recipes_list:

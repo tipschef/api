@@ -5,11 +5,11 @@ from typing import List
 from app.recipe.model.recipe.recipe_model import RecipeModel
 from app.recipe.schema.ingredient.ingredient_base_schema import IngredientBaseSchema
 from app.recipe.schema.media.media_schema import MediaSchema
-from app.recipe.schema.recipe.recipe_full_schema import RecipeFullSchema
+from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.step.step_schema import StepSchema
 
 
-class RecipeResponseExtendedSchema(RecipeFullSchema):
+class RecipeResponseExtendedSchema(RecipeResponseSchema):
     can_be_seen: bool
 
     @staticmethod
