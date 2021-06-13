@@ -71,6 +71,14 @@ class RecipeRepository:
         database.commit()
 
     @staticmethod
+    def update_thumbnail_video_by_id(database: Session, recipe_id: int, thumbnail_id: int, video_id: int) -> None:
+        database.query(RecipeModel).filter(RecipeModel.is_deleted.is_(False), RecipeModel.id == recipe_id) \
+            .update({RecipeModel.thumbnail_id: thumbnail_id,
+                     RecipeModel.video_id: video_id,
+                     RecipeModel.last_updated: datetime.utcnow()})
+        database.commit()
+
+    @staticmethod
     def get_followed_recipes(database: Session, user_id: int) -> List[RecipeModel]:
         sub_query = database.query(FollowModel.followed_id).filter(FollowModel.follower_id == user_id)
         return database.query(RecipeModel).filter(RecipeModel.creator_id.in_(sub_query), RecipeModel.is_deleted.is_(False)).all()

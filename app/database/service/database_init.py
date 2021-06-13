@@ -31,7 +31,7 @@ def init_database() -> None:
 
 
 def init_data(database: Session) -> None:
-    recipe_categories = ['Entrée', 'Plat principal', 'Dessert', 'Accompagnement', 'Amuse-gueule', 'Boisson', 'Confiserie', 'Sauce']
+    recipe_categories = ['Entrée', 'Plat principal', 'Dessert', 'Accompagnement', 'Amuse-bouche', 'Boisson', 'Confiserie', 'Sauce']
     RecipeCategoryRepository.create_recipe_categories(database, recipe_categories)
 
     recipe_cooking_types = ['Four', 'Plaques', 'Sans cuisson', 'Autres']

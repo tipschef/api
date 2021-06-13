@@ -17,3 +17,9 @@ class MediaSchema(MediaBaseSchema):
                            created_date=media_model.created_date,
                            path=media_model.path,
                            media_category_id=media_model.media_category_id)
+
+    @staticmethod
+    def init():
+        return MediaSchema(id=0,
+                           path='',
+                           media_category_id=0)

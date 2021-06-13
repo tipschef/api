@@ -15,6 +15,7 @@ class RecipeResponseExtendedSchema(RecipeResponseSchema):
     @staticmethod
     def from_recipe_models_seen(recipe: RecipeModel, steps: List[StepSchema],
                                 ingredients: List[IngredientBaseSchema], medias: List[MediaSchema],
+                                thumbnail: MediaSchema, video: MediaSchema,
                                 can_be_seen: bool) -> RecipeResponseExtendedSchema:
         return RecipeResponseExtendedSchema(min_tier=recipe.min_tier,
                                             portion_number=recipe.portion_number,
@@ -34,5 +35,7 @@ class RecipeResponseExtendedSchema(RecipeResponseSchema):
                                             steps=steps,
                                             ingredients=ingredients,
                                             medias=medias,
+                                            thumbnail=thumbnail,
+                                            video=video,
                                             creator_id=recipe.creator_id,
                                             can_be_seen=can_be_seen)

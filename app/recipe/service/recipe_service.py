@@ -62,6 +62,10 @@ class RecipeService:
         recipes_list_response = []
         recipes_list = RecipeRepository.get_all_recipe_for_user(database, asking_user.id)
         for recipe in recipes_list:
+            thumbnail = MediaRepository.get_media_by_id(database, recipe.thumbnail_id)
+
+            video = MediaRepository.get_media_by_id(database, recipe.video_id)
+
             steps = [StepSchema.from_step_model(step) for step in
                      StepRepository.get_steps_by_recipe_id(database, recipe.id)]
 
@@ -74,7 +78,7 @@ class RecipeService:
 
             can_be_seen = current_user.id == asking_user.id or recipe.min_tier == 0 or (subscription is not None and recipe.min_tier <= subscription.tier)
             recipes_list_response.append(
-                RecipeResponseExtendedSchema.from_recipe_models_seen(recipe, steps=steps, ingredients=ingredients, medias=medias, can_be_seen=can_be_seen))
+                RecipeResponseExtendedSchema.from_recipe_models_seen(recipe, steps=steps, ingredients=ingredients, medias=medias, can_be_seen=can_be_seen, thumbnail=MediaSchema.from_media_model(thumbnail), video=MediaSchema.from_media_model(video)))
         return recipes_list_response
 
     @staticmethod
@@ -86,14 +90,17 @@ class RecipeService:
         steps = [StepSchema.from_step_model(step) for step in
                  StepRepository.get_steps_by_recipe_id(database, recipe_id)]
 
+        thumbnail = MediaRepository.get_media_by_id(database, recipe.thumbnail_id)
+
+        video = MediaRepository.get_media_by_id(database, recipe.video_id)
+
         ingredients = [IngredientBaseSchema.from_ingredient_tuple(ingredient[0], ingredient[1], ingredient[2]) for
                        ingredient in
                        RecipeIngredientsRepository.get_recipe_ingredients_by_recipe_id(database, recipe_id)]
 
         medias = [MediaSchema.from_media_model(media[1]) for
                   media in RecipeMediasRepository.get_all_recipe_medias_data_by_recipe_id(database, recipe_id)]
-
-        return RecipeResponseSchema.from_recipe_models(recipe, steps=steps, ingredients=ingredients, medias=medias)
+        return RecipeResponseSchema.from_recipe_models(recipe, steps=steps, ingredients=ingredients, medias=medias, thumbnail=MediaSchema.from_media_model(thumbnail), video=MediaSchema.from_media_model(video))
 
     @staticmethod
     def delete_a_recipe_by_id(database: Session, recipe_id: int, current_user: UserSchema) -> bool:
@@ -208,3 +215,58 @@ class RecipeService:
         for media in medias:
             RecipeMediasRepository.delete_recipe_medias_by_recipe_and_media_id(database, recipe_id, media.id)
         return True
+
+    @staticmethod
+    def add_thumbnail_to_recipe(database: Session, recipe_id: int, creator_id: int, thumbnail) -> MediaSchema:
+        recipe_from_db = RecipeRepository.get_recipe_by_id(database, recipe_id)
+
+        if recipe_from_db is None:
+            raise RecipeIdNotFoundException()
+        if recipe_from_db.creator_id != creator_id:
+            raise CannotModifyOthersPeopleRecipeException()
+        video_id = recipe_from_db.video_id
+
+        # thumbnail
+        media_category = MediaCategoryRepository.get_media_category_by_name(database, thumbnail.content_type.split('/')[0])
+        if media_category is None:
+            media_category = MediaCategoryRepository.create_media_category(database, MediaCategorySchema(
+                name=thumbnail.content_type.split('/')[0], description=thumbnail.content_type.split('/')[0]))
+        media_schema = MediaBaseSchema(path='temp', media_category_id=media_category.id)
+        created_thumbnail = MediaRepository.create_media(database, media_schema)
+        filename = get_bucket_manager_service().save_file(
+            f'{creator_id}/{recipe_id}/{created_thumbnail.id}_{thumbnail.filename}', thumbnail.file)
+        created_thumbnail.path = filename
+        MediaRepository.update_media_by_id(database, created_thumbnail.id, filename)
+        thumbnail_id = created_thumbnail.id
+
+        RecipeRepository.update_thumbnail_video_by_id(database, recipe_id, thumbnail_id, video_id)
+
+        return MediaSchema.from_media_model(created_thumbnail)
+
+    @staticmethod
+    def add_video_to_recipe(database: Session, recipe_id: int, creator_id: int, video) -> MediaSchema:
+        recipe_from_db = RecipeRepository.get_recipe_by_id(database, recipe_id)
+
+        if recipe_from_db is None:
+            raise RecipeIdNotFoundException()
+        if recipe_from_db.creator_id != creator_id:
+            raise CannotModifyOthersPeopleRecipeException()
+        thumbnail_id = recipe_from_db.thumbnail_id
+
+        # video
+        media_category = MediaCategoryRepository.get_media_category_by_name(database,
+                                                                            video.content_type.split('/')[0])
+        if media_category is None:
+            media_category = MediaCategoryRepository.create_media_category(database, MediaCategorySchema(
+                name=video.content_type.split('/')[0], description=video.content_type.split('/')[0]))
+        media_schema = MediaBaseSchema(path='temp', media_category_id=media_category.id)
+        created_video = MediaRepository.create_media(database, media_schema)
+        filename = get_bucket_manager_service().save_file(
+            f'{creator_id}/{recipe_id}/{created_video.id}_{video.filename}', video.file)
+        created_video.path = filename
+        MediaRepository.update_media_by_id(database, created_video.id, filename)
+        video_id = created_video.id
+
+        RecipeRepository.update_thumbnail_video_by_id(database, recipe_id, thumbnail_id, video_id)
+
+        return MediaSchema.from_media_model(created_video)
