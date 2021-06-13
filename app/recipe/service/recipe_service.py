@@ -15,10 +15,12 @@ from app.recipe.repository.recipe.recipe_ingredients_repository import RecipeIng
 from app.recipe.repository.recipe.recipe_medias_repository import RecipeMediasRepository
 from app.recipe.repository.recipe.recipe_repository import RecipeRepository
 from app.recipe.repository.step.step_repository import StepRepository
+from app.recipe.schema.ingredient.ingredient_base_schema import IngredientBaseSchema
 from app.recipe.schema.media.media_base_schema import MediaBaseSchema
 from app.recipe.schema.media.media_category_schema import MediaCategorySchema
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
+from app.recipe.schema.recipe.recipe_full_schema import RecipeFullSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe.recipe_schema import RecipeSchema
@@ -43,15 +45,19 @@ class RecipeService:
             if ingredient is None:
                 ingredient = IngredientRepository.create_ingredient(database, ingredient_bloc.ingredient_name)
 
-            ingredient_unit = IngredientUnitRepository.get_ingredient_unit_by_name(database, ingredient_bloc.ingredient_unit)
+            ingredient_unit = IngredientUnitRepository.get_ingredient_unit_by_name(database,
+                                                                                   ingredient_bloc.ingredient_unit)
             if ingredient_unit is None:
-                ingredient_unit = IngredientUnitRepository.create_ingredient_unit(database, ingredient_bloc.ingredient_unit)
+                ingredient_unit = IngredientUnitRepository.create_ingredient_unit(database,
+                                                                                  ingredient_bloc.ingredient_unit)
 
-            RecipeIngredientsRepository.create_recipe_ingredients(database, recipe_created.id, ingredient.id, ingredient_unit.id, ingredient_bloc.quantity)
+            RecipeIngredientsRepository.create_recipe_ingredients(database, recipe_created.id, ingredient.id,
+                                                                  ingredient_unit.id, ingredient_bloc.quantity)
         return recipe_created.id
 
     @staticmethod
-    def get_all_recipe_for_specific_user(database: Session, current_user: UserSchema, asking_username: str) -> List[RecipeResponseExtendedSchema]:
+    def get_all_recipe_for_specific_user(database: Session, current_user: UserSchema, asking_username: str) -> List[
+        RecipeResponseExtendedSchema]:
         asking_user = UserRepository.get_user_by_username(asking_username)
         subscription = SubscriptionRepository.get_subscription(database, asking_user.id, current_user.id)
 
@@ -59,24 +65,36 @@ class RecipeService:
         recipes_list = RecipeRepository.get_all_recipe_for_user(database, asking_user.id)
         for recipe in recipes_list:
             video_media = MediaSchema.from_media_model(MediaRepository.get_media_by_id(database, recipe.video_id))
-            thumbnail_media = MediaSchema.from_media_model(MediaRepository.get_media_by_id(database, recipe.thumbnail_id))
-            steps = [StepSchema.from_step_model(step) for step in StepRepository.get_steps_by_recipe_id(database, recipe.id)]
+            thumbnail_media = MediaSchema.from_media_model(
+                MediaRepository.get_media_by_id(database, recipe.thumbnail_id))
+            steps = [StepSchema.from_step_model(step) for step in
+                     StepRepository.get_steps_by_recipe_id(database, recipe.id)]
 
-            can_be_seen = current_user.id == asking_user.id or recipe.min_tier == 0 or (subscription is not None and recipe.min_tier <= subscription.tier)
+            can_be_seen = current_user.id == asking_user.id or recipe.min_tier == 0 or (
+                        subscription is not None and recipe.min_tier <= subscription.tier)
             print(can_be_seen)
-            recipes_list_response.append(RecipeResponseExtendedSchema.from_recipe_model(recipe, steps=steps, thumbnail=thumbnail_media, video=video_media, can_be_seen=can_be_seen))
+            recipes_list_response.append(
+                RecipeResponseExtendedSchema.from_recipe_model(recipe, steps=steps, thumbnail=thumbnail_media,
+                                                               video=video_media, can_be_seen=can_be_seen))
         return recipes_list_response
 
     @staticmethod
-    def get_a_recipe_by_id(database: Session, recipe_id: int) -> RecipeResponseSchema:
+    def get_a_recipe_by_id(database: Session, recipe_id: int) -> RecipeFullSchema:
         recipe = RecipeRepository.get_recipe_by_id(database, recipe_id)
         if recipe is None:
             raise RecipeIdNotFoundException()
-        video_media = MediaSchema.from_media_model(MediaRepository.get_media_by_id(database, recipe.video_id))
-        thumbnail_media = MediaSchema.from_media_model(MediaRepository.get_media_by_id(database, recipe.thumbnail_id))
+
         steps = [StepSchema.from_step_model(step) for step in
                  StepRepository.get_steps_by_recipe_id(database, recipe_id)]
-        return RecipeResponseSchema.from_recipe_model(recipe, steps=steps, thumbnail=thumbnail_media, video=video_media)
+
+        ingredients = [IngredientBaseSchema.from_ingredient_tuple(ingredient[0], ingredient[1], ingredient[2]) for
+                       ingredient in
+                       RecipeIngredientsRepository.get_recipe_ingredients_by_recipe_id(database, recipe_id)]
+
+        medias = [MediaSchema.from_media_model(media[1]) for
+                  media in RecipeMediasRepository.get_all_recipe_medias_data_by_recipe_id(database, recipe_id)]
+
+        return RecipeFullSchema.from_recipe_models(recipe, steps=steps, ingredients=ingredients, medias=medias)
 
     @staticmethod
     def delete_a_recipe_by_id(database: Session, recipe_id: int, current_user: UserSchema) -> bool:
@@ -85,10 +103,15 @@ class RecipeService:
             raise RecipeIdNotFoundException()
         if recipe.creator_id != current_user.id:
             raise CannotModifyOthersPeopleRecipeException()
-        MediaRepository.delete_media_by_id(database, recipe.video_id)
-        MediaRepository.delete_media_by_id(database, recipe.thumbnail_id)
+
         _ = [StepRepository.delete_step_by_id(database, step.id) for step in
              StepRepository.get_steps_by_recipe_id(database, recipe_id)]
+
+        _ = [MediaRepository.delete_media_by_id(database, recipe_media.media_id) for recipe_media in
+             RecipeMediasRepository.get_all_recipe_medias_by_recipe_id(database, recipe_id)]
+
+        RecipeIngredientsRepository.delete_recipe_ingredients_by_recipe_id(database, recipe_id)
+
         RecipeRepository.delete_recipe_by_id(database, recipe_id)
         return True
 
@@ -116,11 +139,14 @@ class RecipeService:
             if ingredient is None:
                 ingredient = IngredientRepository.create_ingredient(database, ingredient_bloc.ingredient_name)
 
-            ingredient_unit = IngredientUnitRepository.get_ingredient_unit_by_name(database, ingredient_bloc.ingredient_unit)
+            ingredient_unit = IngredientUnitRepository.get_ingredient_unit_by_name(database,
+                                                                                   ingredient_bloc.ingredient_unit)
             if ingredient_unit is None:
-                ingredient_unit = IngredientUnitRepository.create_ingredient_unit(database, ingredient_bloc.ingredient_unit)
+                ingredient_unit = IngredientUnitRepository.create_ingredient_unit(database,
+                                                                                  ingredient_bloc.ingredient_unit)
 
-            RecipeIngredientsRepository.create_recipe_ingredients(database, recipe_to_update.id, ingredient.id, ingredient_unit.id, ingredient_bloc.quantity)
+            RecipeIngredientsRepository.create_recipe_ingredients(database, recipe_to_update.id, ingredient.id,
+                                                                  ingredient_unit.id, ingredient_bloc.quantity)
 
         StepRepository.create_steps(database, recipe.steps, recipe_id)
 
@@ -141,7 +167,8 @@ class RecipeService:
         return recipes
 
     @staticmethod
-    def add_media_to_recipe(database: Session, creator_id: int, recipe_id: int, medias: List[UploadFile]) -> List[MediaSchema]:
+    def add_media_to_recipe(database: Session, creator_id: int, recipe_id: int, medias: List[UploadFile]) -> List[
+        MediaSchema]:
         recipe = RecipeRepository.get_recipe_by_id(database, recipe_id)
         created_media_ids = []
         created_medias = []
@@ -151,12 +178,15 @@ class RecipeService:
             raise NotRecipeOwnerException()
 
         for media in medias:
-            media_category = MediaCategoryRepository.get_media_category_by_name(database, media.content_type.split('/')[0])
+            media_category = MediaCategoryRepository.get_media_category_by_name(database,
+                                                                                media.content_type.split('/')[0])
             if media_category is None:
-                media_category = MediaCategoryRepository.create_media_category(database, MediaCategorySchema(name=media.content_type.split('/')[0], description=media.content_type.split('/')[0]))
+                media_category = MediaCategoryRepository.create_media_category(database, MediaCategorySchema(
+                    name=media.content_type.split('/')[0], description=media.content_type.split('/')[0]))
             media_schema = MediaBaseSchema(path='temp', media_category_id=media_category.id)
             created_media = MediaRepository.create_media(database, media_schema)
-            filename = get_bucket_manager_service().save_file(f'{creator_id}/{recipe_id}/{created_media.id}_{media.filename}', media.file)
+            filename = get_bucket_manager_service().save_file(
+                f'{creator_id}/{recipe_id}/{created_media.id}_{media.filename}', media.file)
             created_media.path = filename
             MediaRepository.update_media_by_id(database, created_media.id, filename)
             created_media_ids.append(created_media.id)

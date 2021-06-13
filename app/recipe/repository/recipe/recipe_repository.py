@@ -19,6 +19,7 @@ class RecipeRepository:
                                 name=recipe.name,
                                 description=recipe.description,
                                 recipe_cooking_type_id=recipe.recipe_cooking_type_id,
+                                recipe_category_id=recipe.recipe_category_id,
                                 portion_number=recipe.portion_number,
                                 portion_unit=recipe.portion_unit,
                                 preparation_hours=recipe.preparation_hours,

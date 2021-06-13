@@ -9,6 +9,7 @@ from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundExcep
     CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
+from app.recipe.schema.recipe.recipe_full_schema import RecipeFullSchema
 from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.recipe.service.like_service import LikeService
@@ -80,9 +81,9 @@ async def get_my_wall(database: Session = Depends(get_database),
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.get('/{recipe_id}', response_model=RecipeResponseSchema, tags=['recipes'])
+@router.get('/{recipe_id}', response_model=RecipeFullSchema, tags=['recipes'])
 async def get_a_recipe(recipe_id: int, database: Session = Depends(get_database),
-                       _: UserSchema = Depends(UserService.get_current_active_user)) -> RecipeResponseSchema:
+                       _: UserSchema = Depends(UserService.get_current_active_user)) -> RecipeFullSchema:
     try:
         recipe = RecipeService.get_a_recipe_by_id(database, recipe_id)
         return recipe
