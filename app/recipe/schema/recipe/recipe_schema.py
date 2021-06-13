@@ -14,7 +14,7 @@ class RecipeSchema(RecipeBaseSchema):
     creator_id: int
     is_deleted: bool = False
     last_updated: Optional[datetime]
-    created_at: Optional[datetime]
+    created_date: Optional[datetime]
 
     @staticmethod
     def from_recipe_base_schema(recipe: RecipeBaseSchema, creator_id: int) -> RecipeSchema:

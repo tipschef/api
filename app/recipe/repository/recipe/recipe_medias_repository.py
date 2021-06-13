@@ -30,6 +30,11 @@ class RecipeMediasRepository:
         database.commit()
 
     @staticmethod
+    def delete_recipe_medias_by_recipe_and_media_id(database: Session, recipe_id: int, media_id: int) -> None:
+        database.query(RecipeMediasModel).filter(RecipeMediasModel.recipe_id == recipe_id).filter(RecipeMediasModel.media_id == media_id).delete()
+        database.commit()
+
+    @staticmethod
     def get_all_recipe_medias_by_recipe_id(database: Session, recipe_id: int) -> List[RecipeMediasModel]:
         return database.query(RecipeMediasModel).filter(RecipeMediasModel.recipe_id == recipe_id).all()
 
