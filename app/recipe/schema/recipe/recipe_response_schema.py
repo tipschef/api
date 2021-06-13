@@ -33,4 +33,9 @@ class RecipeResponseSchema(RecipeSchema):
                                     steps=steps,
                                     ingredients=ingredients,
                                     medias=medias,
-                                    creator_id=recipe.creator_id)
+                                    creator_id=recipe.creator_id,
+                                    id=recipe.id,
+                                    is_deleted=recipe.is_deleted,
+                                    last_updated=recipe.last_updated,
+                                    created_date=recipe.created_date,
+                                    )

@@ -194,5 +194,17 @@ class RecipeService:
         recipes_list = RecipeRepository.get_all_recipe_for_user(database, creator_id)
         for recipe in recipes_list:
             recipes.append(RecipeService.get_a_recipe_by_id(database, recipe.id))
-        print(recipes)
         return recipes
+
+    @staticmethod
+    def delete_medias_of_recipe(database: Session, recipe_id: int, creator_id: int, medias: List[MediaSchema]) -> bool:
+        recipe_from_db = RecipeRepository.get_recipe_by_id(database, recipe_id)
+
+        if recipe_from_db is None:
+            raise RecipeIdNotFoundException()
+        if recipe_from_db.creator_id != creator_id:
+            raise CannotModifyOthersPeopleRecipeException()
+
+        for media in medias:
+            RecipeMediasRepository.delete_recipe_medias_by_recipe_and_media_id(database, recipe_id, media.id)
+        return True

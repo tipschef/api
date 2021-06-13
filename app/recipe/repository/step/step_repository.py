@@ -28,11 +28,13 @@ class StepRepository:
 
     @staticmethod
     def get_steps_by_recipe_id(database: Session, recipe_id: int) -> List[StepModel]:
-        return database.query(StepModel).filter(StepModel.recipe_id == recipe_id, StepModel.is_deleted.is_(False)).all()
+        return database.query(StepModel).filter(StepModel.recipe_id == recipe_id) \
+                                        .filter(False == StepModel.is_deleted).all()
 
     @staticmethod
     def delete_step_by_id(database: Session, step_id: int) -> None:
-        database.query(StepModel).filter(StepModel.is_deleted.is_(False), StepModel.id == step_id).update({StepModel.is_deleted: True})
+        database.query(StepModel).filter(StepModel.is_deleted.is_(False), StepModel.id == step_id).update(
+            {StepModel.is_deleted: True})
         database.commit()
 
     @staticmethod

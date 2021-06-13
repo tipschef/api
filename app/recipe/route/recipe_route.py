@@ -9,8 +9,8 @@ from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundExcep
     CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
-from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
+from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.recipe.service.like_service import LikeService
 from app.recipe.service.recipe_service import RecipeService
@@ -39,7 +39,8 @@ async def create_recipe(recipe: RecipeBaseSchema, database: Session = Depends(ge
 @router.post('/media/{recipe_id}', response_model=List[MediaSchema], tags=['recipes'])
 async def add_medias_to_recipe(recipe_id: int, files: List[UploadFile] = File(...),
                                database: Session = Depends(get_database),
-                               current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[MediaSchema]:
+                               current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
+    MediaSchema]:
     try:
         medias = RecipeService.add_media_to_recipe(database, current_user.id, recipe_id, files)
         return medias
@@ -54,7 +55,8 @@ async def add_medias_to_recipe(recipe_id: int, files: List[UploadFile] = File(..
 
 @router.get('/me', response_model=List[RecipeResponseExtendedSchema], tags=['recipes'])
 async def get_my_recipe(database: Session = Depends(get_database),
-                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseExtendedSchema]:
+                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
+    RecipeResponseExtendedSchema]:
     try:
         recipe_list = RecipeService.get_all_recipe_for_specific_user(database, current_user, current_user.username)
         return recipe_list
@@ -112,6 +114,21 @@ async def delete_a_recipe(recipe_id: int, database: Session = Depends(get_databa
                           current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
         RecipeService.delete_a_recipe_by_id(database, recipe_id, current_user)
+        return {'status': 'Done'}
+    except RecipeIdNotFoundException as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
+    except CannotModifyOthersPeopleRecipeException as exception:
+        raise HTTPException(status_code=403, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.put('/media/{recipe_id}', response_model=dict, tags=['recipes'])
+async def delete_media_from_recipe(recipe_id: int, medias: List[MediaSchema], database: Session = Depends(get_database),
+                                   current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+    try:
+        RecipeService.delete_medias_of_recipe(database, recipe_id, current_user.id, medias)
         return {'status': 'Done'}
     except RecipeIdNotFoundException as exception:
         raise HTTPException(status_code=404, detail=str(exception))
