@@ -30,4 +30,4 @@ class UserNotFoundException(Exception):
 
 class WrongUploadFileType(Exception):
     def __str__(self):
-        return f'Upload file type must be an Image'
+        return 'Upload file type must be an Image'
