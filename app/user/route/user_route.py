@@ -8,7 +8,7 @@ from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.service.recipe_service import RecipeService
 from app.user.exception.user_route_exceptions import UserAlreadyExistsException, UsernameAlreadyExistsException, \
-    UserNotFoundException
+    UserNotFoundException, WrongUploadFileType
 from app.user.schema.user_auth_schema import UserAuthSchema
 from app.user.schema.user_create_schema import UserCreateSchema
 from app.user.schema.user_detailed_schema import UserDetailedSchema
@@ -133,6 +133,8 @@ async def upload_profile_picture(file: UploadFile = File(...),
     try:
         media = UserService.update_user_profile_picture(database, current_user.id, file)
         return media
+    except WrongUploadFileType as exception:
+        raise HTTPException(status_code=415, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
@@ -146,6 +148,8 @@ async def upload_background_picture(file: UploadFile = File(...),
     try:
         media = UserService.update_user_background_picture(database, current_user.id, file)
         return media
+    except WrongUploadFileType as exception:
+        raise HTTPException(status_code=415, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
