@@ -29,7 +29,7 @@ class StepRepository:
     @staticmethod
     def get_steps_by_recipe_id(database: Session, recipe_id: int) -> List[StepModel]:
         return database.query(StepModel).filter(StepModel.recipe_id == recipe_id) \
-                                        .filter(False == StepModel.is_deleted).all()
+                                        .filter(not StepModel.is_deleted).all()
 
     @staticmethod
     def delete_step_by_id(database: Session, step_id: int) -> None:

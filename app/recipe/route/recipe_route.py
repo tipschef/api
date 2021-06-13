@@ -39,8 +39,7 @@ async def create_recipe(recipe: RecipeBaseSchema, database: Session = Depends(ge
 @router.post('/media/{recipe_id}', response_model=List[MediaSchema], tags=['recipes'])
 async def add_medias_to_recipe(recipe_id: int, files: List[UploadFile] = File(...),
                                database: Session = Depends(get_database),
-                               current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
-    MediaSchema]:
+                               current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[MediaSchema]:
     try:
         medias = RecipeService.add_media_to_recipe(database, current_user.id, recipe_id, files)
         return medias
@@ -55,8 +54,7 @@ async def add_medias_to_recipe(recipe_id: int, files: List[UploadFile] = File(..
 
 @router.get('/me', response_model=List[RecipeResponseExtendedSchema], tags=['recipes'])
 async def get_my_recipe(database: Session = Depends(get_database),
-                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
-    RecipeResponseExtendedSchema]:
+                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseExtendedSchema]:
     try:
         recipe_list = RecipeService.get_all_recipe_for_specific_user(database, current_user, current_user.username)
         return recipe_list
