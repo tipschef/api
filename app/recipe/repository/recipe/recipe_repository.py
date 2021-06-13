@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.recipe.model.recipe.recipe_model import RecipeModel
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
-from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
+from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.user.model.follow_model import FollowModel
 
 
@@ -19,6 +19,7 @@ class RecipeRepository:
                                 name=recipe.name,
                                 description=recipe.description,
                                 recipe_cooking_type_id=recipe.recipe_cooking_type_id,
+                                recipe_category_id=recipe.recipe_category_id,
                                 portion_number=recipe.portion_number,
                                 portion_unit=recipe.portion_unit,
                                 preparation_hours=recipe.preparation_hours,
@@ -49,14 +50,24 @@ class RecipeRepository:
         database.commit()
 
     @staticmethod
-    def update_recipe_by_id(database: Session, recipe_id: int, recipe: RecipeResponseSchema, ) -> None:
+    def update_recipe_by_id(database: Session, recipe_id: int, recipe: RecipeSchema, ) -> None:
         database.query(RecipeModel).filter(RecipeModel.is_deleted.is_(False), RecipeModel.id == recipe_id)\
-                                   .update({RecipeModel.name: recipe.name,
-                                            RecipeModel.min_tier: recipe.min_tier,
+                                   .update({RecipeModel.min_tier: recipe.min_tier,
+                                            RecipeModel.portion_number: recipe.portion_number,
+                                            RecipeModel.portion_unit: recipe.portion_unit,
+                                            RecipeModel.preparation_hours: recipe.preparation_hours,
+                                            RecipeModel.preparation_minutes: recipe.preparation_minutes,
+                                            RecipeModel.cooking_hours: recipe.cooking_hours,
+                                            RecipeModel.cooking_minutes: recipe.cooking_minutes,
+                                            RecipeModel.resting_hours: recipe.resting_hours,
+                                            RecipeModel.resting_minutes: recipe.resting_minutes,
+                                            RecipeModel.difficulty: recipe.difficulty,
+                                            RecipeModel.cost: recipe.cost,
+                                            RecipeModel.name: recipe.name,
                                             RecipeModel.description: recipe.description,
-                                            RecipeModel.last_updated: datetime.utcnow(),
-                                            RecipeModel.video_id: recipe.video.id,
-                                            RecipeModel.thumbnail_id: recipe.thumbnail.id})
+                                            RecipeModel.recipe_category_id: recipe.recipe_category_id,
+                                            RecipeModel.recipe_cooking_type_id: recipe.recipe_cooking_type_id,
+                                            RecipeModel.last_updated: datetime.utcnow()})
         database.commit()
 
     @staticmethod
