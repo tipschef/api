@@ -22,7 +22,6 @@ from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
 from app.recipe.schema.recipe.recipe_full_schema import RecipeFullSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
-from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.recipe.schema.step.step_schema import StepSchema
 from app.user.repository.subscription_repository import SubscriptionRepository
@@ -73,8 +72,7 @@ class RecipeService:
             medias = [MediaSchema.from_media_model(media[1]) for
                       media in RecipeMediasRepository.get_all_recipe_medias_data_by_recipe_id(database, recipe.id)]
 
-            can_be_seen = current_user.id == asking_user.id or recipe.min_tier == 0 or (
-                    subscription is not None and recipe.min_tier <= subscription.tier)
+            can_be_seen = current_user.id == asking_user.id or recipe.min_tier == 0 or (subscription is not None and recipe.min_tier <= subscription.tier)
             recipes_list_response.append(
                 RecipeResponseExtendedSchema.from_recipe_models_seen(recipe, steps=steps, ingredients=ingredients, medias=medias, can_be_seen=can_be_seen))
         return recipes_list_response
@@ -162,8 +160,7 @@ class RecipeService:
         return recipes
 
     @staticmethod
-    def add_media_to_recipe(database: Session, creator_id: int, recipe_id: int, medias: List[UploadFile]) -> List[
-        MediaSchema]:
+    def add_media_to_recipe(database: Session, creator_id: int, recipe_id: int, medias: List[UploadFile]) -> List[MediaSchema]:
         recipe = RecipeRepository.get_recipe_by_id(database, recipe_id)
         created_media_ids = []
         created_medias = []

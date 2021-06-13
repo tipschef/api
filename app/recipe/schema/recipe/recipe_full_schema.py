@@ -14,7 +14,7 @@ class RecipeFullSchema(RecipeSchema):
 
     @staticmethod
     def from_recipe_models(recipe: RecipeModel, steps: List[StepSchema],
-                          ingredients: List[IngredientBaseSchema], medias: List[MediaSchema]) -> RecipeFullSchema:
+                           ingredients: List[IngredientBaseSchema], medias: List[MediaSchema]) -> RecipeFullSchema:
         return RecipeFullSchema(min_tier=recipe.min_tier,
                                 portion_number=recipe.portion_number,
                                 portion_unit=recipe.portion_unit,
