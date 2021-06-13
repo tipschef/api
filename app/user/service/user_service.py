@@ -12,7 +12,7 @@ from app.recipe.schema.media.media_base_schema import MediaBaseSchema
 from app.recipe.schema.media.media_category_schema import MediaCategorySchema
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.user.exception.user_route_exceptions import UserAlreadyExistsException, UsernameAlreadyExistsException, \
-    UserNotFoundException
+    UserNotFoundException, WrongUploadFileType
 from app.user.model.user_model import UserModel
 from app.user.repository.follow_repository import FollowRepository
 from app.user.repository.user_repository import UserRepository
@@ -66,6 +66,8 @@ class UserService:
         media_category = MediaCategoryRepository.get_media_category_by_name(database, media.content_type.split('/')[0])
 
         creator = UserRepository.get_user_by_id(database, creator_id)
+        if media.content_type.split('/')[0] != 'image':
+            raise WrongUploadFileType
 
         if media_category is None:
             media_category = MediaCategoryRepository.create_media_category(database, MediaCategorySchema(
@@ -88,6 +90,8 @@ class UserService:
         media_category = MediaCategoryRepository.get_media_category_by_name(database, media.content_type.split('/')[0])
 
         creator = UserRepository.get_user_by_id(database, creator_id)
+        if media.content_type.split('/')[0] != 'image':
+            raise WrongUploadFileType
 
         if media_category is None:
             media_category = MediaCategoryRepository.create_media_category(database, MediaCategorySchema(
