@@ -10,6 +10,7 @@ from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundExcep
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
 from app.recipe.schema.recipe.recipe_full_schema import RecipeFullSchema
+from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.recipe.service.like_service import LikeService
@@ -49,9 +50,9 @@ async def add_medias_to_recipe(recipe_id: int, files: List[UploadFile] = File(..
         raise HTTPException(status_code=400, detail=str(exception))
 
 
-@router.get('/me', response_model=List[RecipeResponseSchema], tags=['recipes'])
+@router.get('/me', response_model=List[RecipeResponseExtendedSchema], tags=['recipes'])
 async def get_my_recipe(database: Session = Depends(get_database),
-                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseSchema]:
+                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseExtendedSchema]:
     try:
         recipe_list = RecipeService.get_all_recipe_for_specific_user(database, current_user, current_user.username)
         return recipe_list
@@ -71,11 +72,21 @@ async def init_database(database: Session = Depends(get_database)) -> dict:
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.get('/wall', response_model=List[RecipeResponseSchema], tags=['recipes', 'wall'])
+@router.get('/wall', response_model=List[RecipeFullSchema], tags=['recipes', 'wall'])
 async def get_my_wall(database: Session = Depends(get_database),
-                      current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseSchema]:
+                      current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeFullSchema]:
     try:
         return RecipeService.get_my_wall(database, current_user)
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/creator', response_model=List[RecipeFullSchema], tags=['recipes'])
+async def get_all_creator_recipe(database: Session = Depends(get_database),
+                                 current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeFullSchema]:
+    try:
+        return RecipeService.get_all_creator_recipe(database, current_user.id)
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

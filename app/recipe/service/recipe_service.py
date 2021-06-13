@@ -56,26 +56,27 @@ class RecipeService:
         return recipe_created.id
 
     @staticmethod
-    def get_all_recipe_for_specific_user(database: Session, current_user: UserSchema, asking_username: str) -> List[
-        RecipeResponseExtendedSchema]:
+    def get_all_recipe_for_specific_user(database: Session, current_user: UserSchema, asking_username: str) -> List[RecipeResponseExtendedSchema]:
         asking_user = UserRepository.get_user_by_username(asking_username)
         subscription = SubscriptionRepository.get_subscription(database, asking_user.id, current_user.id)
 
         recipes_list_response = []
         recipes_list = RecipeRepository.get_all_recipe_for_user(database, asking_user.id)
         for recipe in recipes_list:
-            video_media = MediaSchema.from_media_model(MediaRepository.get_media_by_id(database, recipe.video_id))
-            thumbnail_media = MediaSchema.from_media_model(
-                MediaRepository.get_media_by_id(database, recipe.thumbnail_id))
             steps = [StepSchema.from_step_model(step) for step in
                      StepRepository.get_steps_by_recipe_id(database, recipe.id)]
 
+            ingredients = [IngredientBaseSchema.from_ingredient_tuple(ingredient[0], ingredient[1], ingredient[2]) for
+                           ingredient in
+                           RecipeIngredientsRepository.get_recipe_ingredients_by_recipe_id(database, recipe.id)]
+
+            medias = [MediaSchema.from_media_model(media[1]) for
+                      media in RecipeMediasRepository.get_all_recipe_medias_data_by_recipe_id(database, recipe.id)]
+
             can_be_seen = current_user.id == asking_user.id or recipe.min_tier == 0 or (
-                        subscription is not None and recipe.min_tier <= subscription.tier)
-            print(can_be_seen)
+                    subscription is not None and recipe.min_tier <= subscription.tier)
             recipes_list_response.append(
-                RecipeResponseExtendedSchema.from_recipe_model(recipe, steps=steps, thumbnail=thumbnail_media,
-                                                               video=video_media, can_be_seen=can_be_seen))
+                RecipeResponseExtendedSchema.from_recipe_models_seen(recipe, steps=steps, ingredients=ingredients, medias=medias, can_be_seen=can_be_seen))
         return recipes_list_response
 
     @staticmethod
@@ -153,17 +154,11 @@ class RecipeService:
         return True
 
     @staticmethod
-    def get_my_wall(database: Session, user: UserSchema) -> List[RecipeResponseSchema]:
+    def get_my_wall(database: Session, user: UserSchema) -> List[RecipeFullSchema]:
         recipes = []
         recipes_list = RecipeRepository.get_followed_recipes(database, user.id)
         for recipe in recipes_list:
-            video_media = MediaSchema.from_media_model(MediaRepository.get_media_by_id(database, recipe.video_id))
-            thumbnail_media = MediaSchema.from_media_model(
-                MediaRepository.get_media_by_id(database, recipe.thumbnail_id))
-            steps = [StepSchema.from_step_model(step) for step in
-                     StepRepository.get_steps_by_recipe_id(database, recipe.id)]
-            recipes.append(RecipeResponseSchema.from_recipe_model(recipe, steps=steps, thumbnail=thumbnail_media,
-                                                                  video=video_media))
+            recipes.append(RecipeService.get_a_recipe_by_id(database, recipe.id))
         return recipes
 
     @staticmethod
@@ -195,3 +190,12 @@ class RecipeService:
 
         RecipeMediasRepository.create_medias(database, created_media_ids, recipe_id)
         return created_medias
+
+    @staticmethod
+    def get_all_creator_recipe(database: Session, creator_id: int) -> List[RecipeFullSchema]:
+        recipes = []
+        recipes_list = RecipeRepository.get_all_recipe_for_user(database, creator_id)
+        for recipe in recipes_list:
+            recipes.append(RecipeService.get_a_recipe_by_id(database, recipe.id))
+        print(recipes)
+        return recipes
