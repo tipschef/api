@@ -89,7 +89,7 @@ class RecipeService:
 
         steps = [StepSchema.from_step_model(step) for step in
                  StepRepository.get_steps_by_recipe_id(database, recipe_id)]
-
+        print(steps)
         thumbnail = MediaRepository.get_media_by_id(database, recipe.thumbnail_id)
 
         video = MediaRepository.get_media_by_id(database, recipe.video_id)
@@ -153,7 +153,7 @@ class RecipeService:
 
             RecipeIngredientsRepository.create_recipe_ingredients(database, recipe_to_update.id, ingredient.id,
                                                                   ingredient_unit.id, ingredient_bloc.quantity)
-
+        print(recipe.steps)
         StepRepository.create_steps(database, recipe.steps, recipe_id)
 
         return True
