@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
@@ -84,7 +84,6 @@ async def add_video_media_to_recipe(recipe_id: int, video: UploadFile = File(...
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-
 @router.get('/me', response_model=List[RecipeResponseExtendedSchema], tags=['recipes'])
 async def get_my_recipe(database: Session = Depends(get_database),
                         current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseExtendedSchema]:
@@ -109,8 +108,7 @@ async def init_database(database: Session = Depends(get_database)) -> dict:
 
 @router.get('/wall', response_model=List[RecipeResponseSchema], tags=['recipes', 'wall'])
 async def get_my_wall(database: Session = Depends(get_database),
-                      current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
-    RecipeResponseSchema]:
+                      current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseSchema]:
     try:
         return RecipeService.get_my_wall(database, current_user)
     except Exception as exception:
