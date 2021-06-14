@@ -63,7 +63,7 @@ steps:
     entrypoint: bash
     args:
       - -c
-      - gcloud run deploy gcr-tipschef-$_PROJECT_ENV-$_CLOUD_RUN_LOCATION-api --image eu.gcr.io/$_PROJECT_ID/gcr/tipschef-$SHORT_SHA --platform gke --port 8080 --timeout=15m --memory=1536Mi --concurrency=10 --cpu=1 --revision-suffix=$SHORT_SHA --service-account=gcr-tipschef-dev-euw-api@tipschef-dev.iam.gserviceaccount.com --use-http2
+      - gcloud alpha run deploy gcr-tipschef-$_PROJECT_ENV-$_CLOUD_RUN_LOCATION-api --image eu.gcr.io/$_PROJECT_ID/gcr/tipschef-$SHORT_SHA --platform managed --port 8080 --timeout=15m --memory=1536Mi --concurrency=10 --cpu=1 --region $_CLOUD_RUN_LOCATION --revision-suffix=$SHORT_SHA --allow-unauthenticated --service-account=gcr-tipschef-dev-euw-api@tipschef-dev.iam.gserviceaccount.com --use-http2
   - id: Set up traffic in Cloud Run to latest revision
     name: 'gcr.io/cloud-builders/gcloud'
     waitFor:
