@@ -39,7 +39,8 @@ async def create_recipe(recipe: RecipeBaseSchema, database: Session = Depends(ge
 @router.post('/media/{recipe_id}', response_model=List[MediaSchema], tags=['recipes'])
 async def add_medias_to_recipe(recipe_id: int, files: List[UploadFile] = File(...),
                                database: Session = Depends(get_database),
-                               current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[MediaSchema]:
+                               current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
+    MediaSchema]:
     try:
         medias = RecipeService.add_media_to_recipe(database, current_user.id, recipe_id, files)
         return medias
@@ -55,7 +56,8 @@ async def add_medias_to_recipe(recipe_id: int, files: List[UploadFile] = File(..
 @router.post('/thumbnail_media/{recipe_id}', response_model=MediaSchema, tags=['recipes'])
 async def add_thumbnail_media_to_recipe(recipe_id: int, thumbnail: UploadFile = File(...),
                                         database: Session = Depends(get_database),
-                                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> MediaSchema:
+                                        current_user: UserSchema = Depends(
+                                            UserService.get_current_active_user)) -> MediaSchema:
     try:
         medias = RecipeService.add_thumbnail_to_recipe(database, recipe_id, current_user.id, thumbnail)
         return medias
@@ -71,7 +73,8 @@ async def add_thumbnail_media_to_recipe(recipe_id: int, thumbnail: UploadFile = 
 @router.post('/video_media/{recipe_id}', response_model=MediaSchema, tags=['recipes'])
 async def add_video_media_to_recipe(recipe_id: int, video: UploadFile = File(...),
                                     database: Session = Depends(get_database),
-                                    current_user: UserSchema = Depends(UserService.get_current_active_user)) -> MediaSchema:
+                                    current_user: UserSchema = Depends(
+                                        UserService.get_current_active_user)) -> MediaSchema:
     try:
         medias = RecipeService.add_video_to_recipe(database, recipe_id, current_user.id, video)
         return medias
@@ -86,7 +89,8 @@ async def add_video_media_to_recipe(recipe_id: int, video: UploadFile = File(...
 
 @router.get('/me', response_model=List[RecipeResponseExtendedSchema], tags=['recipes'])
 async def get_my_recipe(database: Session = Depends(get_database),
-                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseExtendedSchema]:
+                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
+    RecipeResponseExtendedSchema]:
     try:
         recipe_list = RecipeService.get_all_recipe_for_specific_user(database, current_user, current_user.username)
         return recipe_list
@@ -108,7 +112,8 @@ async def init_database(database: Session = Depends(get_database)) -> dict:
 
 @router.get('/wall', response_model=List[RecipeResponseSchema], tags=['recipes', 'wall'])
 async def get_my_wall(database: Session = Depends(get_database),
-                      current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseSchema]:
+                      current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
+    RecipeResponseSchema]:
     try:
         return RecipeService.get_my_wall(database, current_user)
     except Exception as exception:
@@ -118,7 +123,8 @@ async def get_my_wall(database: Session = Depends(get_database),
 
 @router.get('/creator', response_model=List[RecipeResponseSchema], tags=['recipes'])
 async def get_all_creator_recipe(database: Session = Depends(get_database),
-                                 current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseSchema]:
+                                 current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
+    RecipeResponseSchema]:
     try:
         return RecipeService.get_all_creator_recipe(database, current_user.id)
     except Exception as exception:
@@ -184,7 +190,7 @@ async def update_a_recipe(recipe_id: int, recipe: RecipeSchema, database: Sessio
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.get('/{recipe_id}/like', response_model=dict, tags=['recipes', 'like'])
+@router.post('/{recipe_id}/like', response_model=dict, tags=['recipes', 'like'])
 async def like_a_recipe(recipe_id: int, database: Session = Depends(get_database),
                         current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
@@ -196,13 +202,24 @@ async def like_a_recipe(recipe_id: int, database: Session = Depends(get_database
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.get('/{recipe_id}/dislike', response_model=dict, tags=['recipes', 'like'])
+@router.post('/{recipe_id}/dislike', response_model=dict, tags=['recipes', 'like'])
 async def dislike_a_recipe(recipe_id: int, database: Session = Depends(get_database),
                            current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
         if LikeService.dislike_someone_by_id(database, current_user, recipe_id):
             return {'Status': 'Done'}
         return {'Status': 'You have not liked this recipe'}
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/{recipe_id}/like', response_model=dict, tags=['recipes', 'like'])
+async def get_like_from_recipe(recipe_id: int, database: Session = Depends(get_database),
+                               _: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+    try:
+        like_count = LikeService.get_like_by_recipe_id(database, recipe_id)
+        return {'recipe_id': 'recipe_id', 'like_count': like_count}
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
