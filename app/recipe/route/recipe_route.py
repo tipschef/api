@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from app.database.service.database_init import init_data
 from app.database.service.database_instance import get_database
 from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundException, \
-    CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException
+    CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException, UserNotAuthorized
+from app.recipe.schema.like.like_schema import LikeSchema
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
@@ -134,10 +135,12 @@ async def get_all_creator_recipe(database: Session = Depends(get_database),
 
 @router.get('/{recipe_id}', response_model=RecipeResponseSchema, tags=['recipes'])
 async def get_a_recipe(recipe_id: int, database: Session = Depends(get_database),
-                       _: UserSchema = Depends(UserService.get_current_active_user)) -> RecipeResponseSchema:
+                       asking_user: UserSchema = Depends(UserService.get_current_active_user)) -> RecipeResponseSchema:
     try:
-        recipe = RecipeService.get_a_recipe_by_id(database, recipe_id)
+        recipe = RecipeService.get_a_recipe_by_id(database, recipe_id, asking_user)
         return recipe
+    except UserNotAuthorized as exception:
+        raise HTTPException(status_code=403, detail=exception.as_dict())
     except RecipeIdNotFoundException as exception:
         raise HTTPException(status_code=404, detail=str(exception))
     except Exception as exception:
@@ -214,12 +217,11 @@ async def dislike_a_recipe(recipe_id: int, database: Session = Depends(get_datab
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.get('/{recipe_id}/like', response_model=dict, tags=['recipes', 'like'])
+@router.get('/{recipe_id}/like', response_model=LikeSchema, tags=['recipes', 'like'])
 async def get_like_from_recipe(recipe_id: int, database: Session = Depends(get_database),
-                               _: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+                               current_user: UserSchema = Depends(UserService.get_current_active_user)) -> LikeSchema:
     try:
-        like_count = LikeService.get_like_by_recipe_id(database, recipe_id)
-        return {'recipe_id': 'recipe_id', 'like_count': like_count}
+        return LikeService.get_like_by_recipe_id(database, recipe_id, current_user)
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

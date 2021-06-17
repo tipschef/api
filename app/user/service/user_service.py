@@ -12,7 +12,7 @@ from app.recipe.schema.media.media_base_schema import MediaBaseSchema
 from app.recipe.schema.media.media_category_schema import MediaCategorySchema
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.user.exception.user_route_exceptions import UserAlreadyExistsException, UsernameAlreadyExistsException, \
-    UserNotFoundException, WrongUploadFileType
+    UsernameNotFoundException, WrongUploadFileType, UserIdNotFoundException
 from app.user.model.user_model import UserModel
 from app.user.repository.follow_repository import FollowRepository
 from app.user.repository.user_repository import UserRepository
@@ -45,7 +45,7 @@ class UserService:
     def get_user_by_username(database: Session, username: str) -> UserDetailedSchema:
         user = UserRepository.get_user_by_username(username)
         if user is None:
-            raise UserNotFoundException(username)
+            raise UsernameNotFoundException(username)
 
         if user.profile_media_id is not None:
             profile_media = MediaRepository.get_media_by_id(database, user.profile_media_id)
@@ -60,6 +60,28 @@ class UserService:
         count_follower = FollowRepository.get_count_followers_by_followed_username(database, user.id)
         count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
         return UserDetailedSchema.from_user_model(user, count_likes, count_follower, user.description, profile_media, background_media)
+
+    @staticmethod
+    def get_user_by_user_id(database: Session, user_id: int) -> UserDetailedSchema:
+        user = UserRepository.get_user_by_id(database, user_id)
+
+        if user is None:
+            raise UserIdNotFoundException(user_id)
+
+        if user.profile_media_id is not None:
+            profile_media = MediaRepository.get_media_by_id(database, user.profile_media_id)
+        else:
+            profile_media = None
+
+        if user.background_media_id is not None:
+            background_media = MediaRepository.get_media_by_id(database, user.background_media_id)
+        else:
+            background_media = None
+
+        count_follower = FollowRepository.get_count_followers_by_followed_username(database, user.id)
+        count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
+        return UserDetailedSchema.from_user_model(user, count_likes, count_follower, user.description, profile_media,
+                                                  background_media)
 
     @staticmethod
     def update_user_profile_picture(database: Session, creator_id: int, media: UploadFile) -> MediaSchema:

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from sqlalchemy.orm import Session
 
 from app.recipe.repository.like_repository import LikeRepository
+from app.recipe.schema.like.like_schema import LikeSchema
 from app.user.schema.user_schema import UserSchema
 
 
@@ -24,5 +25,7 @@ class LikeService:
         return False
 
     @staticmethod
-    def get_like_by_recipe_id(database: Session, recipe_id: int):
-        return LikeRepository.get_like(database, recipe_id)
+    def get_like_by_recipe_id(database: Session, recipe_id: int, user: UserSchema) -> LikeSchema:
+        like_count = LikeRepository.get_like(database, recipe_id)
+        liked_by_me = LikeRepository.get_like_by_user(database, recipe_id, user.id) is not None
+        return LikeSchema(recipe_id=recipe_id, like_count=like_count, liked_by_me=liked_by_me)

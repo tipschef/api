@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.common.service.bucket_manager_service import get_bucket_manager_service
 from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundException, \
-    CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException
+    CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException, UserNotAuthorized
 from app.recipe.repository.ingredient.ingredient_repository import IngredientRepository
 from app.recipe.repository.ingredient.ingredient_unit_repository import IngredientUnitRepository
 from app.recipe.repository.media.media_category_repository import MediaCategoryRepository
@@ -82,10 +82,14 @@ class RecipeService:
         return recipes_list_response
 
     @staticmethod
-    def get_a_recipe_by_id(database: Session, recipe_id: int) -> RecipeResponseSchema:
+    def get_a_recipe_by_id(database: Session, recipe_id: int, asking_user: UserSchema) -> RecipeResponseSchema:
         recipe = RecipeRepository.get_recipe_by_id(database, recipe_id)
         if recipe is None:
             raise RecipeIdNotFoundException()
+
+        subscription = SubscriptionRepository.get_subscription(database, recipe.creator_id, asking_user.id)
+        if not (recipe.creator_id == asking_user.id or recipe.min_tier == 0 or (subscription is not None and recipe.min_tier <= subscription.tier)):
+            raise UserNotAuthorized(min_tier=recipe.min_tier)
 
         steps = [StepSchema.from_step_model(step) for step in
                  StepRepository.get_steps_by_recipe_id(database, recipe_id)]
