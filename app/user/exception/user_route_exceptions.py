@@ -31,3 +31,13 @@ class UserNotFoundException(Exception):
 class WrongUploadFileType(Exception):
     def __str__(self):
         return 'Upload file type must be an Image'
+
+
+class UsernameNotFound(Exception):
+    username: str
+
+    def __init__(self, username: str):
+        self.username = username
+
+    def __str__(self):
+        return f"'{self.username}' not found."

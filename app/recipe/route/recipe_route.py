@@ -84,17 +84,6 @@ async def add_video_media_to_recipe(recipe_id: int, video: UploadFile = File(...
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.get('/me', response_model=List[RecipeResponseExtendedSchema], tags=['recipes'])
-async def get_my_recipe(database: Session = Depends(get_database),
-                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseExtendedSchema]:
-    try:
-        recipe_list = RecipeService.get_all_recipe_for_specific_user(database, current_user, current_user.username)
-        return recipe_list
-    except Exception as exception:
-        print(exception)
-        raise HTTPException(status_code=500, detail='Server expception')
-
-
 @router.post('/init', response_model=dict, tags=['recipes', 'admin'])
 async def init_database(database: Session = Depends(get_database)) -> dict:
     # TODO : Vérifier que l'utilsateur courant est un administrateur

@@ -8,7 +8,7 @@ from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.service.recipe_service import RecipeService
 from app.user.exception.user_route_exceptions import UserAlreadyExistsException, UsernameAlreadyExistsException, \
-    UserNotFoundException, WrongUploadFileType
+    UserNotFoundException, WrongUploadFileType, UsernameNotFound
 from app.user.schema.user_auth_schema import UserAuthSchema
 from app.user.schema.user_create_schema import UserCreateSchema
 from app.user.schema.user_detailed_schema import UserDetailedSchema
@@ -76,11 +76,14 @@ async def unfollow_user_by_username(username: str, database: Session = Depends(g
 
 
 @router.get('/{username}/recipes', response_model=List[RecipeResponseExtendedSchema], tags=['users', 'recipes'])
-async def get_recipes_from_username(username: str, database: Session = Depends(get_database),
+async def get_recipes_from_username(username: str, per_page: int = 20, page: int = 1, database: Session = Depends(get_database),
                                     current_user: UserSchema = Depends(UserService.get_current_active_user)) \
         -> List[RecipeResponseExtendedSchema]:
     try:
-        return RecipeService.get_all_recipe_for_specific_user(database, current_user, username)
+        return RecipeService.get_all_recipe_for_specific_user(database, current_user, username, per_page, page)
+    except UsernameNotFound as exception:
+        print(exception)
+        raise HTTPException(status_code=404, detail=exception)
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
