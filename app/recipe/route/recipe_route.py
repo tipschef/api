@@ -9,7 +9,6 @@ from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundExcep
     CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
-from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.recipe.service.like_service import LikeService
