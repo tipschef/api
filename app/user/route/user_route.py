@@ -51,9 +51,10 @@ async def get_user_by_user_id(user_id: int, database: Session = Depends(get_data
 
 
 @router.get('/{username}', response_model=UserDetailedSchema, tags=['users'])
-async def get_user_by_username(username: str, database: Session = Depends(get_database)) -> UserDetailedSchema:
+async def get_user_by_username(username: str, database: Session = Depends(get_database),
+                               current_user: UserSchema = Depends(UserService.get_current_active_user)) -> UserDetailedSchema:
     try:
-        return UserService.get_user_by_username(database, username)
+        return UserService.get_user_by_username(database, username, current_user)
     except UsernameNotFoundException as exception:
         raise HTTPException(status_code=404, detail=str(exception))
     except Exception as exception:
