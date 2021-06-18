@@ -29,4 +29,3 @@ class UserNotAuthorized(Exception):
             'detail': str(self),
             'min_tier': self.min_tier
         }
-

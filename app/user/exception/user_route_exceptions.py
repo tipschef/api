@@ -1,6 +1,3 @@
-from typing import Union
-
-
 class UserAlreadyExistsException(Exception):
     user_email: str
 
