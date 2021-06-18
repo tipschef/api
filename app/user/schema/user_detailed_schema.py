@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import EmailStr
 
 from app.recipe.model.media.media_model import MediaModel
@@ -8,7 +10,7 @@ from app.user.schema.user_base_schema import UserBaseSchema
 class UserDetailedSchema(UserBaseSchema):
     likes: int
     followers: int
-    description: str
+    description: Optional[str]
     profile_url: str
     background_url: str
 

@@ -50,6 +50,15 @@ class RecipeRepository:
         database.commit()
 
     @staticmethod
+    def get_recipes_by_user_id_date_desc_paginate(database: Session, user_id: int, per_page: int, page: int) -> List[RecipeModel]:
+        return database.query(RecipeModel).filter(RecipeModel.creator_id == user_id,
+                                                  RecipeModel.is_deleted.is_(False))\
+                                          .order_by(RecipeModel.created_date.desc())\
+                                          .limit(per_page)\
+                                          .offset((page-1) * per_page)\
+                                          .all()
+
+    @staticmethod
     def update_recipe_by_id(database: Session, recipe_id: int, recipe: RecipeSchema, ) -> None:
         database.query(RecipeModel).filter(RecipeModel.is_deleted.is_(False), RecipeModel.id == recipe_id)\
                                    .update({RecipeModel.min_tier: recipe.min_tier,

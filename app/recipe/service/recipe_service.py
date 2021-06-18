@@ -24,6 +24,7 @@ from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.recipe.schema.step.step_schema import StepSchema
+from app.user.exception.user_route_exceptions import UsernameNotFound
 from app.user.repository.subscription_repository import SubscriptionRepository
 from app.user.repository.user_repository import UserRepository
 from app.user.schema.user_schema import UserSchema
@@ -55,12 +56,15 @@ class RecipeService:
         return recipe_created.id
 
     @staticmethod
-    def get_all_recipe_for_specific_user(database: Session, current_user: UserSchema, asking_username: str) -> List[RecipeResponseExtendedSchema]:
+    def get_all_recipe_for_specific_user(database: Session, current_user: UserSchema, asking_username: str, per_page: int, page: int) -> List[RecipeResponseExtendedSchema]:
         asking_user = UserRepository.get_user_by_username(asking_username)
         subscription = SubscriptionRepository.get_subscription(database, asking_user.id, current_user.id)
 
+        if asking_user is None:
+            raise UsernameNotFound(asking_username)
+
         recipes_list_response = []
-        recipes_list = RecipeRepository.get_all_recipe_for_user(database, asking_user.id)
+        recipes_list = RecipeRepository.get_recipes_by_user_id_date_desc_paginate(database, asking_user.id, per_page, page)
         for recipe in recipes_list:
             thumbnail = MediaRepository.get_media_by_id(database, recipe.thumbnail_id)
 
@@ -76,9 +80,19 @@ class RecipeService:
             medias = [MediaSchema.from_media_model(media[1]) for
                       media in RecipeMediasRepository.get_all_recipe_medias_data_by_recipe_id(database, recipe.id)]
 
+            user = UserRepository.get_user_by_id(database, recipe.creator_id)
+
+            user_icon = MediaRepository.get_media_by_id(database, user.profile_media_id)
+            user_icon_path = None if user_icon is None else user_icon.path
+
             can_be_seen = current_user.id == asking_user.id or recipe.min_tier == 0 or (subscription is not None and recipe.min_tier <= subscription.tier)
             recipes_list_response.append(
-                RecipeResponseExtendedSchema.from_recipe_models_seen(recipe, steps=steps, ingredients=ingredients, medias=medias, can_be_seen=can_be_seen, thumbnail=MediaSchema.from_media_model(thumbnail), video=MediaSchema.from_media_model(video)))
+                RecipeResponseExtendedSchema.from_recipe_models_seen(recipe, steps=steps, ingredients=ingredients,
+                                                                     medias=medias, can_be_seen=can_be_seen,
+                                                                     thumbnail=MediaSchema.from_media_model(thumbnail),
+                                                                     video=MediaSchema.from_media_model(video),
+                                                                     creator_username=user.username,
+                                                                     creator_icon=user_icon_path))
         return recipes_list_response
 
     @staticmethod

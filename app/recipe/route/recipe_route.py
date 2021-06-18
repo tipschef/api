@@ -10,7 +10,6 @@ from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundExcep
 from app.recipe.schema.like.like_schema import LikeSchema
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
-from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.recipe.service.like_service import LikeService
@@ -86,18 +85,6 @@ async def add_video_media_to_recipe(recipe_id: int, video: UploadFile = File(...
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
-
-
-@router.get('/me', response_model=List[RecipeResponseExtendedSchema], tags=['recipes'])
-async def get_my_recipe(database: Session = Depends(get_database),
-                        current_user: UserSchema = Depends(UserService.get_current_active_user))\
-        -> List[RecipeResponseExtendedSchema]:
-    try:
-        recipe_list = RecipeService.get_all_recipe_for_specific_user(database, current_user, current_user.username)
-        return recipe_list
-    except Exception as exception:
-        print(exception)
-        raise HTTPException(status_code=500, detail='Server expception')
 
 
 @router.post('/init', response_model=dict, tags=['recipes', 'admin'])

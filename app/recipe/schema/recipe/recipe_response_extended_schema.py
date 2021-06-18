@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional
 
 from app.recipe.model.recipe.recipe_model import RecipeModel
 from app.recipe.schema.ingredient.ingredient_base_schema import IngredientBaseSchema
@@ -11,12 +11,14 @@ from app.recipe.schema.step.step_schema import StepSchema
 
 class RecipeResponseExtendedSchema(RecipeResponseSchema):
     can_be_seen: bool
+    creator_username: str
+    creator_icon: Optional[str]
 
     @staticmethod
     def from_recipe_models_seen(recipe: RecipeModel, steps: List[StepSchema],
                                 ingredients: List[IngredientBaseSchema], medias: List[MediaSchema],
                                 thumbnail: MediaSchema, video: MediaSchema,
-                                can_be_seen: bool) -> RecipeResponseExtendedSchema:
+                                can_be_seen: bool, creator_username: str, creator_icon: str) -> RecipeResponseExtendedSchema:
         return RecipeResponseExtendedSchema(min_tier=recipe.min_tier,
                                             portion_number=recipe.portion_number,
                                             portion_unit=recipe.portion_unit,
@@ -32,10 +34,15 @@ class RecipeResponseExtendedSchema(RecipeResponseSchema):
                                             description=recipe.description,
                                             recipe_category_id=recipe.recipe_category_id,
                                             recipe_cooking_type_id=recipe.recipe_cooking_type_id,
+                                            id=recipe.id,
+                                            last_updated=recipe.last_updated,
+                                            created_date=recipe.created_date,
                                             steps=steps,
                                             ingredients=ingredients,
                                             medias=medias,
                                             thumbnail=thumbnail,
                                             video=video,
+                                            creator_username=creator_username,
+                                            creator_icon=creator_icon,
                                             creator_id=recipe.creator_id,
                                             can_be_seen=can_be_seen)
