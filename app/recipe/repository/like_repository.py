@@ -14,8 +14,12 @@ class LikeRepository:
         return database.query(LikeModel).filter(LikeModel.user_id == user_id).count()
 
     @staticmethod
-    def get_like(database: Session, recipe_id: int, user_id: int) -> Optional[LikeModel]:
+    def get_like_by_user(database: Session, recipe_id: int, user_id: int) -> Optional[LikeModel]:
         return database.query(LikeModel).filter(LikeModel.recipe_id == recipe_id, LikeModel.user_id == user_id).first()
+
+    @staticmethod
+    def get_like(database: Session, recipe_id: int) -> int:
+        return database.query(LikeModel).filter(LikeModel.recipe_id == recipe_id).count()
 
     @staticmethod
     def like(database: Session, recipe_id: int, user_id: int) -> LikeModel:

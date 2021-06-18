@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.common.service.bucket_manager_service import get_bucket_manager_service
 from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundException, \
-    CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException
+    CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException, UserNotAuthorized
 from app.recipe.repository.ingredient.ingredient_repository import IngredientRepository
 from app.recipe.repository.ingredient.ingredient_unit_repository import IngredientUnitRepository
 from app.recipe.repository.media.media_category_repository import MediaCategoryRepository
@@ -99,7 +99,36 @@ class RecipeService:
 
         medias = [MediaSchema.from_media_model(media[1]) for
                   media in RecipeMediasRepository.get_all_recipe_medias_data_by_recipe_id(database, recipe_id)]
-        return RecipeResponseSchema.from_recipe_models(recipe, steps=steps, ingredients=ingredients, medias=medias, thumbnail=MediaSchema.from_media_model(thumbnail), video=MediaSchema.from_media_model(video))
+        return RecipeResponseSchema.from_recipe_models(recipe, steps=steps, ingredients=ingredients, medias=medias,
+                                                       thumbnail=MediaSchema.from_media_model(thumbnail),
+                                                       video=MediaSchema.from_media_model(video))
+
+    @staticmethod
+    def get_a_recipe_by_id_and_asking_user(database: Session, recipe_id: int, asking_user: UserSchema) -> RecipeResponseSchema:
+        recipe = RecipeRepository.get_recipe_by_id(database, recipe_id)
+        if recipe is None:
+            raise RecipeIdNotFoundException()
+
+        subscription = SubscriptionRepository.get_subscription(database, recipe.creator_id, asking_user.id)
+        if not (recipe.creator_id == asking_user.id or recipe.min_tier == 0 or (
+                subscription is not None and recipe.min_tier <= subscription.tier)):
+            raise UserNotAuthorized(min_tier=recipe.min_tier)
+
+        steps = [StepSchema.from_step_model(step) for step in
+                 StepRepository.get_steps_by_recipe_id(database, recipe_id)]
+        thumbnail = MediaRepository.get_media_by_id(database, recipe.thumbnail_id)
+
+        video = MediaRepository.get_media_by_id(database, recipe.video_id)
+
+        ingredients = [IngredientBaseSchema.from_ingredient_tuple(ingredient[0], ingredient[1], ingredient[2]) for
+                       ingredient in
+                       RecipeIngredientsRepository.get_recipe_ingredients_by_recipe_id(database, recipe_id)]
+
+        medias = [MediaSchema.from_media_model(media[1]) for
+                  media in RecipeMediasRepository.get_all_recipe_medias_data_by_recipe_id(database, recipe_id)]
+        return RecipeResponseSchema.from_recipe_models(recipe, steps=steps, ingredients=ingredients, medias=medias,
+                                                       thumbnail=MediaSchema.from_media_model(thumbnail),
+                                                       video=MediaSchema.from_media_model(video))
 
     @staticmethod
     def delete_a_recipe_by_id(database: Session, recipe_id: int, current_user: UserSchema) -> bool:

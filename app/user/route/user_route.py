@@ -8,7 +8,7 @@ from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.service.recipe_service import RecipeService
 from app.user.exception.user_route_exceptions import UserAlreadyExistsException, UsernameAlreadyExistsException, \
-    UserNotFoundException, WrongUploadFileType
+    UsernameNotFoundException, WrongUploadFileType, UserIdNotFoundException
 from app.user.schema.user_auth_schema import UserAuthSchema
 from app.user.schema.user_create_schema import UserCreateSchema
 from app.user.schema.user_detailed_schema import UserDetailedSchema
@@ -39,11 +39,22 @@ async def create_user_route(user: UserCreateSchema, database: Session = Depends(
         raise HTTPException(status_code=500, detail='Server exception')
 
 
+@router.get('/id/{user_id}', response_model=UserDetailedSchema, tags=['users'])
+async def get_user_by_user_id(user_id: int, database: Session = Depends(get_database)) -> UserDetailedSchema:
+    try:
+        return UserService.get_user_by_user_id(database, user_id)
+    except UserIdNotFoundException as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
 @router.get('/{username}', response_model=UserDetailedSchema, tags=['users'])
 async def get_user_by_username(username: str, database: Session = Depends(get_database)) -> UserDetailedSchema:
     try:
         return UserService.get_user_by_username(database, username)
-    except UserNotFoundException as exception:
+    except UsernameNotFoundException as exception:
         raise HTTPException(status_code=404, detail=str(exception))
     except Exception as exception:
         print(exception)

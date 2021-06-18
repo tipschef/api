@@ -18,14 +18,24 @@ class UsernameAlreadyExistsException(Exception):
         return f"'{self.username}' already used."
 
 
-class UserNotFoundException(Exception):
-    username: int
+class UsernameNotFoundException(Exception):
+    username: str
 
     def __init__(self, username: str):
         self.username = username
 
     def __str__(self):
         return f"User with username='{self.username}' not found."
+
+
+class UserIdNotFoundException(Exception):
+    user_id: int
+
+    def __init__(self, user_id: int):
+        self.user_id = user_id
+
+    def __str__(self):
+        return f"User with userid='{self.user_id}' not found."
 
 
 class WrongUploadFileType(Exception):
