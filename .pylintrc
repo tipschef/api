@@ -15,4 +15,5 @@ disable=missing-module-docstring,
         invalid-envvar-default,
         duplicate-code,
         arguments-differ,
-        too-many-arguments
+        too-many-arguments,
+        too-many-locals
