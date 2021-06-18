@@ -88,6 +88,10 @@ class RecipeRepository:
         database.commit()
 
     @staticmethod
-    def get_followed_recipes(database: Session, user_id: int) -> List[RecipeModel]:
+    def get_followed_recipes(database: Session, user_id: int, per_page: int, page: int) -> List[RecipeModel]:
         sub_query = database.query(FollowModel.followed_id).filter(FollowModel.follower_id == user_id)
-        return database.query(RecipeModel).filter(RecipeModel.creator_id.in_(sub_query), RecipeModel.is_deleted.is_(False)).all()
+        return database.query(RecipeModel).filter(RecipeModel.creator_id.in_(sub_query), RecipeModel.is_deleted.is_(False))\
+                                          .order_by(RecipeModel.created_date.desc())\
+                                          .limit(per_page)\
+                                          .offset((page - 1) * per_page)\
+                                          .all()

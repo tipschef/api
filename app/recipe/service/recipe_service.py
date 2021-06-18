@@ -232,11 +232,13 @@ class RecipeService:
         return True
 
     @staticmethod
-    def get_my_wall(database: Session, user: UserSchema) -> List[RecipeResponseSchema]:
+    def get_my_wall(database: Session, current_user: UserSchema, per_page: int, page: int) -> List[RecipeResponseExtendedSchema]:
         recipes = []
-        recipes_list = RecipeRepository.get_followed_recipes(database, user.id)
+        recipes_list = RecipeRepository.get_followed_recipes(database, current_user.id, per_page, page)
         for recipe in recipes_list:
-            recipes.append(RecipeService.get_a_recipe_by_id(database, recipe.id))
+            recipes.append(RecipeService.get_recipe_response_extended_schema_from_model(database=database,
+                                                                                        recipe=recipe,
+                                                                                        current_user=current_user))
         return recipes
 
     @staticmethod

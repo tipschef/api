@@ -109,12 +109,12 @@ async def get_liked_recipe(per_page: int = 20, page: int = 1, database: Session 
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.get('/wall', response_model=List[RecipeResponseSchema], tags=['recipes', 'wall'])
-async def get_my_wall(database: Session = Depends(get_database),
+@router.get('/wall', response_model=List[RecipeResponseExtendedSchema], tags=['recipes', 'wall'])
+async def get_my_wall(per_page: int = 20, page: int = 1, database: Session = Depends(get_database),
                       current_user: UserSchema = Depends(UserService.get_current_active_user))\
-        -> List[RecipeResponseSchema]:
+        -> List[RecipeResponseExtendedSchema]:
     try:
-        return RecipeService.get_my_wall(database, current_user)
+        return RecipeService.get_my_wall(database, current_user, per_page, page)
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
