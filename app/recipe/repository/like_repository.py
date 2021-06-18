@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy.orm import Session
 
@@ -16,6 +16,14 @@ class LikeRepository:
     @staticmethod
     def get_like_by_user(database: Session, recipe_id: int, user_id: int) -> Optional[LikeModel]:
         return database.query(LikeModel).filter(LikeModel.recipe_id == recipe_id, LikeModel.user_id == user_id).first()
+
+    @staticmethod
+    def get_likes_by_user(database: Session, user_id: int, per_page: int, page: int) -> List[LikeModel]:
+        return database.query(LikeModel).filter(LikeModel.user_id == user_id)\
+                                        .order_by(LikeModel.created_date.desc())\
+                                        .limit(per_page)\
+                                        .offset((page - 1) * per_page)\
+                                        .all()
 
     @staticmethod
     def get_like(database: Session, recipe_id: int) -> int:

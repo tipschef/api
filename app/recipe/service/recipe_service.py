@@ -10,6 +10,7 @@ from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundExcep
 from app.recipe.model.recipe.recipe_model import RecipeModel
 from app.recipe.repository.ingredient.ingredient_repository import IngredientRepository
 from app.recipe.repository.ingredient.ingredient_unit_repository import IngredientUnitRepository
+from app.recipe.repository.like_repository import LikeRepository
 from app.recipe.repository.media.media_category_repository import MediaCategoryRepository
 from app.recipe.repository.media.media_repository import MediaRepository
 from app.recipe.repository.recipe.recipe_ingredients_repository import RecipeIngredientsRepository
@@ -59,9 +60,12 @@ class RecipeService:
         return recipe_created.id
 
     @staticmethod
-    def get_recipe_response_extended_schema_from_model(database: Session, recipe: RecipeModel, current_user: UserSchema,
-                                                       asking_user: UserModel,
-                                                       subscription: SubscriptionModel) -> RecipeResponseExtendedSchema:
+    def get_recipe_response_extended_schema_from_model(database: Session, recipe: RecipeModel, current_user: UserSchema) -> RecipeResponseExtendedSchema:
+
+        asking_user = UserRepository.get_user_by_id(database, recipe.creator_id)
+
+        subscription = SubscriptionRepository.get_subscription(database, asking_user.id, current_user.id)
+
         thumbnail = MediaRepository.get_media_by_id(database, recipe.thumbnail_id)
 
         video = MediaRepository.get_media_by_id(database, recipe.video_id)
@@ -95,7 +99,6 @@ class RecipeService:
     def get_all_recipe_for_specific_user(database: Session, current_user: UserSchema, asking_username: str,
                                          per_page: int, page: int) -> List[RecipeResponseExtendedSchema]:
         asking_user = UserRepository.get_user_by_username(asking_username)
-        subscription = SubscriptionRepository.get_subscription(database, asking_user.id, current_user.id)
 
         if asking_user is None:
             raise UsernameNotFound(asking_username)
@@ -106,9 +109,21 @@ class RecipeService:
         for recipe in recipes_list:
             recipes_list_response.append(RecipeService.get_recipe_response_extended_schema_from_model(database=database,
                                                                                                       recipe=recipe,
-                                                                                                      current_user=current_user,
-                                                                                                      asking_user=asking_user,
-                                                                                                      subscription=subscription))
+                                                                                                      current_user=current_user))
+        return recipes_list_response
+
+    @staticmethod
+    def get_all_liked_recipes(database: Session, current_user: UserSchema, per_page: int, page: int) -> List[RecipeResponseExtendedSchema]:
+
+        recipes_list_response = []
+        likes = LikeRepository.get_likes_by_user(database, current_user.id, per_page, page)
+
+        recipes_list = [RecipeRepository.get_recipe_by_id(database, like.recipe_id) for like in likes]
+
+        for recipe in recipes_list:
+            recipes_list_response.append(RecipeService.get_recipe_response_extended_schema_from_model(database=database,
+                                                                                                      recipe=recipe,
+                                                                                                      current_user=current_user))
         return recipes_list_response
 
     @staticmethod
@@ -225,8 +240,7 @@ class RecipeService:
         return recipes
 
     @staticmethod
-    def add_media_to_recipe(database: Session, creator_id: int, recipe_id: int, medias: List[UploadFile]) -> List[
-        MediaSchema]:
+    def add_media_to_recipe(database: Session, creator_id: int, recipe_id: int, medias: List[UploadFile]) -> List[MediaSchema]:
         recipe = RecipeRepository.get_recipe_by_id(database, recipe_id)
         created_media_ids = []
         created_medias = []

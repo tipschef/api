@@ -10,6 +10,7 @@ from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundExcep
 from app.recipe.schema.like.like_schema import LikeSchema
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
+from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.recipe.service.like_service import LikeService
@@ -93,6 +94,16 @@ async def init_database(database: Session = Depends(get_database)) -> dict:
     try:
         init_data(database)
         return {'message': 'Done'}
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/liked_recipe', response_model=List[RecipeResponseExtendedSchema], tags=['recipes', 'wall'])
+async def get_liked_recipe(per_page: int = 20, page: int = 1, database: Session = Depends(get_database),
+                           current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[RecipeResponseExtendedSchema]:
+    try:
+        return RecipeService.get_all_liked_recipes(database, current_user, per_page, page)
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
