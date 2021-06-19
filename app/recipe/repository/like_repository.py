@@ -4,6 +4,7 @@ from typing import Optional, List
 from sqlalchemy.orm import Session
 
 from app.recipe.model.like_model import LikeModel
+from app.recipe.model.recipe.recipe_model import RecipeModel
 
 
 @dataclass
@@ -11,7 +12,10 @@ class LikeRepository:
 
     @staticmethod
     def get_count_like_by_user_id(database: Session, user_id: int) -> int:
-        return database.query(LikeModel).filter(LikeModel.user_id == user_id).count()
+        return database.query(LikeModel, RecipeModel)\
+                       .filter(RecipeModel.creator_id == user_id)\
+                       .filter(RecipeModel.id == LikeModel.recipe_id)\
+                       .count()
 
     @staticmethod
     def get_like_by_user(database: Session, recipe_id: int, user_id: int) -> Optional[LikeModel]:
