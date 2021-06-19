@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 from fastapi import Depends, UploadFile
 from sqlalchemy.orm import Session
@@ -64,6 +65,29 @@ class UserService:
         count_follower = FollowRepository.get_count_followers_by_followed_username(database, user.id)
         count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
         return UserDetailedSchema.from_user_model_with_follow(user, count_likes, count_follower, user.description, profile_media, background_media, following)
+
+    @staticmethod
+    def search_username(database: Session, username: str, current_user: UserSchema) -> List[UserDetailedSchema]:
+        users = UserRepository.search_username(database, username)
+        schema_to_return = []
+        for user in users:
+            if user.profile_media_id is not None:
+                profile_media = MediaRepository.get_media_by_id(database, user.profile_media_id)
+            else:
+                profile_media = None
+
+            if user.background_media_id is not None:
+                background_media = MediaRepository.get_media_by_id(database, user.background_media_id)
+            else:
+                background_media = None
+
+            follow = FollowRepository.get_follow(database, followed_id=user.id, follower_id=current_user.id)
+            following = follow is not None
+
+            count_follower = FollowRepository.get_count_followers_by_followed_username(database, user.id)
+            count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
+            schema_to_return.append(UserDetailedSchema.from_user_model_with_follow(user, count_likes, count_follower, user.description, profile_media, background_media, following))
+        return schema_to_return
 
     @staticmethod
     def get_user_by_user_id(database: Session, user_id: int) -> UserDetailedSchema:

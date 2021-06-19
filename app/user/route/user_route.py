@@ -50,6 +50,16 @@ async def get_user_by_user_id(user_id: int, database: Session = Depends(get_data
         raise HTTPException(status_code=500, detail='Server exception')
 
 
+@router.get('/search', response_model=List[UserDetailedSchema], tags=['users'])
+async def search_user(username: str, database: Session = Depends(get_database),
+                      current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[UserDetailedSchema]:
+    try:
+        return UserService.search_username(database, username, current_user)
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
 @router.get('/{username}', response_model=UserDetailedSchema, tags=['users'])
 async def get_user_by_username(username: str, database: Session = Depends(get_database),
                                current_user: UserSchema = Depends(UserService.get_current_active_user)) -> UserDetailedSchema:

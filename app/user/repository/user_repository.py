@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List
 
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
@@ -22,6 +22,10 @@ class UserRepository:
     def get_user_by_username(username: str) -> Optional[UserModel]:
         for database in get_database():
             return database.query(UserModel).filter(UserModel.username == username).first()
+
+    @staticmethod
+    def search_username(database: Session, username: str) -> List[UserModel]:
+        return database.query(UserModel).filter(UserModel.username.contains(username)).all()
 
     @staticmethod
     def create_user(database: Session, user: UserCreateSchema) -> UserModel:
