@@ -26,8 +26,7 @@ class UserDetailedSchema(UserBaseSchema):
                                   background_url=background.path if background is not None else "")
 
     @staticmethod
-    def from_user_model_with_follow(user: UserModel, likes: int, followers: int, description: str, profile: MediaModel,
-                                    background: MediaModel, following: bool):
+    def from_user_model_with_follow(user: UserModel, likes: int, followers: int, description: str, profile: MediaModel, background: MediaModel, following: bool):
         return UserDetailedSchema(email=EmailStr(user.email),
                                   username=user.username,
                                   likes=likes,
