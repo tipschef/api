@@ -60,7 +60,7 @@ class RecipeService:
     @staticmethod
     def get_recipe_response_extended_schema_from_model(database: Session, recipe: RecipeModel, current_user: UserSchema) -> RecipeResponseExtendedSchema:
 
-        asking_user = UserRepository.get_user_by_id(database, recipe.creator_id)
+        asking_user = UserRepository.get_user_by_id(recipe.creator_id)
 
         subscription = SubscriptionRepository.get_subscription(database, asking_user.id, current_user.id)
 
@@ -78,7 +78,7 @@ class RecipeService:
         medias = [MediaSchema.from_media_model(media[1]) for
                   media in RecipeMediasRepository.get_all_recipe_medias_data_by_recipe_id(database, recipe.id)]
 
-        user = UserRepository.get_user_by_id(database, recipe.creator_id)
+        user = UserRepository.get_user_by_id(recipe.creator_id)
 
         user_icon = MediaRepository.get_media_by_id(database, user.profile_media_id)
         user_icon_path = None if user_icon is None else user_icon.path

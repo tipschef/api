@@ -8,11 +8,13 @@ from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.service.recipe_service import RecipeService
 from app.user.exception.user_route_exceptions import UserAlreadyExistsException, UsernameAlreadyExistsException, \
-    UsernameNotFoundException, WrongUploadFileType, UserIdNotFoundException, UsernameNotFound
+    UsernameNotFoundException, WrongUploadFileType, UserIdNotFoundException, UsernameNotFound, \
+    EmailAlreadyExistsException
 from app.user.schema.user_auth_schema import UserAuthSchema
 from app.user.schema.user_create_schema import UserCreateSchema
 from app.user.schema.user_detailed_schema import UserDetailedSchema
 from app.user.schema.user_schema import UserSchema
+from app.user.schema.user_update_schema import UserUpdateSchema
 from app.user.service.follow_service import FollowService
 from app.user.service.subscription_service import SubscriptionService
 from app.user.service.user_service import UserService
@@ -50,9 +52,23 @@ async def get_user_by_user_id(user_id: int, database: Session = Depends(get_data
         raise HTTPException(status_code=500, detail='Server exception')
 
 
+@router.get('/me', response_model=UserDetailedSchema, tags=['users'])
+async def get_user_by_username(database: Session = Depends(get_database),
+                               current_user: UserSchema = Depends(
+                                   UserService.get_current_active_user)) -> UserDetailedSchema:
+    try:
+        return UserService.get_my_informations(database, current_user)
+    except UsernameNotFoundException as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
 @router.get('/search', response_model=List[UserDetailedSchema], tags=['users'])
 async def search_user(username: str, database: Session = Depends(get_database),
-                      current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[UserDetailedSchema]:
+                      current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
+    UserDetailedSchema]:
     try:
         return UserService.search_username(database, username, current_user)
     except Exception as exception:
@@ -62,7 +78,8 @@ async def search_user(username: str, database: Session = Depends(get_database),
 
 @router.get('/{username}', response_model=UserDetailedSchema, tags=['users'])
 async def get_user_by_username(username: str, database: Session = Depends(get_database),
-                               current_user: UserSchema = Depends(UserService.get_current_active_user)) -> UserDetailedSchema:
+                               current_user: UserSchema = Depends(
+                                   UserService.get_current_active_user)) -> UserDetailedSchema:
     try:
         return UserService.get_user_by_username(database, username, current_user)
     except UsernameNotFoundException as exception:
@@ -151,7 +168,7 @@ async def gift_a_subscription_by_username(username: str, receiver: str, tier: in
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.patch('/profile', response_model=MediaSchema, tags=['users', 'profile', 'media'])
+@router.patch('/update/profile', response_model=MediaSchema, tags=['users', 'profile', 'media'])
 async def upload_profile_picture(file: UploadFile = File(...),
                                  database: Session = Depends(get_database),
                                  current_user: UserAuthSchema = Depends(
@@ -166,7 +183,7 @@ async def upload_profile_picture(file: UploadFile = File(...),
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.patch('/background', response_model=MediaSchema, tags=['users', 'profile', 'media'])
+@router.patch('/update/background', response_model=MediaSchema, tags=['users', 'profile', 'media'])
 async def upload_background_picture(file: UploadFile = File(...),
                                     database: Session = Depends(get_database),
                                     current_user: UserAuthSchema = Depends(
@@ -174,6 +191,26 @@ async def upload_background_picture(file: UploadFile = File(...),
     try:
         media = UserService.update_user_background_picture(database, current_user.id, file)
         return media
+    except WrongUploadFileType as exception:
+        raise HTTPException(status_code=415, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.patch('/update/data', response_model=dict, tags=['users', 'profile', 'media'])
+async def update_profile(user_data: UserUpdateSchema, database: Session = Depends(get_database),
+                         current_user: UserAuthSchema = Depends(
+                             UserService.get_current_active_user)) -> dict:
+
+    try:
+        if UserService.update_user_profile(user_data, database, current_user):
+            return {'status': 'updated'}
+
+    except UsernameAlreadyExistsException as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
+    except EmailAlreadyExistsException as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
     except WrongUploadFileType as exception:
         raise HTTPException(status_code=415, detail=str(exception))
     except Exception as exception:
