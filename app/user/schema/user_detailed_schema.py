@@ -39,7 +39,7 @@ class UserDetailedSchema(UserBaseSchema):
 
     @staticmethod
     def from_user_model_with_data(user: UserModel, likes: int, followers: int, description: str, profile: MediaModel,
-                                    background: MediaModel, following: bool, subscribers: int, recipes: int):
+                                  background: MediaModel, following: bool, subscribers: int, recipes: int):
         return UserDetailedSchema(email=EmailStr(user.email),
                                   username=user.username,
                                   likes=likes,
