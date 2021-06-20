@@ -16,6 +16,7 @@ class UserDetailedSchema(UserBaseSchema):
     profile_url: str
     background_url: str
     following: Optional[bool]
+    is_partner: bool
 
     @staticmethod
     def from_user_model(user: UserModel, likes: int, followers: int, description: str, profile: MediaModel,
@@ -25,7 +26,8 @@ class UserDetailedSchema(UserBaseSchema):
                                   likes=likes,
                                   followers=followers, description=description,
                                   profile_url=profile.path if profile is not None else "",
-                                  background_url=background.path if background is not None else "")
+                                  background_url=background.path if background is not None else "",
+                                  is_partner=user.is_partner)
 
     @staticmethod
     def from_user_model_with_follow(user: UserModel, likes: int, followers: int, description: str, profile: MediaModel, background: MediaModel, following: bool):
@@ -35,7 +37,8 @@ class UserDetailedSchema(UserBaseSchema):
                                   following=following,
                                   followers=followers, description=description,
                                   profile_url=profile.path if profile is not None else "",
-                                  background_url=background.path if background is not None else "")
+                                  background_url=background.path if background is not None else "",
+                                  is_partner=user.is_partner)
 
     @staticmethod
     def from_user_model_with_data(user: UserModel, likes: int, followers: int, description: str, profile: MediaModel,
@@ -48,4 +51,5 @@ class UserDetailedSchema(UserBaseSchema):
                                   recipes=recipes,
                                   followers=followers, description=description,
                                   profile_url=profile.path if profile is not None else "",
-                                  background_url=background.path if background is not None else "")
+                                  background_url=background.path if background is not None else "",
+                                  is_partner=user.is_partner)

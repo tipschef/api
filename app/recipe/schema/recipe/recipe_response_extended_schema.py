@@ -13,12 +13,13 @@ class RecipeResponseExtendedSchema(RecipeResponseSchema):
     can_be_seen: bool
     creator_username: str
     creator_icon: Optional[str]
+    creator_is_partner: Optional[bool]
 
     @staticmethod
     def from_recipe_models_seen(recipe: RecipeModel, steps: List[StepSchema],
                                 ingredients: List[IngredientBaseSchema], medias: List[MediaSchema],
                                 thumbnail: MediaSchema, video: MediaSchema,
-                                can_be_seen: bool, creator_username: str, creator_icon: str) -> RecipeResponseExtendedSchema:
+                                can_be_seen: bool, creator_username: str, creator_icon: str, creator_is_partner: bool) -> RecipeResponseExtendedSchema:
         return RecipeResponseExtendedSchema(min_tier=recipe.min_tier,
                                             portion_number=recipe.portion_number,
                                             portion_unit=recipe.portion_unit,
@@ -45,4 +46,5 @@ class RecipeResponseExtendedSchema(RecipeResponseSchema):
                                             creator_username=creator_username,
                                             creator_icon=creator_icon,
                                             creator_id=recipe.creator_id,
+                                            creator_is_partner=creator_is_partner,
                                             can_be_seen=can_be_seen)

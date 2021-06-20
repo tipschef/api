@@ -90,7 +90,8 @@ class RecipeService:
                                                                     thumbnail=MediaSchema.from_media_model(thumbnail),
                                                                     video=MediaSchema.from_media_model(video),
                                                                     creator_username=user.username,
-                                                                    creator_icon=user_icon_path)
+                                                                    creator_icon=user_icon_path,
+                                                                    creator_is_partner=user.is_partner)
 
     @staticmethod
     def get_all_recipe_for_specific_user(database: Session, current_user: UserSchema, asking_username: str,
