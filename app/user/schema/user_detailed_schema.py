@@ -10,6 +10,8 @@ from app.user.schema.user_base_schema import UserBaseSchema
 class UserDetailedSchema(UserBaseSchema):
     likes: int
     followers: int
+    subscribers: Optional[int]
+    recipes: Optional[int]
     description: Optional[str]
     profile_url: str
     background_url: str
@@ -31,6 +33,19 @@ class UserDetailedSchema(UserBaseSchema):
                                   username=user.username,
                                   likes=likes,
                                   following=following,
+                                  followers=followers, description=description,
+                                  profile_url=profile.path if profile is not None else "",
+                                  background_url=background.path if background is not None else "")
+
+    @staticmethod
+    def from_user_model_with_data(user: UserModel, likes: int, followers: int, description: str, profile: MediaModel,
+                                    background: MediaModel, following: bool, subscribers: int, recipes: int):
+        return UserDetailedSchema(email=EmailStr(user.email),
+                                  username=user.username,
+                                  likes=likes,
+                                  following=following,
+                                  subscribers=subscribers,
+                                  recipes=recipes,
                                   followers=followers, description=description,
                                   profile_url=profile.path if profile is not None else "",
                                   background_url=background.path if background is not None else "")

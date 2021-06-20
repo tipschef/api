@@ -37,6 +37,10 @@ class RecipeRepository:
         return db_recipe
 
     @staticmethod
+    def get_count_recipe_by_creator_id(database: Session, creator_id: int) -> int:
+        return database.query(RecipeModel).filter(RecipeModel.creator_id == creator_id, RecipeModel.is_deleted.is_(False)).count()
+
+    @staticmethod
     def get_all_recipe_for_user(database: Session, user_id: int) -> List[RecipeModel]:
         return database.query(RecipeModel).filter(RecipeModel.creator_id == user_id, RecipeModel.is_deleted.is_(False)).all()
 

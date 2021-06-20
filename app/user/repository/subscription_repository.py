@@ -15,6 +15,10 @@ class SubscriptionRepository:
                                                         SubscriptionModel.subscriber_id == subscriber_id).first()
 
     @staticmethod
+    def get_count_subscriber_by_subscribed_id(database: Session, subscribed_id: int) -> int:
+        return database.query(SubscriptionModel).filter(SubscriptionModel.subscribed_id == subscribed_id).count()
+
+    @staticmethod
     def subscribe(database: Session, subscribed_id: int, subscriber_id: int, tier: int,
                   gifted_id: Optional[int] = None) -> SubscriptionModel:
         db_subscribe = SubscriptionModel(subscribed_id=subscribed_id, subscriber_id=subscriber_id, gifted_id=gifted_id,

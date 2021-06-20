@@ -9,6 +9,7 @@ from app.common.service.bucket_manager_service import get_bucket_manager_service
 from app.recipe.repository.like_repository import LikeRepository
 from app.recipe.repository.media.media_category_repository import MediaCategoryRepository
 from app.recipe.repository.media.media_repository import MediaRepository
+from app.recipe.repository.recipe.recipe_repository import RecipeRepository
 from app.recipe.schema.media.media_base_schema import MediaBaseSchema
 from app.recipe.schema.media.media_category_schema import MediaCategorySchema
 from app.recipe.schema.media.media_schema import MediaSchema
@@ -16,10 +17,11 @@ from app.user.exception.user_route_exceptions import UserAlreadyExistsException,
     UsernameNotFoundException, WrongUploadFileType, UserIdNotFoundException
 from app.user.model.user_model import UserModel
 from app.user.repository.follow_repository import FollowRepository
+from app.user.repository.subscription_repository import SubscriptionRepository
 from app.user.repository.user_repository import UserRepository
 from app.user.schema.user_auth_schema import UserAuthSchema
-from app.user.schema.user_detailed_schema import UserDetailedSchema
 from app.user.schema.user_create_schema import UserCreateSchema
+from app.user.schema.user_detailed_schema import UserDetailedSchema
 from app.user.schema.user_schema import UserSchema
 
 
@@ -64,7 +66,9 @@ class UserService:
 
         count_follower = FollowRepository.get_count_followers_by_followed_username(database, user.id)
         count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
-        return UserDetailedSchema.from_user_model_with_follow(user, count_likes, count_follower, user.description, profile_media, background_media, following)
+
+        return UserDetailedSchema.from_user_model_with_follow(user, count_likes, count_follower, user.description,
+                                                              profile_media, background_media, following)
 
     @staticmethod
     def search_username(database: Session, username: str, current_user: UserSchema) -> List[UserDetailedSchema]:
@@ -86,7 +90,13 @@ class UserService:
 
             count_follower = FollowRepository.get_count_followers_by_followed_username(database, user.id)
             count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
-            schema_to_return.append(UserDetailedSchema.from_user_model_with_follow(user, count_likes, count_follower, user.description, profile_media, background_media, following))
+            count_subscriber = SubscriptionRepository.get_count_subscriber_by_subscribed_id(database, user.id)
+            count_recipe = RecipeRepository.get_count_recipe_by_creator_id(database, user.id)
+            schema_to_return.append(
+                UserDetailedSchema.from_user_model_with_data(user, count_likes, count_follower, user.description,
+                                                             profile_media, background_media, following,
+                                                             subscribers=count_subscriber, recipes=count_recipe))
+
         return schema_to_return
 
     @staticmethod
