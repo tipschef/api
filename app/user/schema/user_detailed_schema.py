@@ -67,5 +67,5 @@ class UserDetailedSchema(UserBaseSchema):
                                   followers=followers, description=description,
                                   profile_url=profile.path if profile is not None else "",
                                   background_url=background.path if background is not None else "",
-                                  firstname=firstname, lastname=lastname
+                                  firstname=firstname, lastname=lastname, is_partner=user.is_partner
                                   )
