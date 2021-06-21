@@ -51,3 +51,13 @@ class UsernameNotFound(Exception):
 
     def __str__(self):
         return f"'{self.username}' not found."
+
+
+class EmailAlreadyExistsException(Exception):
+    email: str
+
+    def __init__(self, email: str):
+        self.email = email
+
+    def __str__(self):
+        return f"'{self.email}' already used."

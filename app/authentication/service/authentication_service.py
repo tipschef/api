@@ -31,6 +31,10 @@ class AuthenticationService:
         return UserRepository.get_user_by_username(username)
 
     @staticmethod
+    def get_user_by_id(user_id: int) -> Optional[UserModel]:
+        return UserRepository.get_user_by_id(user_id)
+
+    @staticmethod
     def _create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
         to_encode = data.copy()
         if expires_delta:
@@ -54,7 +58,7 @@ class AuthenticationService:
             raise WrongCredentialException
 
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = AuthenticationService._create_access_token(data={'sub': user.username},
+        access_token = AuthenticationService._create_access_token(data={'sub': str(user_already_exist.id)},
                                                                   expires_delta=access_token_expires)
         return AuthenticatedSchema(username=user.username, token=access_token, token_type='Bearer')
 
@@ -62,18 +66,18 @@ class AuthenticationService:
     async def get_current_user(token: str = Depends(oauth2_scheme)) -> UserAuthSchema:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            username = payload.get('sub')
-            if username is None:
+            user_id = payload.get('sub')
+            if user_id is None:
                 raise Exception
         except ExpiredSignatureError:
-            username = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={'verify_exp': False}).get('sub')
-            user = UserAuthSchema.from_user_model(AuthenticationService.get_user(username))
+            user_id = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={'verify_exp': False}).get('sub')
+            user = UserAuthSchema.from_user_model(AuthenticationService.get_user_by_id(user_id))
             if user is None:
                 raise Exception
             return user
         except JWTError:
             raise Exception
-        user = UserAuthSchema.from_user_model(AuthenticationService.get_user(username))
+        user = UserAuthSchema.from_user_model(AuthenticationService.get_user_by_id(user_id))
         if user is None:
             raise Exception
         return user
