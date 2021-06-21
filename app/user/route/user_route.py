@@ -53,7 +53,7 @@ async def get_user_by_user_id(user_id: int, database: Session = Depends(get_data
 
 
 @router.get('/me', response_model=UserDetailedSchema, tags=['users'])
-async def get_user_by_username(database: Session = Depends(get_database),
+async def get_user_information(database: Session = Depends(get_database),
                                current_user: UserSchema = Depends(
                                    UserService.get_current_active_user)) -> UserDetailedSchema:
     try:
@@ -67,8 +67,8 @@ async def get_user_by_username(database: Session = Depends(get_database),
 
 @router.get('/search', response_model=List[UserDetailedSchema], tags=['users'])
 async def search_user(username: str, database: Session = Depends(get_database),
-                      current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
-    UserDetailedSchema]:
+                      current_user: UserSchema = Depends(UserService.get_current_active_user))\
+        -> List[UserDetailedSchema]:
     try:
         return UserService.search_username(database, username, current_user)
     except Exception as exception:
@@ -202,7 +202,7 @@ async def upload_background_picture(file: UploadFile = File(...),
 async def update_profile(user_data: UserUpdateSchema, database: Session = Depends(get_database),
                          current_user: UserAuthSchema = Depends(
                              UserService.get_current_active_user)) -> dict:
-
+    print(user_data)
     try:
         if UserService.update_user_profile(user_data, database, current_user):
             return {'status': 'updated'}

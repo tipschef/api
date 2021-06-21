@@ -18,8 +18,8 @@ from app.user.model.user_model import UserModel
 from app.user.repository.follow_repository import FollowRepository
 from app.user.repository.user_repository import UserRepository
 from app.user.schema.user_auth_schema import UserAuthSchema
-from app.user.schema.user_detailed_schema import UserDetailedSchema
 from app.user.schema.user_create_schema import UserCreateSchema
+from app.user.schema.user_detailed_schema import UserDetailedSchema
 from app.user.schema.user_schema import UserSchema
 from app.user.schema.user_update_schema import UserUpdateSchema
 
@@ -65,7 +65,8 @@ class UserService:
 
         count_follower = FollowRepository.get_count_followers_by_followed_username(database, user.id)
         count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
-        return UserDetailedSchema.from_user_model_with_follow(user, count_likes, count_follower, user.description, profile_media, background_media, following)
+        return UserDetailedSchema.from_user_model_with_follow(user, count_likes, count_follower, user.description,
+                                                              profile_media, background_media, following)
 
     @staticmethod
     def get_my_informations(database: Session, current_user: UserSchema):
@@ -89,7 +90,9 @@ class UserService:
         count_follower = FollowRepository.get_count_followers_by_followed_username(database, user.id)
         count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
         return UserDetailedSchema.from_user_model_with_name(user, count_likes, count_follower, user.description,
-                                                              profile_media, background_media, following, user.firstname, user.lastname)
+                                                            profile_media, background_media, following, user.firstname,
+                                                            user.lastname)
+
     @staticmethod
     def search_username(database: Session, username: str, current_user: UserSchema) -> List[UserDetailedSchema]:
         users = UserRepository.search_username(database, username)
@@ -110,7 +113,9 @@ class UserService:
 
             count_follower = FollowRepository.get_count_followers_by_followed_username(database, user.id)
             count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
-            schema_to_return.append(UserDetailedSchema.from_user_model_with_follow(user, count_likes, count_follower, user.description, profile_media, background_media, following))
+            schema_to_return.append(
+                UserDetailedSchema.from_user_model_with_follow(user, count_likes, count_follower, user.description,
+                                                               profile_media, background_media, following))
         return schema_to_return
 
     @staticmethod
@@ -185,9 +190,14 @@ class UserService:
 
     @staticmethod
     def update_user_profile(user_data: UserUpdateSchema, database: Session, user_to_update: UserSchema) -> Optional[bool]:
-        if UserRepository.get_user_by_username(user_data.username) is not None:
+        user_found_with_username = UserRepository.get_user_by_username(user_data.username)
+        if user_data.username != user_to_update.username and user_found_with_username is not None:
             raise UsernameAlreadyExistsException(user_data.username)
-        if UserRepository.get_user_by_email(database, user_data.email) is not None:
+        if user_data.email != user_to_update.email and\
+                UserRepository.get_user_by_email(database, user_data.email) is not None:
             raise EmailAlreadyExistsException(user_data.email)
-        UserRepository.update_user_information(user_data, database, user_to_update)
+        if user_data.password != '':
+            UserRepository.update_user_information_with_password(user_data, database, user_to_update)
+        else:
+            UserRepository.update_user_information_without_password(user_data, database, user_to_update)
         return True

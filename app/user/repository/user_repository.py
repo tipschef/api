@@ -57,7 +57,7 @@ class UserRepository:
         database.commit()
 
     @staticmethod
-    def update_user_information(user_data: UserUpdateSchema, database: Session, user_to_update: UserSchema) -> None:
+    def update_user_information_with_password(user_data: UserUpdateSchema, database: Session, user_to_update: UserSchema) -> None:
 
         try:
             database.query(UserModel).filter(UserModel.id == user_to_update.id).update(
@@ -69,7 +69,26 @@ class UserRepository:
                  UserModel.description: user_data.description}
             )
             database.commit()
-        except IntegrityError as exception:
+        except IntegrityError:
+            print('existe déja')
+
+        except Exception as exception:
+            print(exception)
+
+    @staticmethod
+    def update_user_information_without_password(user_data: UserUpdateSchema, database: Session,
+                                                 user_to_update: UserSchema) -> None:
+
+        try:
+            database.query(UserModel).filter(UserModel.id == user_to_update.id).update(
+                {UserModel.username: user_data.username,
+                 UserModel.email: user_data.email,
+                 UserModel.firstname: user_data.firstname,
+                 UserModel.lastname: user_data.lastname,
+                 UserModel.description: user_data.description}
+            )
+            database.commit()
+        except IntegrityError:
             print('existe déja')
 
         except Exception as exception:

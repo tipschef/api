@@ -75,8 +75,7 @@ class AuthenticationService:
             if user is None:
                 raise Exception
             return user
-        except JWTError as e:
-            print(e)
+        except JWTError:
             raise Exception
         user = UserAuthSchema.from_user_model(AuthenticationService.get_user_by_id(user_id))
         if user is None:

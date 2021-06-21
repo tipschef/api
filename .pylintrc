@@ -16,4 +16,5 @@ disable=missing-module-docstring,
         duplicate-code,
         arguments-differ,
         too-many-arguments,
-        too-many-locals
+        too-many-locals,
+        broad-except
