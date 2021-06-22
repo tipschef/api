@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import timedelta, datetime
 from typing import Optional
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError, ExpiredSignatureError
 from passlib.context import CryptContext
@@ -70,12 +70,9 @@ class AuthenticationService:
             if user_id is None:
                 raise Exception
         except ExpiredSignatureError:
-            user_id = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={'verify_exp': False}).get('sub')
-            user = UserAuthSchema.from_user_model(AuthenticationService.get_user_by_id(user_id))
-            if user is None:
-                raise Exception
-            return user
-        except JWTError:
+            raise HTTPException(status_code=401, detail='Token expired')
+        except JWTError as e:
+            print(e)
             raise Exception
         user = UserAuthSchema.from_user_model(AuthenticationService.get_user_by_id(user_id))
         if user is None:
