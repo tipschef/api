@@ -10,7 +10,7 @@ class CommentModel(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     content = Column(String(255), index=True)
-    is_deleted = Column(Boolean, index=True)
+    is_deleted = Column(Boolean, index=True, default=False)
     user_id = Column(Integer, ForeignKey('user.id'), index=True)
     recipe_id = Column(Integer, ForeignKey('recipe.id'), index=True)
     created_date = Column(DateTime, default=datetime.datetime.utcnow, index=True)
