@@ -27,6 +27,7 @@ class CommentRepository:
             .join(MediaModel, MediaModel.id == UserModel.profile_media_id) \
             .filter(CommentModel.recipe_id == recipe_id) \
             .filter(CommentModel.is_deleted == False) \
+            .order_by(CommentModel.created_date.desc())\
             .all()
 
     @staticmethod

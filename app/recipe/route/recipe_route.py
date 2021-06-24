@@ -229,11 +229,12 @@ async def get_like_from_recipe(recipe_id: int, database: Session = Depends(get_d
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.post('/{recipe_id}/comment', response_model=LikeSchema, tags=['recipes', 'comments'])
+@router.post('/{recipe_id}/comment', response_model=dict, tags=['recipes', 'comments'])
 async def add_comment_to_recipe(recipe_id: int, comment: CommentInputSchema, database: Session = Depends(get_database),
-                                current_user: UserSchema = Depends(UserService.get_current_active_user)):
+                                current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
-        return CommentService.create_comment_on_a_recipe(database, current_user, comment, recipe_id)
+        CommentService.create_comment_on_a_recipe(database, current_user, comment, recipe_id)
+        return {'Status': 'Done'}
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
