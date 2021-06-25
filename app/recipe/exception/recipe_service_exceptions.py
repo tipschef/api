@@ -29,3 +29,13 @@ class UserNotAuthorized(Exception):
             'detail': str(self),
             'min_tier': self.min_tier
         }
+
+
+class WrongUserToDeleteComment(Exception):
+    comment_id: int
+
+    def __init__(self, comment_id: int):
+        self.comment_id = comment_id
+
+    def __str__(self):
+        return f'You are not the owner of this comment `{self.comment_id}`'

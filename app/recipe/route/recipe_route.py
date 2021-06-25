@@ -6,13 +6,16 @@ from sqlalchemy.orm import Session
 from app.database.service.database_init import init_data
 from app.database.service.database_instance import get_database
 from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundException, \
-    CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException, UserNotAuthorized
+    CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException, UserNotAuthorized, WrongUserToDeleteComment
+from app.recipe.schema.comment.comment_input_schema import CommentInputSchema
+from app.recipe.schema.comment.comment_output_base_schema import CommentOutputBaseSchema
 from app.recipe.schema.like.like_schema import LikeSchema
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.schema.recipe.recipe_response_schema import RecipeResponseSchema
 from app.recipe.schema.recipe.recipe_schema import RecipeSchema
+from app.recipe.service.comment_service import CommentService
 from app.recipe.service.like_service import LikeService
 from app.recipe.service.recipe_service import RecipeService
 from app.user.schema.user_schema import UserSchema
@@ -221,6 +224,41 @@ async def get_like_from_recipe(recipe_id: int, database: Session = Depends(get_d
                                current_user: UserSchema = Depends(UserService.get_current_active_user)) -> LikeSchema:
     try:
         return LikeService.get_like_by_recipe_id(database, recipe_id, current_user)
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.post('/{recipe_id}/comment', response_model=dict, tags=['recipes', 'comments'])
+async def add_comment_to_recipe(recipe_id: int, comment: CommentInputSchema, database: Session = Depends(get_database),
+                                current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+    try:
+        CommentService.create_comment_on_a_recipe(database, current_user, comment, recipe_id)
+        return {'Status': 'Done'}
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.delete('/{recipe_id}/comment/{comment_id}', response_model=dict, tags=['recipes', 'comments'])
+async def remove_comment_from_recipe(recipe_id: int, comment_id: int, database: Session = Depends(get_database),
+                                     current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+    try:
+        CommentService.delete_comment_by_id(database, current_user, comment_id, recipe_id)
+        return {'Status': 'Done'}
+    except WrongUserToDeleteComment as exception:
+        raise HTTPException(status_code=403, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/{recipe_id}/comment', response_model=List[CommentOutputBaseSchema], tags=['recipes', 'comments'])
+async def get_all_comment_from_a_recipe(recipe_id: int, database: Session = Depends(get_database),
+                                        _: UserSchema = Depends(UserService.get_current_active_user))\
+        -> List[CommentOutputBaseSchema]:
+    try:
+        return CommentService.get_comments_by_recipe_id(database, recipe_id)
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

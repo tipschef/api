@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from fastapi import Depends, UploadFile, HTTPException
+from fastapi import Depends, UploadFile
 from sqlalchemy.orm import Session
 
 from app.authentication.service.authentication_service import AuthenticationService
