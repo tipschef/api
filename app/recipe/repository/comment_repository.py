@@ -26,7 +26,7 @@ class CommentRepository:
             .join(UserModel, UserModel.id == CommentModel.user_id) \
             .join(MediaModel, MediaModel.id == UserModel.profile_media_id) \
             .filter(CommentModel.recipe_id == recipe_id) \
-            .filter(CommentModel.is_deleted == False) \
+            .filter(CommentModel.is_deleted == 0) \
             .order_by(CommentModel.created_date.desc())\
             .all()
 
@@ -44,5 +44,5 @@ class CommentRepository:
         return database.query(CommentModel) \
             .filter(CommentModel.id == comment_id) \
             .filter(CommentModel.recipe_id == recipe_id) \
-            .filter(CommentModel.is_deleted == False) \
+            .filter(CommentModel.is_deleted == 0) \
             .first()

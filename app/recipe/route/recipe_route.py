@@ -242,7 +242,7 @@ async def add_comment_to_recipe(recipe_id: int, comment: CommentInputSchema, dat
 
 @router.delete('/{recipe_id}/comment/{comment_id}', response_model=dict, tags=['recipes', 'comments'])
 async def remove_comment_from_recipe(recipe_id: int, comment_id: int, database: Session = Depends(get_database),
-                               current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+                                     current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
         CommentService.delete_comment_by_id(database, current_user, comment_id, recipe_id)
         return {'Status': 'Done'}
@@ -255,7 +255,8 @@ async def remove_comment_from_recipe(recipe_id: int, comment_id: int, database: 
 
 @router.get('/{recipe_id}/comment', response_model=List[CommentOutputBaseSchema], tags=['recipes', 'comments'])
 async def get_all_comment_from_a_recipe(recipe_id: int, database: Session = Depends(get_database),
-                               _: UserSchema = Depends(UserService.get_current_active_user)) -> List[CommentOutputBaseSchema]:
+                                        _: UserSchema = Depends(UserService.get_current_active_user))\
+        -> List[CommentOutputBaseSchema]:
     try:
         return CommentService.get_comments_by_recipe_id(database, recipe_id)
     except Exception as exception:

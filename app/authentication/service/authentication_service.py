@@ -71,8 +71,8 @@ class AuthenticationService:
                 raise Exception
         except ExpiredSignatureError:
             raise HTTPException(status_code=401, detail='Token expired')
-        except JWTError as e:
-            print(e)
+        except JWTError as exception:
+            print(exception)
             raise Exception
         user = UserAuthSchema.from_user_model(AuthenticationService.get_user_by_id(user_id))
         if user is None:

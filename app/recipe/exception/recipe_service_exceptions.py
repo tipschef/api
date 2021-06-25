@@ -39,5 +39,3 @@ class WrongUserToDeleteComment(Exception):
 
     def __str__(self):
         return f'You are not the owner of this comment `{self.comment_id}`'
-
-
