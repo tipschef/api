@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.database.service.database_init import init_data
 from app.database.service.database_instance import get_database
 from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundException, \
-    CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException, UserNotAuthorized
+    CannotModifyOthersPeopleRecipeException, NotRecipeOwnerException, UserNotAuthorized, WrongUserToDeleteComment
 from app.recipe.schema.comment.comment_input_schema import CommentInputSchema
 from app.recipe.schema.comment.comment_output_base_schema import CommentOutputBaseSchema
 from app.recipe.schema.like.like_schema import LikeSchema
@@ -246,6 +246,8 @@ async def remove_comment_from_recipe(recipe_id: int, comment_id: int, database: 
     try:
         CommentService.delete_comment_by_id(database, current_user, comment_id, recipe_id)
         return {'Status': 'Done'}
+    except WrongUserToDeleteComment as exception:
+        raise HTTPException(status_code=403, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

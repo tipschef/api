@@ -31,10 +31,18 @@ class CommentRepository:
             .all()
 
     @staticmethod
-    def delete_comment_by_id(database: Session, user_id: int, comment_id: int, recipe_id: int):
+    def delete_comment_by_id(database: Session, user_id: int, comment_id: int, recipe_id: int) -> None:
         database.query(CommentModel).filter(CommentModel.is_deleted.is_(False)) \
                 .filter(CommentModel.user_id == user_id)\
                 .filter(CommentModel.id == comment_id)\
                 .filter(CommentModel.recipe_id == recipe_id)\
                 .update({CommentModel.is_deleted: True})
         database.commit()
+
+    @staticmethod
+    def get_comment_by_id(database: Session, comment_id: int, recipe_id: int) -> CommentModel:
+        return database.query(CommentModel) \
+            .filter(CommentModel.id == comment_id) \
+            .filter(CommentModel.recipe_id == recipe_id) \
+            .filter(CommentModel.is_deleted == False) \
+            .first()

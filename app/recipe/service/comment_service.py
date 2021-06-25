@@ -3,6 +3,7 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
+from app.recipe.exception.recipe_service_exceptions import WrongUserToDeleteComment
 from app.recipe.repository.comment_repository import CommentRepository
 from app.recipe.schema.comment.comment_input_schema import CommentInputSchema
 from app.recipe.schema.comment.comment_output_base_schema import CommentOutputBaseSchema
@@ -22,6 +23,8 @@ class CommentService:
 
     @staticmethod
     def delete_comment_by_id(database: Session, user: UserSchema, comment_id: int, recipe_id: int) -> bool:
+        if CommentRepository.get_comment_by_id(database, comment_id, recipe_id).user_id != user.id:
+            raise WrongUserToDeleteComment(comment_id)
         CommentRepository.delete_comment_by_id(database, user.id, comment_id, recipe_id)
         return True
 
