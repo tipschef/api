@@ -16,7 +16,7 @@ from app.user.model.user_model import UserModel
 from app.user.repository.user_repository import UserRepository
 from app.user.schema.user_auth_schema import UserAuthSchema
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440
 ALGORITHM = 'HS256'
 SECRET_KEY = 'dsfljldfgjlksdfgjlksdfjglikfdg'
 
