@@ -35,7 +35,8 @@ async def get_template() -> TemplateListSchema:
 
 
 @router.post('/preview', response_model=dict, tags=['books'])
-async def preview(preview_schema: PreviewSchema, current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+async def preview(preview_schema: PreviewSchema,
+                  current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
         return {'url': BookService.preview_html(preview_schema.html, current_user)}
     except Exception as exception:
@@ -57,7 +58,7 @@ async def post_cover(cover: UploadFile = File(...),
 
 @router.post('/pdf/{book_id}/{u_id}', response_model=dict, tags=['recipes'])
 async def add_pdf_to_recipe(book_id: int, u_id: str, file: UploadFile = File(...),
-                            database: Session = Depends(get_database))\
+                            database: Session = Depends(get_database)) \
         -> dict:
     try:
         BookService.add_pdf_to_book(database, book_id, u_id, file)

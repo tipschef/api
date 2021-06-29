@@ -62,10 +62,13 @@ class BookService:
         u_id = str(uuid.uuid4())
         book_model = BookRepository.create_book(database, create_book_schema, current_user.id, u_id)
 
-        _ = [BookRecipeRepository.create_book_recipe(database, book_model.id, recipe_template.recipe_id) for recipe_template in
+        _ = [BookRecipeRepository.create_book_recipe(database, book_model.id, recipe_template.recipe_id) for
+             recipe_template in
              create_book_schema.recipe_template]
 
-        broker.publish(BookBrokerSchema.from_book_schema_and_id(create_book_schema, book_model.id, current_user.username, u_id).json())
+        broker.publish(
+            BookBrokerSchema.from_book_schema_and_id(create_book_schema, book_model.id, current_user.username,
+                                                     u_id).json())
 
         return BookSchema.from_book_model(book_model)
 
@@ -84,10 +87,3 @@ class BookService:
         BookRepository.update_book_by_id(database, book_id, filename)
 
         return BookSchema.from_book_model(book)
-
-
-
-
-
-
-
