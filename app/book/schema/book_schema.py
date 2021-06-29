@@ -13,7 +13,6 @@ class BookSchema(BaseModel):
 
     @staticmethod
     def from_book_model(book: BookModel) -> BookSchema:
-        print(book)
         return BookSchema(id=book.id,
                           title=book.title,
                           description=book.description,

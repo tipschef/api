@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 
+from app.book.exception.book_service_exception import BookIdNotFoundException, UniqueIdDoesNotMatch
 from app.book.schema.book_schema import BookSchema
 from app.book.schema.create_book_schema import CreateBookSchema
 from app.book.schema.preview_schema import PreviewSchema
@@ -49,6 +50,22 @@ async def post_cover(cover: UploadFile = File(...),
     try:
         filename = BookService.post_cover(current_user.id, cover)
         return {'url': filename}
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.post('/pdf/{book_id}/{u_id}', response_model=dict, tags=['recipes'])
+async def add_pdf_to_recipe(book_id: int, u_id: str, file: UploadFile = File(...),
+                            database: Session = Depends(get_database))\
+        -> dict:
+    try:
+        BookService.add_pdf_to_book(database, book_id, u_id, file)
+        return {'message': 'done'}
+    except BookIdNotFoundException as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
+    except UniqueIdDoesNotMatch as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

@@ -6,13 +6,16 @@ from typing import List
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
+from app.book.exception.book_service_exception import BookIdNotFoundException, UniqueIdDoesNotMatch
 from app.book.repository.book_recipe_repository import BookRecipeRepository
 from app.book.repository.book_repository import BookRepository
+from app.book.schema.book_broker_schema import BookBrokerSchema
 from app.book.schema.book_schema import BookSchema
 from app.book.schema.create_book_schema import CreateBookSchema
 from app.book.schema.template_list_schema import TemplateListSchema
 from app.book.schema.template_schema import TemplateSchema
 from app.common.model.pdf import PDF
+from app.common.service.broker_manager_service import get_broker_manager_service
 from app.common.service.bucket_manager_service import get_bucket_manager_service
 from app.user.schema.user_schema import UserSchema
 
@@ -55,9 +58,36 @@ class BookService:
 
     @staticmethod
     def create_book(database: Session, create_book_schema: CreateBookSchema, current_user: UserSchema) -> BookSchema:
-        book_model = BookRepository.create_book(database, create_book_schema, current_user.id)
+        broker = get_broker_manager_service()
+        u_id = str(uuid.uuid4())
+        book_model = BookRepository.create_book(database, create_book_schema, current_user.id, u_id)
 
         _ = [BookRecipeRepository.create_book_recipe(database, book_model.id, recipe_template.recipe_id) for recipe_template in
              create_book_schema.recipe_template]
 
+        broker.publish(BookBrokerSchema.from_book_schema_and_id(create_book_schema, book_model.id, current_user.username, u_id).json())
+
         return BookSchema.from_book_model(book_model)
+
+    @staticmethod
+    def add_pdf_to_book(database: Session, book_id: int, u_id: str, file: UploadFile) -> BookSchema:
+        book = BookRepository.get_book_by_id(database, book_id)
+        if book is None:
+            raise BookIdNotFoundException()
+
+        if book.u_id != u_id:
+            raise UniqueIdDoesNotMatch()
+
+        filename = get_bucket_manager_service().save_file(
+            f'{book.creator_id}/book/{book.id}_pdf.pdf', file.file)
+
+        BookRepository.update_book_by_id(database, book_id, filename)
+
+        return BookSchema.from_book_model(book)
+
+
+
+
+
+
+

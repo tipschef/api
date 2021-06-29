@@ -11,6 +11,7 @@ class BookModel(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), index=True)
     path = Column(String(255), index=True)
+    u_id = Column(String(255), index=True)
     price_euro = Column(Float, index=True)
     description = Column(String(700), index=True)
     is_creating = Column(Boolean, index=True)
