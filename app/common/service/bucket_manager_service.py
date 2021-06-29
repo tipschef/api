@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass, field
-from typing import List, Optional
 from typing import IO
+from typing import List, Optional
 
 from fastapi import UploadFile
 from google.cloud import storage
@@ -25,6 +25,12 @@ class BucketManagerService:
             blob.upload_from_file(file_content)
             blob.make_public()
             return blob.public_url
+
+    def get_list(self, path: str):
+        bucket = self.bucket_client.get_bucket(self.bucket_name)
+        blobs = bucket.list_blobs(prefix=path)
+
+        return blobs
 
     def save_files(self, paths: List[UploadFile]) -> List[str]:
         return [self.save_file(filepath.filename, filepath.file) for filepath in paths]
