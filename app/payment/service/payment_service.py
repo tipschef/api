@@ -21,6 +21,10 @@ from app.user.schema.user_schema import UserSchema
 class PaymentService:
 
     def __post_init__(self):
+        self.init_data()
+
+    @staticmethod
+    def init_data():
         secret_manager_service = get_secret_manager_service()
         secret_content = secret_manager_service.get_secret_json()
         stripe.api_key = secret_content.get('stripe_api_key')
