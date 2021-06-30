@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 from sqlalchemy.orm import Session
 
@@ -27,6 +28,21 @@ class BookRepository:
     @staticmethod
     def get_book_by_id(database: Session, book_id: int) -> BookModel:
         return database.query(BookModel).filter(BookModel.id == book_id, BookModel.is_deleted.is_(False)).first()
+
+    @staticmethod
+    def get_book_by_id_deleted_or_not(database: Session, book_id: int) -> BookModel:
+        return database.query(BookModel).filter(BookModel.id == book_id).first()
+
+    @staticmethod
+    def delete_book_by_id(database: Session, book_id: int) -> None:
+        database.query(BookModel).filter(BookModel.is_deleted.is_(False), BookModel.id == book_id).update(
+            {BookModel.is_deleted: True})
+        database.commit()
+
+    @staticmethod
+    def get_book_by_creator_id(database: Session, creator_id: int) -> List[BookModel]:
+        return database.query(BookModel).filter(BookModel.creator_id == creator_id,
+                                                BookModel.is_deleted.is_(False)).all()
 
     @staticmethod
     def update_book_by_id(database: Session, book_id: int, path: str) -> None:
