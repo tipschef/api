@@ -6,7 +6,8 @@ from typing import List
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
-from app.book.exception.book_service_exception import BookIdNotFoundException, UniqueIdDoesNotMatch
+from app.book.exception.book_service_exception import BookIdNotFoundException, UniqueIdDoesNotMatch, \
+    CannotModifyOthersPeopleBookException
 from app.book.repository.book_recipe_repository import BookRecipeRepository
 from app.book.repository.book_repository import BookRepository
 from app.book.schema.book_broker_schema import BookBrokerSchema
@@ -74,7 +75,7 @@ class BookService:
 
     @staticmethod
     def add_pdf_to_book(database: Session, book_id: int, u_id: str, file: UploadFile) -> BookSchema:
-        book = BookRepository.get_book_by_id(database, book_id)
+        book = BookRepository.get_book_by_id_deleted_or_not(database, book_id)
         if book is None:
             raise BookIdNotFoundException()
 
@@ -87,3 +88,33 @@ class BookService:
         BookRepository.update_book_by_id(database, book_id, filename)
 
         return BookSchema.from_book_model(book)
+
+    @staticmethod
+    def get_my_books(database: Session, current_user: UserSchema) -> List[BookSchema]:
+        arr = []
+        books = BookRepository.get_book_by_creator_id(database, current_user.id)
+
+        for book in books:
+            arr.append(BookSchema.from_book_model_and_number_of_recipe(book, BookRecipeRepository.get_number_recipe_by_book(database, book.id)))
+
+        return arr
+
+    @staticmethod
+    def delete_a_book_by_id(database: Session, book_id: int, current_user: UserSchema):
+        book = BookRepository.get_book_by_id(database, book_id)
+
+        if book is None:
+            raise BookIdNotFoundException()
+
+        if book.creator_id != current_user.id:
+            raise CannotModifyOthersPeopleBookException()
+
+        BookRepository.delete_book_by_id(database, book_id)
+
+
+
+
+
+
+
+
