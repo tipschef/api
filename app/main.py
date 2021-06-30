@@ -13,6 +13,7 @@ from app.recipe.route.recipe_category_route import router as recipe_category_rou
 from app.recipe.route.recipe_cooking_type_route import router as recipe_cooking_type_route
 from app.recipe.route.recipe_route import router as recipe_route
 from app.user.route.user_route import router as user_router
+from app.payment.route.payment_route import router as payment_router
 from app.book.route.book_route import router as book_router
 
 app = FastAPI()
@@ -35,6 +36,7 @@ def setup_router() -> None:
     app.include_router(recipe_category_route, prefix='/v1')
     app.include_router(recipe_cooking_type_route, prefix='/v1')
     app.include_router(book_router, prefix='/v1')
+    app.include_router(payment_router, prefix='/v1')
 
 
 def setup_database() -> None:

@@ -23,7 +23,6 @@ class SubscriptionRepository:
                   gifted_id: Optional[int] = None) -> SubscriptionModel:
         db_subscribe = SubscriptionModel(subscribed_id=subscribed_id, subscriber_id=subscriber_id, gifted_id=gifted_id,
                                          tier=tier)
-        print(db_subscribe)
         database.add(db_subscribe)
         database.commit()
         database.refresh(db_subscribe)

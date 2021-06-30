@@ -23,3 +23,4 @@ class UserModel(Base):
     profile_media_id = Column(Integer, ForeignKey('media.id'), index=True, default=None)
     background_media_id = Column(Integer, ForeignKey('media.id'), index=True, default=None)
     created_date = Column(DateTime, default=datetime.datetime.utcnow, index=True)
+    phone = Column(String(255), default='', index=True)
