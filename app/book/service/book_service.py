@@ -95,7 +95,9 @@ class BookService:
         books = BookRepository.get_book_by_creator_id(database, current_user.id)
 
         for book in books:
-            arr.append(BookSchema.from_book_model_and_number_of_recipe(book, BookRecipeRepository.get_number_recipe_by_book(database, book.id)))
+            arr.append(BookSchema.from_book_model_and_number_of_recipe(book,
+                                                                       BookRecipeRepository.get_number_recipe_by_book(
+                                                                           database, book.id)))
 
         return arr
 
@@ -110,11 +112,3 @@ class BookService:
             raise CannotModifyOthersPeopleBookException()
 
         BookRepository.delete_book_by_id(database, book_id)
-
-
-
-
-
-
-
-

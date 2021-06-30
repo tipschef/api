@@ -38,7 +38,7 @@ async def get_template() -> TemplateListSchema:
 
 
 @router.get('/creator', response_model=List[BookSchema], tags=['books'])
-async def get_template(database: Session = Depends(get_database),
+async def get_my_books(database: Session = Depends(get_database),
                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[BookSchema]:
     try:
         return BookService.get_my_books(database, current_user)
