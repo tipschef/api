@@ -196,14 +196,15 @@ class UserService:
         return MediaSchema.from_media_model(created_media)
 
     @staticmethod
-    def update_user_profile(user_data: UserUpdateSchema, database: Session, user_to_update: UserSchema) -> Optional[bool]:
+    def update_user_profile(user_data: UserUpdateSchema, database: Session, user_to_update: UserSchema) \
+            -> Optional[bool]:
         user_found_with_username = UserRepository.get_user_by_username(user_data.username)
         if user_data.username != user_to_update.username and user_found_with_username is not None:
             raise UsernameAlreadyExistsException(user_data.username)
-        if user_data.email != user_to_update.email and\
+        if user_data.email != user_to_update.email and \
                 UserRepository.get_user_by_email(database, user_data.email) is not None:
             raise EmailAlreadyExistsException(user_data.email)
-        if user_data.password != '':
+        if user_data.password.get_secret_value() != '':
             UserRepository.update_user_information_with_password(user_data, database, user_to_update)
         else:
             UserRepository.update_user_information_without_password(user_data, database, user_to_update)

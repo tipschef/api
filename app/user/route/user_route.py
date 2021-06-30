@@ -7,6 +7,7 @@ from app.database.service.database_instance import get_database
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.service.recipe_service import RecipeService
+from app.user.exception.subscription_service_exceptions import UserNotPartnerException
 from app.user.exception.user_route_exceptions import UserAlreadyExistsException, UsernameAlreadyExistsException, \
     UsernameNotFoundException, WrongUploadFileType, UserIdNotFoundException, UsernameNotFound, \
     EmailAlreadyExistsException
@@ -67,7 +68,7 @@ async def get_user_information(database: Session = Depends(get_database),
 
 @router.get('/search', response_model=List[UserDetailedSchema], tags=['users'])
 async def search_user(username: str, database: Session = Depends(get_database),
-                      current_user: UserSchema = Depends(UserService.get_current_active_user))\
+                      current_user: UserSchema = Depends(UserService.get_current_active_user)) \
         -> List[UserDetailedSchema]:
     try:
         return UserService.search_username(database, username, current_user)
@@ -122,8 +123,7 @@ async def get_recipes_from_username(username: str, per_page: int = 20, page: int
     try:
         return RecipeService.get_all_recipe_for_specific_user(database, current_user, username, per_page, page)
     except UsernameNotFound as exception:
-        print(exception)
-        raise HTTPException(status_code=404, detail=exception)
+        raise HTTPException(status_code=404, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
@@ -136,6 +136,8 @@ async def subscribe_by_username(username: str, tier: int, database: Session = De
         if SubscriptionService.subscribe_to_someone_by_username(database, current_user, username, tier):
             return {'Status': 'Done'}
         return {'Status': 'Already subscribed'}
+    except UserNotPartnerException as exception:
+        raise HTTPException(status_code=403, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
@@ -163,6 +165,8 @@ async def gift_a_subscription_by_username(username: str, receiver: str, tier: in
                                                                           tier):
             return {'Status': 'Done'}
         return {'Status': 'You were not subscribed'}
+    except UserNotPartnerException as exception:
+        raise HTTPException(status_code=403, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
@@ -202,7 +206,6 @@ async def upload_background_picture(file: UploadFile = File(...),
 async def update_profile(user_data: UserUpdateSchema, database: Session = Depends(get_database),
                          current_user: UserAuthSchema = Depends(
                              UserService.get_current_active_user)) -> dict:
-    print(user_data)
     try:
         if UserService.update_user_profile(user_data, database, current_user):
             return {'status': 'updated'}

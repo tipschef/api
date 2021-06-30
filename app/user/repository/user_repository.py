@@ -58,7 +58,6 @@ class UserRepository:
 
     @staticmethod
     def update_user_information_with_password(user_data: UserUpdateSchema, database: Session, user_to_update: UserSchema) -> None:
-
         try:
             database.query(UserModel).filter(UserModel.id == user_to_update.id).update(
                 {UserModel.username: user_data.username,
@@ -78,7 +77,7 @@ class UserRepository:
     @staticmethod
     def update_user_information_without_password(user_data: UserUpdateSchema, database: Session,
                                                  user_to_update: UserSchema) -> None:
-
+        print('i passe there')
         try:
             database.query(UserModel).filter(UserModel.id == user_to_update.id).update(
                 {UserModel.username: user_data.username,

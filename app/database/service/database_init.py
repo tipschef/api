@@ -7,6 +7,7 @@ from app.recipe.repository.recipe.recipe_cooking_type_repository import RecipeCo
 from app.user.model.user_model import UserModel
 from app.user.model.follow_model import FollowModel
 from app.user.model.subscription_model import SubscriptionModel
+from app.user.model.tier_model import TierModel
 
 from app.recipe.model.comment_model import CommentModel
 from app.recipe.model.ingredient.ingredient_model import IngredientModel
@@ -24,6 +25,8 @@ from app.recipe.model.step.step_model import StepModel
 from app.book.model.book_model import BookModel
 from app.book.model.book_purchase_model import BookPurchaseModel
 from app.book.model.book_recipe_model import BookRecipeModel
+
+from app.payment.model.payment_model import PaymentModel
 
 
 def init_database() -> None:
