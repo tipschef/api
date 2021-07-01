@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.database.service.database_instance import get_database
 from app.recipe.schema.media.media_category_schema import MediaCategorySchema, MediaCategoryResponseSchema
 from app.recipe.service.media_category_service import MediaCategoryService
-from app.user.schema.user_schema import UserSchema
+from app.user.schema.user.user_schema import UserSchema
 from app.user.service.user_service import UserService
 
 router = APIRouter(prefix='/media_category')

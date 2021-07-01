@@ -10,7 +10,7 @@ from app.user.repository.follow_repository import FollowRepository
 from app.user.repository.subscription_repository import SubscriptionRepository
 from app.user.repository.user_repository import UserRepository
 from app.user.schema.dashboard_schema import DashboardSchema
-from app.user.schema.user_schema import UserSchema
+from app.user.schema.user.user_schema import UserSchema
 
 
 @dataclass

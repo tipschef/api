@@ -23,7 +23,7 @@ from app.recipe.repository.recipe.recipe_repository import RecipeRepository
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_simple_schema import RecipeSimpleSchema
 from app.user.repository.user_repository import UserRepository
-from app.user.schema.user_schema import UserSchema
+from app.user.schema.user.user_schema import UserSchema
 
 
 @dataclass

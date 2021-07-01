@@ -14,7 +14,7 @@ from app.authentication.schema.authenticated_schema import AuthenticatedSchema
 from app.authentication.schema.authentication_schema import AuthenticationSchema
 from app.user.model.user_model import UserModel
 from app.user.repository.user_repository import UserRepository
-from app.user.schema.user_auth_schema import UserAuthSchema
+from app.user.schema.user.user_auth_schema import UserAuthSchema
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440
 ALGORITHM = 'HS256'

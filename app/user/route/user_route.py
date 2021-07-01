@@ -4,19 +4,24 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.database.service.database_instance import get_database
+from app.payment.exception.payment_service_exceptions import NoPaymentMethodException
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.service.recipe_service import RecipeService
-from app.user.exception.subscription_service_exceptions import UserNotPartnerException
+from app.user.exception.subscription_service_exceptions import UserNotPartnerException, AlreadySubscribedToUser, \
+    TierDoesNotExist, NotEnoughFollowersException, UserNotSubscribedException
 from app.user.exception.user_route_exceptions import UserAlreadyExistsException, UsernameAlreadyExistsException, \
     UsernameNotFoundException, WrongUploadFileType, UserIdNotFoundException, UsernameNotFound, \
     EmailAlreadyExistsException
+from app.user.schema.create_random_subscription_schema import CreateRandomSubscriptionSchema
+from app.user.schema.create_subscription_schema import CreateSubscriptionSchema
 from app.user.schema.dashboard_schema import DashboardSchema
-from app.user.schema.user_auth_schema import UserAuthSchema
-from app.user.schema.user_create_schema import UserCreateSchema
-from app.user.schema.user_detailed_schema import UserDetailedSchema
-from app.user.schema.user_schema import UserSchema
-from app.user.schema.user_update_schema import UserUpdateSchema
+from app.user.schema.tier_schema import TierSchema
+from app.user.schema.user.user_auth_schema import UserAuthSchema
+from app.user.schema.user.user_create_schema import UserCreateSchema
+from app.user.schema.user.user_detailed_schema import UserDetailedSchema
+from app.user.schema.user.user_schema import UserSchema
+from app.user.schema.user.user_update_schema import UserUpdateSchema
 from app.user.service.dashboard_service import DashboardService
 from app.user.service.follow_service import FollowService
 from app.user.service.subscription_service import SubscriptionService
@@ -79,14 +84,69 @@ async def search_user(username: str, database: Session = Depends(get_database),
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.get('/{username}', response_model=UserDetailedSchema, tags=['users'])
-async def get_user_by_username(username: str, database: Session = Depends(get_database),
-                               current_user: UserSchema = Depends(
-                                   UserService.get_current_active_user)) -> UserDetailedSchema:
+@router.get('/subscribe/tier', response_model=List[TierSchema], tags=['subscribe'])
+async def get_tiers(database: Session = Depends(get_database)) -> List[TierSchema]:
     try:
-        return UserService.get_user_by_username(database, username, current_user)
+        return UserService.get_tiers(database)
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.post('/subscribe', response_model=dict, tags=['users', 'subscribe'])
+async def subscribe_by_username(create_subscription: CreateSubscriptionSchema,
+                                database: Session = Depends(get_database),
+                                current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+    try:
+        SubscriptionService.subscribe_to_someone_by_username(database, current_user, create_subscription)
+        return {'Status': 'Done'}
+    except UserNotPartnerException as exception:
+        raise HTTPException(status_code=403, detail=str(exception))
     except UsernameNotFoundException as exception:
         raise HTTPException(status_code=404, detail=str(exception))
+    except AlreadySubscribedToUser as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
+    except NoPaymentMethodException as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
+    except TierDoesNotExist as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/subscribe/available/{username}', response_model=dict, tags=['subscribe'])
+async def count_user_available_followers(username: str,
+                                         database: Session = Depends(get_database)) -> dict:
+    try:
+        return {'available_followers': SubscriptionService.count_user_available_followers(database, username)}
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.post('/subscribe/gift', response_model=dict, tags=['users', 'subscribe'])
+async def gift_a_subscription_by_username(create_random_subscription: CreateRandomSubscriptionSchema,
+                                          database: Session = Depends(get_database),
+                                          current_user: UserSchema = Depends(
+                                              UserService.get_current_active_user)) -> dict:
+    try:
+        SubscriptionService.gist_random_subscription(database, current_user, create_random_subscription)
+        return {'Status': 'Done'}
+    except UserNotPartnerException as exception:
+        raise HTTPException(status_code=403, detail=str(exception))
+    except UsernameNotFoundException as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
+    except AlreadySubscribedToUser as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
+    except NoPaymentMethodException as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
+    except TierDoesNotExist as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
+    except UserNotSubscribedException as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
+    except NotEnoughFollowersException as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
@@ -112,63 +172,6 @@ async def unfollow_user_by_username(username: str, database: Session = Depends(g
         if FollowService.unfollow_someone_by_username(database, current_user, username):
             return {'Status': 'Done'}
         return {'Status': 'You were not following'}
-    except Exception as exception:
-        print(exception)
-        raise HTTPException(status_code=500, detail='Server exception')
-
-
-@router.get('/{username}/recipes', response_model=List[RecipeResponseExtendedSchema], tags=['users', 'recipes'])
-async def get_recipes_from_username(username: str, per_page: int = 20, page: int = 1,
-                                    database: Session = Depends(get_database),
-                                    current_user: UserSchema = Depends(UserService.get_current_active_user)) \
-        -> List[RecipeResponseExtendedSchema]:
-    try:
-        return RecipeService.get_all_recipe_for_specific_user(database, current_user, username, per_page, page)
-    except UsernameNotFound as exception:
-        raise HTTPException(status_code=404, detail=str(exception))
-    except Exception as exception:
-        print(exception)
-        raise HTTPException(status_code=500, detail='Server exception')
-
-
-@router.get('/{username}/subscribe', response_model=dict, tags=['users', 'subscribe'])
-async def subscribe_by_username(username: str, tier: int, database: Session = Depends(get_database),
-                                current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
-    try:
-        if SubscriptionService.subscribe_to_someone_by_username(database, current_user, username, tier):
-            return {'Status': 'Done'}
-        return {'Status': 'Already subscribed'}
-    except UserNotPartnerException as exception:
-        raise HTTPException(status_code=403, detail=str(exception))
-    except Exception as exception:
-        print(exception)
-        raise HTTPException(status_code=500, detail='Server exception')
-
-
-@router.get('/{username}/unsubscribe', response_model=dict, tags=['users', 'subscribe'])
-async def unsubscribe_by_username(username: str, database: Session = Depends(get_database),
-                                  current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
-    try:
-        if SubscriptionService.unsubscribe_to_someone_by_username(database, current_user, username):
-            return {'Status': 'Done'}
-        return {'Status': 'You were not subscribed'}
-    except Exception as exception:
-        print(exception)
-        raise HTTPException(status_code=500, detail='Server exception')
-
-
-@router.get('/{username}/subscribe/{receiver}', response_model=dict, tags=['users', 'subscribe'])
-async def gift_a_subscription_by_username(username: str, receiver: str, tier: int,
-                                          database: Session = Depends(get_database),
-                                          current_user: UserSchema = Depends(UserService.get_current_active_user)) \
-        -> dict:
-    try:
-        if SubscriptionService.gift_a_subscription_to_someone_by_username(database, current_user, username, receiver,
-                                                                          tier):
-            return {'Status': 'Done'}
-        return {'Status': 'You were not subscribed'}
-    except UserNotPartnerException as exception:
-        raise HTTPException(status_code=403, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
@@ -226,6 +229,33 @@ async def get_dashboard_data(database: Session = Depends(get_database),
                                  UserService.get_current_active_user)) -> List[DashboardSchema]:
     try:
         return DashboardService.get_dashboard_data(database, current_user)
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/{username}/recipes', response_model=List[RecipeResponseExtendedSchema], tags=['users', 'recipes'])
+async def get_recipes_from_username(username: str, per_page: int = 20, page: int = 1,
+                                    database: Session = Depends(get_database),
+                                    current_user: UserSchema = Depends(UserService.get_current_active_user)) \
+        -> List[RecipeResponseExtendedSchema]:
+    try:
+        return RecipeService.get_all_recipe_for_specific_user(database, current_user, username, per_page, page)
+    except UsernameNotFound as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/{username}', response_model=UserDetailedSchema, tags=['users'])
+async def get_user_by_username(username: str, database: Session = Depends(get_database),
+                               current_user: UserSchema = Depends(
+                                   UserService.get_current_active_user)) -> UserDetailedSchema:
+    try:
+        return UserService.get_user_by_username(database, username, current_user)
+    except UsernameNotFoundException as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

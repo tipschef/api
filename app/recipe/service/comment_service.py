@@ -8,7 +8,7 @@ from app.recipe.repository.comment_repository import CommentRepository
 from app.recipe.repository.media.media_repository import MediaRepository
 from app.recipe.schema.comment.comment_input_schema import CommentInputSchema
 from app.recipe.schema.comment.comment_output_base_schema import CommentOutputBaseSchema
-from app.user.schema.user_schema import UserSchema
+from app.user.schema.user.user_schema import UserSchema
 
 
 @dataclass

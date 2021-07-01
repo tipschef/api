@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.recipe.repository.like_repository import LikeRepository
 from app.recipe.schema.like.like_schema import LikeSchema
-from app.user.schema.user_schema import UserSchema
+from app.user.schema.user.user_schema import UserSchema
 
 
 @dataclass

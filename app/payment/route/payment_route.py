@@ -10,7 +10,7 @@ from app.payment.schema.card_schema import CardSchema
 from app.payment.schema.payment_intent_schema import PaymentIntentSchema
 from app.payment.schema.payment_schema import PaymentSchema
 from app.payment.service.payment_service import get_payment_service
-from app.user.schema.user_auth_schema import UserAuthSchema
+from app.user.schema.user.user_auth_schema import UserAuthSchema
 from app.user.service.user_service import UserService
 
 router = APIRouter(prefix='/payment')

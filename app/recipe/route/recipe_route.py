@@ -18,7 +18,7 @@ from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.recipe.service.comment_service import CommentService
 from app.recipe.service.like_service import LikeService
 from app.recipe.service.recipe_service import RecipeService
-from app.user.schema.user_schema import UserSchema
+from app.user.schema.user.user_schema import UserSchema
 from app.user.service.user_service import UserService
 
 router = APIRouter(prefix='/recipe')

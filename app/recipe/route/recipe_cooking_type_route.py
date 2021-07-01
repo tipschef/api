@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.database.service.database_instance import get_database
 from app.recipe.schema.recipe.recipe_cooking_type_schema import RecipeCookingTypeResponseSchema
 from app.recipe.service.recipe_cooking_type_service import RecipeCookingTypeService
-from app.user.schema.user_schema import UserSchema
+from app.user.schema.user.user_schema import UserSchema
 from app.user.service.user_service import UserService
 
 router = APIRouter(prefix='/recipe_cooking_type')

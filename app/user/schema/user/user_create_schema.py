@@ -1,6 +1,6 @@
 from pydantic import SecretStr, validator
 
-from app.user.schema.user_base_schema import UserBaseSchema
+from app.user.schema.user.user_base_schema import UserBaseSchema
 
 
 class UserCreateSchema(UserBaseSchema):

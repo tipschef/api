@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from app.recipe.model.comment_model import CommentModel
 from app.recipe.model.media.media_model import MediaModel
 from app.user.model.user_model import UserModel
-from app.user.schema.user_shortened_schema import UserShortenedSchema
+from app.user.schema.user.user_shortened_schema import UserShortenedSchema
 
 
 class CommentOutputBaseSchema(BaseModel):

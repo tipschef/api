@@ -11,7 +11,7 @@ from app.book.schema.preview_schema import PreviewSchema
 from app.book.schema.template_list_schema import TemplateListSchema
 from app.book.service.book_service import BookService
 from app.database.service.database_instance import get_database
-from app.user.schema.user_schema import UserSchema
+from app.user.schema.user.user_schema import UserSchema
 from app.user.service.user_service import UserService
 
 router = APIRouter(prefix='/book')

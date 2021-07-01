@@ -17,3 +17,4 @@ stripe==2.58.0
 fpdf2==2.4.1
 google-cloud-pubsub==2.6.0
 fastapi-utils==0.2.1
+python-dateutil==2.8.1
