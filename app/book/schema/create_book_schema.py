@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Optional
 
 from pydantic.main import BaseModel
 
@@ -13,4 +13,5 @@ class CreateBookSchema(BaseModel):
     cover_path: str
     description_path: str
     cover_picture_path: str
+    price_euro: Optional[float]
     recipe_template: List[RecipeTemplateSchema]

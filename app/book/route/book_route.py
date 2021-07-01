@@ -69,6 +69,33 @@ async def post_cover(cover: UploadFile = File(...),
         raise HTTPException(status_code=500, detail='Server exception')
 
 
+@router.get('/recipe/{recipe_id}', response_model=List[BookSchema], tags=['books'])
+async def get_book_by_recipe(recipe_id: int, database: Session = Depends(get_database)) -> List[BookSchema]:
+    try:
+        return BookService.get_book_by_recipe(database, recipe_id)
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/user/{username}', response_model=List[BookSchema], tags=['books'])
+async def get_book_by_creator(username: str, database: Session = Depends(get_database)) -> List[BookSchema]:
+    try:
+        return BookService.get_book_by_creator(database, username)
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/{book_id}', response_model=BookSchema, tags=['books'])
+async def get_book_by_creator(book_id: int, database: Session = Depends(get_database)) -> BookSchema:
+    try:
+        return BookService.get_book_by_id(database, book_id)
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
 @router.post('/pdf/{book_id}/{u_id}', response_model=dict, tags=['books'])
 async def add_pdf_to_book(book_id: int, u_id: str, file: UploadFile = File(...),
                           database: Session = Depends(get_database)) \
