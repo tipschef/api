@@ -8,6 +8,7 @@ from app.user.model.user_model import UserModel
 from app.user.model.follow_model import FollowModel
 from app.user.model.subscription_model import SubscriptionModel
 from app.user.model.tier_model import TierModel
+from app.user.model.dashboard_model import DashboardModel
 
 from app.recipe.model.comment_model import CommentModel
 from app.recipe.model.ingredient.ingredient_model import IngredientModel

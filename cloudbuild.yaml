@@ -10,14 +10,6 @@ steps:
     args:
       - -c
       - pip install -r requirements-test.txt --user
-  - id: Run test
-    name: docker.io/library/python:3.8.6
-    waitFor:
-      - 'Install Test dependencies'
-    entrypoint: bash
-    args:
-      - -c
-      - python3 -m pytest tests/
   - id: Run pylint
     name: docker.io/library/python:3.8.6
     waitFor:

@@ -65,7 +65,7 @@ class UserService:
         follow = FollowRepository.get_follow(database, followed_id=user.id, follower_id=current_user.id)
         following = follow is not None
 
-        count_follower = FollowRepository.get_count_followers_by_followed_username(database, user.id)
+        count_follower = FollowRepository.get_count_followers_by_followed_id(database, user.id)
         count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
 
         return UserDetailedSchema.from_user_model_with_follow(user, count_likes, count_follower, user.description,
@@ -90,7 +90,7 @@ class UserService:
         follow = FollowRepository.get_follow(database, followed_id=user.id, follower_id=current_user.id)
         following = follow is not None
 
-        count_follower = FollowRepository.get_count_followers_by_followed_username(database, user.id)
+        count_follower = FollowRepository.get_count_followers_by_followed_id(database, user.id)
         count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
         return UserDetailedSchema.from_user_model_with_name(user, count_likes, count_follower, user.description,
                                                             profile_media, background_media, following, user.firstname,
@@ -114,7 +114,7 @@ class UserService:
             follow = FollowRepository.get_follow(database, followed_id=user.id, follower_id=current_user.id)
             following = follow is not None
 
-            count_follower = FollowRepository.get_count_followers_by_followed_username(database, user.id)
+            count_follower = FollowRepository.get_count_followers_by_followed_id(database, user.id)
             count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
             count_subscriber = SubscriptionRepository.get_count_subscriber_by_subscribed_id(database, user.id)
             count_recipe = RecipeRepository.get_count_recipe_by_creator_id(database, user.id)
@@ -142,7 +142,7 @@ class UserService:
         else:
             background_media = None
 
-        count_follower = FollowRepository.get_count_followers_by_followed_username(database, user.id)
+        count_follower = FollowRepository.get_count_followers_by_followed_id(database, user.id)
         count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
         return UserDetailedSchema.from_user_model(user, count_likes, count_follower, user.description, profile_media,
                                                   background_media)
