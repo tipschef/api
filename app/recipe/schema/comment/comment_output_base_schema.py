@@ -19,6 +19,6 @@ class CommentOutputBaseSchema(BaseModel):
     def from_comment_tuple(comment: CommentModel, user: UserModel, media: MediaModel):
         return CommentOutputBaseSchema(content=comment.content,
                                        id=comment.id,
-                                       user=UserShortenedSchema(username=user.username, profile_picture=media.path),
+                                       user=UserShortenedSchema(username=user.username, profile_picture=media.path if media is not None else ''),
                                        recipe_id=comment.recipe_id,
                                        created_date=comment.created_date)

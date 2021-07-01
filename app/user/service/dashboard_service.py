@@ -23,7 +23,6 @@ class DashboardService:
 
     @staticmethod
     def create_dashboard_data():
-        print('je passe')
         for database in get_database():
             for user in UserRepository.get_partners(database):
                 like = LikeRepository.get_count_like_by_user_id(database, user.id)

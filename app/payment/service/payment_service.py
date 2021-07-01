@@ -135,7 +135,7 @@ class PaymentService:
         customer = PaymentService.get_or_create_customer(database, user)
         payment = PaymentRepository.get_payment_by_user_id(database, user.id)
 
-        if not hasattr(customer, 'invoice_settings'):
+        if customer.invoice_settings.default_payment_method is None:
             raise NoPaymentMethodException()
 
         stripe.PaymentIntent.create(
