@@ -21,22 +21,21 @@ class CommentRepository:
         return db_comment
 
     @staticmethod
-    def get_all_comment_from_recipe(database: Session, recipe_id: int) -> List[Tuple[CommentModel, UserModel, MediaModel]]:
-        return database.query(CommentModel, UserModel, MediaModel) \
+    def get_all_comment_from_recipe(database: Session, recipe_id: int) -> List[Tuple[CommentModel, UserModel]]:
+        return database.query(CommentModel, UserModel) \
             .join(UserModel, UserModel.id == CommentModel.user_id) \
-            .join(MediaModel, MediaModel.id == UserModel.profile_media_id) \
             .filter(CommentModel.recipe_id == recipe_id) \
             .filter(CommentModel.is_deleted == 0) \
-            .order_by(CommentModel.created_date.desc())\
+            .order_by(CommentModel.created_date.desc()) \
             .all()
 
     @staticmethod
     def delete_comment_by_id(database: Session, user_id: int, comment_id: int, recipe_id: int) -> None:
         database.query(CommentModel).filter(CommentModel.is_deleted.is_(False)) \
-                .filter(CommentModel.user_id == user_id)\
-                .filter(CommentModel.id == comment_id)\
-                .filter(CommentModel.recipe_id == recipe_id)\
-                .update({CommentModel.is_deleted: True})
+            .filter(CommentModel.user_id == user_id) \
+            .filter(CommentModel.id == comment_id) \
+            .filter(CommentModel.recipe_id == recipe_id) \
+            .update({CommentModel.is_deleted: True})
         database.commit()
 
     @staticmethod
