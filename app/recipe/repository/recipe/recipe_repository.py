@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
+from app.book.model.book_recipe_model import BookRecipeModel
 from app.recipe.model.recipe.recipe_model import RecipeModel
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
 from app.recipe.schema.recipe.recipe_schema import RecipeSchema
@@ -47,6 +48,13 @@ class RecipeRepository:
     @staticmethod
     def get_recipe_by_id(database: Session, recipe_id: int) -> Optional[RecipeModel]:
         return database.query(RecipeModel).filter(RecipeModel.id == recipe_id, RecipeModel.is_deleted.is_(False)).first()
+
+    @staticmethod
+    def get_recipe_by_book_id(database: Session, book_id: int) -> List[Tuple[RecipeModel, BookRecipeModel]]:
+        return database.query(RecipeModel, BookRecipeModel)\
+            .filter(RecipeModel.id == BookRecipeModel.recipe_id, RecipeModel.is_deleted.is_(False))\
+            .filter(BookRecipeModel.book_id == book_id)\
+            .all()
 
     @staticmethod
     def delete_recipe_by_id(database: Session, recipe_id: int) -> None:

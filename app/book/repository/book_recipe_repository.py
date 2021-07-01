@@ -19,3 +19,4 @@ class BookRecipeRepository:
     @staticmethod
     def get_number_recipe_by_book(database: Session, book_id: int) -> int:
         return database.query(BookRecipeModel).filter(BookRecipeModel.book_id == book_id).count()
+

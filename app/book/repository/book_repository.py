@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Tuple
 
 from sqlalchemy.orm import Session
 
 from app.book.model.book_model import BookModel
+from app.book.model.book_recipe_model import BookRecipeModel
 from app.book.schema.create_book_schema import CreateBookSchema
 
 
@@ -14,7 +15,7 @@ class BookRepository:
     def create_book(database: Session, book: CreateBookSchema, creator_id: int, u_id: str) -> BookModel:
         db_book = BookModel(title=book.name,
                             path='',
-                            price_euro=0,
+                            price_euro=book.price_euro,
                             description=book.description,
                             is_creating=True,
                             is_deleted=False,
@@ -28,6 +29,13 @@ class BookRepository:
     @staticmethod
     def get_book_by_id(database: Session, book_id: int) -> BookModel:
         return database.query(BookModel).filter(BookModel.id == book_id, BookModel.is_deleted.is_(False)).first()
+
+    @staticmethod
+    def get_book_by_recipe_id(database: Session, recipe_id: int) -> List[Tuple[BookModel, BookRecipeModel]]:
+        return database.query(BookModel, BookRecipeModel)\
+            .filter(BookModel.id == BookRecipeModel.book_id, BookModel.is_deleted.is_(False))\
+            .filter(BookRecipeModel.recipe_id == recipe_id)\
+            .all()
 
     @staticmethod
     def get_book_by_id_deleted_or_not(database: Session, book_id: int) -> BookModel:

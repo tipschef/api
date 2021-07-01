@@ -18,6 +18,11 @@ from app.book.schema.template_schema import TemplateSchema
 from app.common.model.pdf import PDF
 from app.common.service.broker_manager_service import get_broker_manager_service
 from app.common.service.bucket_manager_service import get_bucket_manager_service
+from app.recipe.repository.media.media_repository import MediaRepository
+from app.recipe.repository.recipe.recipe_repository import RecipeRepository
+from app.recipe.schema.media.media_schema import MediaSchema
+from app.recipe.schema.recipe.recipe_simple_schema import RecipeSimpleSchema
+from app.user.repository.user_repository import UserRepository
 from app.user.schema.user_schema import UserSchema
 
 
@@ -112,3 +117,40 @@ class BookService:
             raise CannotModifyOthersPeopleBookException()
 
         BookRepository.delete_book_by_id(database, book_id)
+
+    @staticmethod
+    def get_book_by_recipe(database: Session, recipe_id: int) -> List[BookSchema]:
+        books = [i[0] for i in BookRepository.get_book_by_recipe_id(database, recipe_id)]
+        book_schema = []
+
+        for book in books:
+            recipes = [i[0] for i in RecipeRepository.get_recipe_by_book_id(database, book.id)]
+            recipe_schemas = [RecipeSimpleSchema.from_recipe_model(i) for i in recipes]
+
+            book_schema.append(BookSchema.from_book_model_and_recipes(book, recipe_schemas))
+
+        return book_schema
+
+    @staticmethod
+    def get_book_by_creator(database: Session, username: str) -> List[BookSchema]:
+        user = UserRepository.get_user_by_username(username)
+        books = BookRepository.get_book_by_creator_id(database, user.id)
+        book_schema = []
+
+        for book in books:
+            recipes = [i[0] for i in RecipeRepository.get_recipe_by_book_id(database, book.id)]
+            recipe_schemas = [RecipeSimpleSchema.from_recipe_model(i) for i in recipes]
+
+            book_schema.append(BookSchema.from_book_model_and_recipes(book, recipe_schemas))
+
+        return book_schema
+
+    @staticmethod
+    def get_book_by_id(database: Session, book_id: int) -> BookSchema:
+        book = BookRepository.get_book_by_id(database, book_id)
+
+        recipes = [i[0] for i in RecipeRepository.get_recipe_by_book_id(database, book.id)]
+
+        recipe_schemas = [RecipeSimpleSchema.from_recipe_model_with_thumbnail(i, MediaSchema.from_media_model(MediaRepository.get_media_by_id(database, i.thumbnail_id))) for i in recipes]
+
+        return BookSchema.from_book_model_and_recipes(book, recipe_schemas)
