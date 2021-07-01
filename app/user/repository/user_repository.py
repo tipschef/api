@@ -22,6 +22,10 @@ class UserRepository:
         return database.query(UserModel).filter(UserModel.email == email).first()
 
     @staticmethod
+    def get_partners(database: Session) -> List[UserModel]:
+        return database.query(UserModel).filter(UserModel.is_partner.is_(True)).all()
+
+    @staticmethod
     def get_user_by_username(username: str) -> Optional[UserModel]:
         for database in get_database():
             return database.query(UserModel).filter(UserModel.username == username).first()

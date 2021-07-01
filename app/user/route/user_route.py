@@ -11,11 +11,13 @@ from app.user.exception.subscription_service_exceptions import UserNotPartnerExc
 from app.user.exception.user_route_exceptions import UserAlreadyExistsException, UsernameAlreadyExistsException, \
     UsernameNotFoundException, WrongUploadFileType, UserIdNotFoundException, UsernameNotFound, \
     EmailAlreadyExistsException
+from app.user.schema.dashboard_schema import DashboardSchema
 from app.user.schema.user_auth_schema import UserAuthSchema
 from app.user.schema.user_create_schema import UserCreateSchema
 from app.user.schema.user_detailed_schema import UserDetailedSchema
 from app.user.schema.user_schema import UserSchema
 from app.user.schema.user_update_schema import UserUpdateSchema
+from app.user.service.dashboard_service import DashboardService
 from app.user.service.follow_service import FollowService
 from app.user.service.subscription_service import SubscriptionService
 from app.user.service.user_service import UserService
@@ -216,6 +218,14 @@ async def update_profile(user_data: UserUpdateSchema, database: Session = Depend
         raise HTTPException(status_code=400, detail=str(exception))
     except WrongUploadFileType as exception:
         raise HTTPException(status_code=415, detail=str(exception))
+
+
+@router.get('/dashboard/data', response_model=List[DashboardSchema], tags=['users', 'dashboard'])
+async def get_dashboard_data(database: Session = Depends(get_database),
+                             current_user: UserAuthSchema = Depends(
+                                 UserService.get_current_active_user)) -> List[DashboardSchema]:
+    try:
+        return DashboardService.get_dashboard_data(database, current_user)
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

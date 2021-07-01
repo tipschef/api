@@ -10,7 +10,7 @@ from app.user.model.follow_model import FollowModel
 class FollowRepository:
 
     @staticmethod
-    def get_count_followers_by_followed_username(database: Session, followed_id: int) -> int:
+    def get_count_followers_by_followed_id(database: Session, followed_id: int) -> int:
         return database.query(FollowModel).filter(FollowModel.followed_id == followed_id).count()
 
     @staticmethod
