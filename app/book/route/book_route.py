@@ -88,7 +88,7 @@ async def get_book_by_creator(username: str, database: Session = Depends(get_dat
 
 
 @router.get('/{book_id}', response_model=BookSchema, tags=['books'])
-async def get_book_by_creator(book_id: int, database: Session = Depends(get_database)) -> BookSchema:
+async def get_book_by_id(book_id: int, database: Session = Depends(get_database)) -> BookSchema:
     try:
         return BookService.get_book_by_id(database, book_id)
     except Exception as exception:
