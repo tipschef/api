@@ -14,8 +14,13 @@ class FollowRepository:
         return database.query(FollowModel).filter(FollowModel.followed_id == followed_id).count()
 
     @staticmethod
+    def get_followers_by_followed_id(database: Session, followed_id: int) -> List[FollowModel]:
+        return database.query(FollowModel).filter(FollowModel.followed_id == followed_id).all()
+
+    @staticmethod
     def get_follow(database: Session, followed_id: int, follower_id: int) -> Optional[FollowModel]:
-        return database.query(FollowModel).filter(FollowModel.followed_id == followed_id, FollowModel.follower_id == follower_id).first()
+        return database.query(FollowModel).filter(FollowModel.followed_id == followed_id,
+                                                  FollowModel.follower_id == follower_id).first()
 
     @staticmethod
     def follow(database: Session, followed_id: int, follower_id: int) -> FollowModel:
@@ -27,7 +32,8 @@ class FollowRepository:
 
     @staticmethod
     def unfollow(database: Session, followed_id: int, follower_id: int) -> None:
-        database.query(FollowModel).filter(FollowModel.followed_id == followed_id, FollowModel.follower_id == follower_id).delete()
+        database.query(FollowModel).filter(FollowModel.followed_id == followed_id,
+                                           FollowModel.follower_id == follower_id).delete()
         database.commit()
 
     @staticmethod

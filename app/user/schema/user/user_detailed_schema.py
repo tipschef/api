@@ -19,7 +19,7 @@ class UserDetailedSchema(UserBaseSchema):
     firstname: Optional[str]
     lastname: Optional[str]
     is_partner: bool
-    subscribed: bool
+    subscribed: Optional[bool]
 
     @staticmethod
     def from_user_model(user: UserModel, likes: int, followers: int, description: str, profile: MediaModel,

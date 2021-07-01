@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy.orm import Session
 
@@ -26,6 +26,13 @@ class SubscriptionRepository:
     @staticmethod
     def get_count_subscriber_by_subscribed_id(database: Session, subscribed_id: int) -> int:
         return database.query(SubscriptionModel).filter(SubscriptionModel.subscribed_id == subscribed_id).count()
+
+    @staticmethod
+    def get_ongoing_subscriber_by_subscribed_id(database: Session, subscribed_id: int) -> List[SubscriptionModel]:
+        return database.query(SubscriptionModel).filter(SubscriptionModel.subscribed_id == subscribed_id) \
+            .filter(datetime.utcnow() <= SubscriptionModel.date_end) \
+            .filter(datetime.utcnow() >= SubscriptionModel.created_date) \
+            .all()
 
     @staticmethod
     def create_subscription(database: Session, subscribed_id: int, subscriber_id: int, tier: int, date_end: datetime,
