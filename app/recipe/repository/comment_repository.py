@@ -4,7 +4,6 @@ from typing import List, Tuple
 from sqlalchemy.orm import Session
 
 from app.recipe.model.comment_model import CommentModel
-from app.recipe.model.media.media_model import MediaModel
 from app.recipe.schema.comment.comment_input_schema import CommentInputSchema
 from app.user.model.user_model import UserModel
 
