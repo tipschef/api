@@ -16,5 +16,3 @@ class TierRepository:
     @staticmethod
     def get_tiers(database: Session) -> List[TierModel]:
         return database.query(TierModel).all()
-
-

@@ -85,7 +85,7 @@ async def search_user(username: str, database: Session = Depends(get_database),
 
 
 @router.get('/subscribe/tier', response_model=List[TierSchema], tags=['subscribe'])
-async def search_user(database: Session = Depends(get_database)) -> List[TierSchema]:
+async def get_tiers(database: Session = Depends(get_database)) -> List[TierSchema]:
     try:
         return UserService.get_tiers(database)
     except Exception as exception:

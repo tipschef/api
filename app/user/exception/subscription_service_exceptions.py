@@ -27,6 +27,7 @@ class UserNotSubscribedException(Exception):
     def __str__(self):
         return f"'You are not subscribed to user {self.username}'"
 
+
 class TierDoesNotExist(Exception):
     tier: str
 
