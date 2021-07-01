@@ -29,7 +29,7 @@ from app.recipe.schema.step.step_schema import StepSchema
 from app.user.exception.user_route_exceptions import UsernameNotFound
 from app.user.repository.subscription_repository import SubscriptionRepository
 from app.user.repository.user_repository import UserRepository
-from app.user.schema.user_schema import UserSchema
+from app.user.schema.user.user_schema import UserSchema
 
 
 @dataclass

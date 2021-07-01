@@ -1,4 +1,4 @@
-from app.user.schema.user_create_schema import UserCreateSchema
+from app.user.schema.user.user_create_schema import UserCreateSchema
 
 
 class UserUpdateSchema(UserCreateSchema):

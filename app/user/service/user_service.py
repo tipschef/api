@@ -19,11 +19,11 @@ from app.user.model.user_model import UserModel
 from app.user.repository.follow_repository import FollowRepository
 from app.user.repository.subscription_repository import SubscriptionRepository
 from app.user.repository.user_repository import UserRepository
-from app.user.schema.user_auth_schema import UserAuthSchema
-from app.user.schema.user_create_schema import UserCreateSchema
-from app.user.schema.user_detailed_schema import UserDetailedSchema
-from app.user.schema.user_schema import UserSchema
-from app.user.schema.user_update_schema import UserUpdateSchema
+from app.user.schema.user.user_auth_schema import UserAuthSchema
+from app.user.schema.user.user_create_schema import UserCreateSchema
+from app.user.schema.user.user_detailed_schema import UserDetailedSchema
+from app.user.schema.user.user_schema import UserSchema
+from app.user.schema.user.user_update_schema import UserUpdateSchema
 
 
 @dataclass

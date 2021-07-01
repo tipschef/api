@@ -5,7 +5,7 @@ from app.authentication.exception.authentication_service_exceptions import Wrong
 from app.authentication.schema.authenticated_schema import Token
 from app.authentication.schema.authentication_schema import AuthenticationSchema
 from app.authentication.service.authentication_service import AuthenticationService
-from app.user.schema.user_auth_schema import UserAuthSchema
+from app.user.schema.user.user_auth_schema import UserAuthSchema
 from app.user.service.user_service import UserService
 
 router = APIRouter(prefix='/auth')

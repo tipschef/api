@@ -7,9 +7,9 @@ from sqlalchemy.orm import Session
 
 from app.database.service.database_instance import get_database
 from app.user.model.user_model import UserModel
-from app.user.schema.user_create_schema import UserCreateSchema
-from app.user.schema.user_schema import UserSchema
-from app.user.schema.user_update_schema import UserUpdateSchema
+from app.user.schema.user.user_create_schema import UserCreateSchema
+from app.user.schema.user.user_schema import UserSchema
+from app.user.schema.user.user_update_schema import UserUpdateSchema
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

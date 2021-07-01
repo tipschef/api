@@ -10,7 +10,7 @@ from app.user.repository.follow_repository import FollowRepository
 from app.user.repository.subscription_repository import SubscriptionRepository
 from app.user.repository.user_repository import UserRepository
 from app.user.schema.dashboard_schema import DashboardSchema
-from app.user.schema.user_schema import UserSchema
+from app.user.schema.user.user_schema import UserSchema
 
 
 @dataclass
@@ -23,7 +23,6 @@ class DashboardService:
 
     @staticmethod
     def create_dashboard_data():
-        print('je passe')
         for database in get_database():
             for user in UserRepository.get_partners(database):
                 like = LikeRepository.get_count_like_by_user_id(database, user.id)

@@ -1,7 +1,7 @@
 from pydantic import EmailStr
 
 from app.user.model.user_model import UserModel
-from app.user.schema.user_schema import UserSchema
+from app.user.schema.user.user_schema import UserSchema
 
 
 class UserAuthSchema(UserSchema):

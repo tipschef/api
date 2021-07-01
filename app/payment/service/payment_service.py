@@ -14,7 +14,7 @@ from app.payment.schema.customer_schema import CustomerSchema
 from app.payment.schema.payment_intent_schema import PaymentIntentSchema
 from app.payment.schema.payment_schema import PaymentSchema
 from app.user.repository.user_repository import UserRepository
-from app.user.schema.user_schema import UserSchema
+from app.user.schema.user.user_schema import UserSchema
 
 
 @dataclass
@@ -134,18 +134,19 @@ class PaymentService:
     def create_payment_intent(database: Session, user: UserSchema, payment_intent: PaymentIntentSchema) -> None:
         customer = PaymentService.get_or_create_customer(database, user)
         payment = PaymentRepository.get_payment_by_user_id(database, user.id)
-
-        if not hasattr(customer, 'invoice_settings'):
+        if customer.invoice_settings.default_payment_method is None:
             raise NoPaymentMethodException()
-
-        stripe.PaymentIntent.create(
-            amount=payment_intent.amount,
-            currency='eur',
-            customer=payment.customer_id,
-            payment_method_types=['card'],
-            payment_method=customer.invoice_settings.default_payment_method,
-            confirm=True
-        )
+        try:
+            stripe.PaymentIntent.create(
+                amount=payment_intent.amount,
+                currency='eur',
+                customer=payment.customer_id,
+                payment_method_types=['card'],
+                payment_method=customer.invoice_settings.default_payment_method,
+                confirm=True
+            )
+        except Exception:
+            raise Exception()
 
     @staticmethod
     def get_or_create_customer(database: Session, user: UserSchema):

@@ -4,7 +4,7 @@ from pydantic import EmailStr
 
 from app.recipe.model.media.media_model import MediaModel
 from app.user.model.user_model import UserModel
-from app.user.schema.user_base_schema import UserBaseSchema
+from app.user.schema.user.user_base_schema import UserBaseSchema
 
 
 class UserDetailedSchema(UserBaseSchema):

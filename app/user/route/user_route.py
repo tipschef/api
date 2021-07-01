@@ -4,19 +4,22 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.database.service.database_instance import get_database
+from app.payment.exception.payment_service_exceptions import NoPaymentMethodException
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_response_extended_schema import RecipeResponseExtendedSchema
 from app.recipe.service.recipe_service import RecipeService
-from app.user.exception.subscription_service_exceptions import UserNotPartnerException
+from app.user.exception.subscription_service_exceptions import UserNotPartnerException, AlreadySubscribedToUser, \
+    TierDoesNotExist
 from app.user.exception.user_route_exceptions import UserAlreadyExistsException, UsernameAlreadyExistsException, \
     UsernameNotFoundException, WrongUploadFileType, UserIdNotFoundException, UsernameNotFound, \
     EmailAlreadyExistsException
+from app.user.schema.create_subscription_schema import CreateSubscriptionSchema
 from app.user.schema.dashboard_schema import DashboardSchema
-from app.user.schema.user_auth_schema import UserAuthSchema
-from app.user.schema.user_create_schema import UserCreateSchema
-from app.user.schema.user_detailed_schema import UserDetailedSchema
-from app.user.schema.user_schema import UserSchema
-from app.user.schema.user_update_schema import UserUpdateSchema
+from app.user.schema.user.user_auth_schema import UserAuthSchema
+from app.user.schema.user.user_create_schema import UserCreateSchema
+from app.user.schema.user.user_detailed_schema import UserDetailedSchema
+from app.user.schema.user.user_schema import UserSchema
+from app.user.schema.user.user_update_schema import UserUpdateSchema
 from app.user.service.dashboard_service import DashboardService
 from app.user.service.follow_service import FollowService
 from app.user.service.subscription_service import SubscriptionService
@@ -131,27 +134,22 @@ async def get_recipes_from_username(username: str, per_page: int = 20, page: int
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.get('/{username}/subscribe', response_model=dict, tags=['users', 'subscribe'])
-async def subscribe_by_username(username: str, tier: int, database: Session = Depends(get_database),
+@router.post('/subscribe', response_model=dict, tags=['users', 'subscribe'])
+async def subscribe_by_username(create_subscription: CreateSubscriptionSchema, database: Session = Depends(get_database),
                                 current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
-        if SubscriptionService.subscribe_to_someone_by_username(database, current_user, username, tier):
-            return {'Status': 'Done'}
-        return {'Status': 'Already subscribed'}
+        SubscriptionService.subscribe_to_someone_by_username(database, current_user, create_subscription)
+        return {'Status': 'Done'}
     except UserNotPartnerException as exception:
         raise HTTPException(status_code=403, detail=str(exception))
-    except Exception as exception:
-        print(exception)
-        raise HTTPException(status_code=500, detail='Server exception')
-
-
-@router.get('/{username}/unsubscribe', response_model=dict, tags=['users', 'subscribe'])
-async def unsubscribe_by_username(username: str, database: Session = Depends(get_database),
-                                  current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
-    try:
-        if SubscriptionService.unsubscribe_to_someone_by_username(database, current_user, username):
-            return {'Status': 'Done'}
-        return {'Status': 'You were not subscribed'}
+    except UsernameNotFoundException as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
+    except AlreadySubscribedToUser as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
+    except NoPaymentMethodException as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
+    except TierDoesNotExist as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

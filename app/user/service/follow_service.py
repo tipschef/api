@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.user.repository.follow_repository import FollowRepository
 from app.user.repository.user_repository import UserRepository
-from app.user.schema.user_schema import UserSchema
+from app.user.schema.user.user_schema import UserSchema
 
 
 @dataclass

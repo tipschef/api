@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -15,14 +16,22 @@ class SubscriptionRepository:
                                                         SubscriptionModel.subscriber_id == subscriber_id).first()
 
     @staticmethod
+    def get_ongoing_subscription(database: Session, subscribed_id: int, subscriber_id: int) -> Optional[SubscriptionModel]:
+        return database.query(SubscriptionModel).filter(SubscriptionModel.subscribed_id == subscribed_id,
+                                                        SubscriptionModel.subscriber_id == subscriber_id) \
+            .filter(datetime.utcnow() <= SubscriptionModel.date_end) \
+            .filter(datetime.utcnow() >= SubscriptionModel.created_date) \
+            .first()
+
+    @staticmethod
     def get_count_subscriber_by_subscribed_id(database: Session, subscribed_id: int) -> int:
         return database.query(SubscriptionModel).filter(SubscriptionModel.subscribed_id == subscribed_id).count()
 
     @staticmethod
-    def subscribe(database: Session, subscribed_id: int, subscriber_id: int, tier: int,
-                  gifted_id: Optional[int] = None) -> SubscriptionModel:
+    def create_subscription(database: Session, subscribed_id: int, subscriber_id: int, tier: int, date_end: datetime,
+                            gifted_id: Optional[int] = None) -> SubscriptionModel:
         db_subscribe = SubscriptionModel(subscribed_id=subscribed_id, subscriber_id=subscriber_id, gifted_id=gifted_id,
-                                         tier=tier)
+                                         tier=tier, date_end=date_end)
         database.add(db_subscribe)
         database.commit()
         database.refresh(db_subscribe)
