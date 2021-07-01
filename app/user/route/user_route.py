@@ -15,6 +15,7 @@ from app.user.exception.user_route_exceptions import UserAlreadyExistsException,
     EmailAlreadyExistsException
 from app.user.schema.create_subscription_schema import CreateSubscriptionSchema
 from app.user.schema.dashboard_schema import DashboardSchema
+from app.user.schema.tier_schema import TierSchema
 from app.user.schema.user.user_auth_schema import UserAuthSchema
 from app.user.schema.user.user_create_schema import UserCreateSchema
 from app.user.schema.user.user_detailed_schema import UserDetailedSchema
@@ -82,6 +83,37 @@ async def search_user(username: str, database: Session = Depends(get_database),
         raise HTTPException(status_code=500, detail='Server exception')
 
 
+@router.get('/subscribe/tier', response_model=List[TierSchema], tags=['subscribe'])
+async def search_user(database: Session = Depends(get_database)) -> List[TierSchema]:
+    try:
+        return UserService.get_tiers(database)
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.post('/subscribe', response_model=dict, tags=['users', 'subscribe'])
+async def subscribe_by_username(create_subscription: CreateSubscriptionSchema,
+                                database: Session = Depends(get_database),
+                                current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+    try:
+        SubscriptionService.subscribe_to_someone_by_username(database, current_user, create_subscription)
+        return {'Status': 'Done'}
+    except UserNotPartnerException as exception:
+        raise HTTPException(status_code=403, detail=str(exception))
+    except UsernameNotFoundException as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
+    except AlreadySubscribedToUser as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
+    except NoPaymentMethodException as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
+    except TierDoesNotExist as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
 @router.get('/{username}', response_model=UserDetailedSchema, tags=['users'])
 async def get_user_by_username(username: str, database: Session = Depends(get_database),
                                current_user: UserSchema = Depends(
@@ -129,27 +161,6 @@ async def get_recipes_from_username(username: str, per_page: int = 20, page: int
         return RecipeService.get_all_recipe_for_specific_user(database, current_user, username, per_page, page)
     except UsernameNotFound as exception:
         raise HTTPException(status_code=404, detail=str(exception))
-    except Exception as exception:
-        print(exception)
-        raise HTTPException(status_code=500, detail='Server exception')
-
-
-@router.post('/subscribe', response_model=dict, tags=['users', 'subscribe'])
-async def subscribe_by_username(create_subscription: CreateSubscriptionSchema, database: Session = Depends(get_database),
-                                current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
-    try:
-        SubscriptionService.subscribe_to_someone_by_username(database, current_user, create_subscription)
-        return {'Status': 'Done'}
-    except UserNotPartnerException as exception:
-        raise HTTPException(status_code=403, detail=str(exception))
-    except UsernameNotFoundException as exception:
-        raise HTTPException(status_code=404, detail=str(exception))
-    except AlreadySubscribedToUser as exception:
-        raise HTTPException(status_code=400, detail=str(exception))
-    except NoPaymentMethodException as exception:
-        raise HTTPException(status_code=400, detail=str(exception))
-    except TierDoesNotExist as exception:
-        raise HTTPException(status_code=400, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

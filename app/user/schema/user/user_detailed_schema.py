@@ -19,6 +19,7 @@ class UserDetailedSchema(UserBaseSchema):
     firstname: Optional[str]
     lastname: Optional[str]
     is_partner: bool
+    subscribed: bool
 
     @staticmethod
     def from_user_model(user: UserModel, likes: int, followers: int, description: str, profile: MediaModel,
@@ -33,11 +34,12 @@ class UserDetailedSchema(UserBaseSchema):
 
     @staticmethod
     def from_user_model_with_follow(user: UserModel, likes: int, followers: int, description: str, profile: MediaModel,
-                                    background: MediaModel, following: bool):
+                                    background: MediaModel, following: bool, subscribed: bool):
         return UserDetailedSchema(email=EmailStr(user.email),
                                   username=user.username,
                                   likes=likes,
                                   following=following,
+                                  subscribed=subscribed,
                                   followers=followers, description=description,
                                   profile_url=profile.path if profile is not None else "",
                                   background_url=background.path if background is not None else "",

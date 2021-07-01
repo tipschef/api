@@ -18,7 +18,9 @@ from app.user.exception.user_route_exceptions import UserAlreadyExistsException,
 from app.user.model.user_model import UserModel
 from app.user.repository.follow_repository import FollowRepository
 from app.user.repository.subscription_repository import SubscriptionRepository
+from app.user.repository.tier_repository import TierRepository
 from app.user.repository.user_repository import UserRepository
+from app.user.schema.tier_schema import TierSchema
 from app.user.schema.user.user_auth_schema import UserAuthSchema
 from app.user.schema.user.user_create_schema import UserCreateSchema
 from app.user.schema.user.user_detailed_schema import UserDetailedSchema
@@ -65,11 +67,14 @@ class UserService:
         follow = FollowRepository.get_follow(database, followed_id=user.id, follower_id=current_user.id)
         following = follow is not None
 
+        subscription = SubscriptionRepository.get_ongoing_subscription(database, subscribed_id=user.id, subscriber_id=current_user.id)
+        subscribed = subscription is not None
+
         count_follower = FollowRepository.get_count_followers_by_followed_id(database, user.id)
         count_likes = LikeRepository.get_count_like_by_user_id(database, user.id)
 
         return UserDetailedSchema.from_user_model_with_follow(user, count_likes, count_follower, user.description,
-                                                              profile_media, background_media, following)
+                                                              profile_media, background_media, following, subscribed)
 
     @staticmethod
     def get_my_informations(database: Session, current_user: UserSchema):
@@ -209,3 +214,7 @@ class UserService:
         else:
             UserRepository.update_user_information_without_password(user_data, database, user_to_update)
         return True
+
+    @staticmethod
+    def get_tiers(database: Session) -> List[TierSchema]:
+        return [TierSchema.from_model(i) for i in TierRepository.get_tiers(database)]
