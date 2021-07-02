@@ -47,10 +47,10 @@ class SubscriptionService:
                                                     PaymentIntentSchema(amount=int(
                                                         tier.price * 100 * create_subscription.number_month)))
         date = datetime.today() + relativedelta(months=+create_subscription.number_month)
-        SubscriptionRepository.create_subscription(database, user_to_be_subscribed.id, user.id, tier.tier, date)
+        SubscriptionRepository.create_subscription(database, user_to_be_subscribed.id, user.id, tier.tier, date, create_subscription.number_month)
 
     @staticmethod
-    def gist_random_subscription(database: Session, user: UserSchema,
+    def gift_random_subscription(database: Session, user: UserSchema,
                                  create_random_subscription: CreateRandomSubscriptionSchema):
         user_to_be_subscribed = UserRepository.get_user_by_username(create_random_subscription.subscribed_username)
 
@@ -87,7 +87,7 @@ class SubscriptionService:
         date = datetime.today() + relativedelta(months=+1)
         for to_be_subscribed_user in to_be_subscribed:
             SubscriptionRepository.create_subscription(database, user_to_be_subscribed.id, to_be_subscribed_user.follower_id,
-                                                       tier.tier, date, user.id)
+                                                       tier.tier, date, 1, user.id)
 
     @staticmethod
     def count_user_available_followers(database: Session, username: str) -> int:
@@ -150,8 +150,7 @@ class SubscriptionService:
             total_month = sum(sub.number_month for sub in subscriptions)
             ongoing = SubscriptionRepository.get_ongoing_subscription(database, subscription.subscribed_id,
                                                                       subscriber_id=subscription.subscriber_id)
-            total_month -= (ongoing.date_end.year - datetime.utcnow().year) * 12 + (
-                        ongoing.date_end.month - datetime.utcnow().month)
+            total_month -= (ongoing.date_end.year - datetime.utcnow().year) * 12 + (ongoing.date_end.month - datetime.utcnow().month)
 
             subscribed = UserRepository.get_user_by_id(subscription.subscribed_id)
 

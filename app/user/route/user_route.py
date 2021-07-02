@@ -118,8 +118,7 @@ async def subscribe_by_username(create_subscription: CreateSubscriptionSchema,
 
 
 @router.get('/subscribe/on_going', response_model=List[GetSubscriptionSchema], tags=['subscribe'])
-async def get_ongoing_subscriptions(database: Session = Depends(get_database), current_user: UserSchema = Depends(
-    UserService.get_current_active_user)) -> List[GetSubscriptionSchema]:
+async def get_ongoing_subscriptions(database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[GetSubscriptionSchema]:
     try:
         return SubscriptionService.get_ongoing_subscriptions(database, current_user)
     except Exception as exception:
@@ -161,7 +160,7 @@ async def gift_a_subscription_by_username(create_random_subscription: CreateRand
                                           current_user: UserSchema = Depends(
                                               UserService.get_current_active_user)) -> dict:
     try:
-        SubscriptionService.gist_random_subscription(database, current_user, create_random_subscription)
+        SubscriptionService.gift_random_subscription(database, current_user, create_random_subscription)
         return {'Status': 'Done'}
     except UserNotPartnerException as exception:
         raise HTTPException(status_code=403, detail=str(exception))
