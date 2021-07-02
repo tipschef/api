@@ -25,6 +25,7 @@ from app.user.schema.user.user_auth_schema import UserAuthSchema
 from app.user.schema.user.user_create_schema import UserCreateSchema
 from app.user.schema.user.user_detailed_schema import UserDetailedSchema
 from app.user.schema.user.user_schema import UserSchema
+from app.user.schema.user.user_shortened_schema import UserShortenedSchema
 from app.user.schema.user.user_update_schema import UserUpdateSchema
 
 
@@ -218,3 +219,7 @@ class UserService:
     @staticmethod
     def get_tiers(database: Session) -> List[TierSchema]:
         return [TierSchema.from_model(i) for i in TierRepository.get_tiers(database)]
+
+    @staticmethod
+    def get_highlighted(database: Session) -> List[UserShortenedSchema]:
+        return [UserShortenedSchema(username=i[0].username, profile_picture=i[1].path, is_partner=i[0].is_partner) for i in UserRepository.get_highlighted(database)]
