@@ -4,13 +4,15 @@ from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.book.exception.book_service_exception import BookIdNotFoundException, UniqueIdDoesNotMatch, \
-    CannotModifyOthersPeopleBookException
+    CannotModifyOthersPeopleBookException, AlreadyHaveBookException
+from app.book.schema.book_purchase_schema import BookPurchaseSchema
 from app.book.schema.book_schema import BookSchema
 from app.book.schema.create_book_schema import CreateBookSchema
 from app.book.schema.preview_schema import PreviewSchema
 from app.book.schema.template_list_schema import TemplateListSchema
 from app.book.service.book_service import BookService
 from app.database.service.database_instance import get_database
+from app.payment.exception.payment_service_exceptions import NoPaymentMethodException
 from app.user.schema.user.user_schema import UserSchema
 from app.user.service.user_service import UserService
 
@@ -82,6 +84,44 @@ async def get_book_by_recipe(recipe_id: int, database: Session = Depends(get_dat
 async def get_book_by_creator(username: str, database: Session = Depends(get_database)) -> List[BookSchema]:
     try:
         return BookService.get_book_by_creator(database, username)
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/check/{book_id}', response_model=dict, tags=['books', 'payment'])
+async def check_already_bought(book_id: int, database: Session = Depends(get_database),
+                               current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+    try:
+        return {'is_bought': BookService.check_already_bought(database, current_user, book_id)}
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/buy', response_model=List[BookPurchaseSchema], tags=['books', 'payment'])
+async def get_my_book_history(database: Session = Depends(get_database),
+                              current_user: UserSchema = Depends(UserService.get_current_active_user))\
+        -> List[BookPurchaseSchema]:
+    try:
+        return BookService.get_book_purchase_history_by_user(database, current_user)
+    except AlreadyHaveBookException as exception:
+        raise HTTPException(status_code=403, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/buy/{book_id}', response_model=dict, tags=['books', 'payment'])
+async def buy_book_by_id(book_id: int, database: Session = Depends(get_database),
+                         current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+    try:
+        BookService.buy_book_by_id(database, book_id, current_user)
+        return {'status': 'Done'}
+    except BookIdNotFoundException as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
+    except NoPaymentMethodException as exception:
+        raise HTTPException(status_code=400, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
