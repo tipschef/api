@@ -1,11 +1,12 @@
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 from passlib.context import CryptContext
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database.service.database_instance import get_database
+from app.recipe.model.media.media_model import MediaModel
 from app.user.model.user_model import UserModel
 from app.user.schema.user.user_create_schema import UserCreateSchema
 from app.user.schema.user.user_schema import UserSchema
@@ -35,6 +36,12 @@ class UserRepository:
         return database.query(UserModel).filter(UserModel.username.contains(username)).all()
 
     @staticmethod
+    def get_highlighted(database: Session) -> List[Tuple[UserModel, MediaModel]]:
+        return database.query(UserModel, MediaModel).join(MediaModel,
+                                                          MediaModel.id == UserModel.profile_media_id).filter(
+            UserModel.is_highlighted.is_(True)).all()
+
+    @staticmethod
     def create_user(database: Session, user: UserCreateSchema) -> UserModel:
         hashed_password = user.password.get_secret_value()
         db_user = UserModel(email=user.email, password=pwd_context.hash(hashed_password), username=user.username)
@@ -61,7 +68,8 @@ class UserRepository:
         database.commit()
 
     @staticmethod
-    def update_user_information_with_password(user_data: UserUpdateSchema, database: Session, user_to_update: UserSchema) -> None:
+    def update_user_information_with_password(user_data: UserUpdateSchema, database: Session,
+                                              user_to_update: UserSchema) -> None:
         try:
             database.query(UserModel).filter(UserModel.id == user_to_update.id).update(
                 {UserModel.username: user_data.username,
@@ -96,3 +104,31 @@ class UserRepository:
 
         except Exception as exception:
             print(exception)
+
+    @staticmethod
+    def set_user_to_partner(database: Session, user_id: int) -> None:
+        database.query(UserModel).filter(UserModel.id == user_id).update(
+            {UserModel.is_partner: True}
+        )
+        database.commit()
+
+    @staticmethod
+    def remove_user_partner(database: Session, user_id: int) -> None:
+        database.query(UserModel).filter(UserModel.id == user_id).update(
+            {UserModel.is_partner: False}
+        )
+        database.commit()
+
+    @staticmethod
+    def highlight_user_by_id(database: Session, user_id: int) -> None:
+        database.query(UserModel).filter(UserModel.id == user_id).update(
+            {UserModel.is_highlighted: True}
+        )
+        database.commit()
+
+    @staticmethod
+    def remove_highlight_user_by_id(database: Session, user_id: int) -> None:
+        database.query(UserModel).filter(UserModel.id == user_id).update(
+            {UserModel.is_highlighted: False}
+        )
+        database.commit()

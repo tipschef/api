@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional, Tuple
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.book.model.book_recipe_model import BookRecipeModel
@@ -9,6 +10,7 @@ from app.recipe.model.recipe.recipe_model import RecipeModel
 from app.recipe.schema.recipe.recipe_base_schema import RecipeBaseSchema
 from app.recipe.schema.recipe.recipe_schema import RecipeSchema
 from app.user.model.follow_model import FollowModel
+from app.user.model.user_model import UserModel
 
 
 @dataclass
@@ -102,7 +104,8 @@ class RecipeRepository:
     @staticmethod
     def get_followed_recipes(database: Session, user_id: int, per_page: int, page: int) -> List[RecipeModel]:
         sub_query = database.query(FollowModel.followed_id).filter(FollowModel.follower_id == user_id)
-        return database.query(RecipeModel).filter(RecipeModel.creator_id.in_(sub_query), RecipeModel.is_deleted.is_(False))\
+        sub_query_2 = database.query(UserModel.id).filter(UserModel.is_highlighted.is_(True))
+        return database.query(RecipeModel).filter(or_(RecipeModel.creator_id.in_(sub_query), RecipeModel.creator_id.in_(sub_query_2)), RecipeModel.is_deleted.is_(False)) \
                                           .order_by(RecipeModel.created_date.desc())\
                                           .limit(per_page)\
                                           .offset((page - 1) * per_page)\
