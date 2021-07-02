@@ -62,7 +62,7 @@ class RecipeService:
 
         asking_user = UserRepository.get_user_by_id(recipe.creator_id)
 
-        subscription = SubscriptionRepository.get_subscription(database, asking_user.id, current_user.id)
+        subscription = SubscriptionRepository.get_ongoing_subscription(database, asking_user.id, current_user.id)
 
         thumbnail = MediaRepository.get_media_by_id(database, recipe.thumbnail_id)
 
@@ -153,7 +153,7 @@ class RecipeService:
         if recipe is None:
             raise RecipeIdNotFoundException()
 
-        subscription = SubscriptionRepository.get_subscription(database, recipe.creator_id, asking_user.id)
+        subscription = SubscriptionRepository.get_ongoing_subscription(database, recipe.creator_id, asking_user.id)
         if not (recipe.creator_id == asking_user.id or recipe.min_tier == 0 or (
                 subscription is not None and recipe.min_tier <= subscription.tier)):
             raise UserNotAuthorized(min_tier=recipe.min_tier)

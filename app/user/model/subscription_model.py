@@ -15,3 +15,4 @@ class SubscriptionModel(Base):
     tier = Column(Integer, index=True)
     created_date = Column(DateTime, default=datetime.datetime.utcnow, index=True)
     date_end = Column(DateTime, index=True)
+    number_month = Column(Integer, index=True)

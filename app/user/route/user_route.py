@@ -16,6 +16,7 @@ from app.user.exception.user_route_exceptions import UserAlreadyExistsException,
 from app.user.schema.create_random_subscription_schema import CreateRandomSubscriptionSchema
 from app.user.schema.create_subscription_schema import CreateSubscriptionSchema
 from app.user.schema.dashboard_schema import DashboardSchema
+from app.user.schema.get_subscription_schema import GetSubscriptionSchema
 from app.user.schema.tier_schema import TierSchema
 from app.user.schema.user.user_auth_schema import UserAuthSchema
 from app.user.schema.user.user_create_schema import UserCreateSchema
@@ -110,6 +111,34 @@ async def subscribe_by_username(create_subscription: CreateSubscriptionSchema,
         raise HTTPException(status_code=400, detail=str(exception))
     except TierDoesNotExist as exception:
         raise HTTPException(status_code=400, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/subscribe/on_going', response_model=List[GetSubscriptionSchema], tags=['subscribe'])
+async def get_ongoing_subscriptions(database: Session = Depends(get_database), current_user: UserSchema = Depends(
+    UserService.get_current_active_user)) -> List[GetSubscriptionSchema]:
+    try:
+        return SubscriptionService.get_ongoing_subscriptions(database, current_user)
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/subscribe/gifted', response_model=List[GetSubscriptionSchema], tags=['subscribe'])
+async def get_gifted_subscriptions(database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[GetSubscriptionSchema]:
+    try:
+        return SubscriptionService.get_gifted_subscriptions(database, current_user)
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/subscribe/expired', response_model=List[GetSubscriptionSchema], tags=['subscribe'])
+async def get_expired_subscriptions(database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[GetSubscriptionSchema]:
+    try:
+        return SubscriptionService.get_expired_subscriptions(database, current_user)
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
