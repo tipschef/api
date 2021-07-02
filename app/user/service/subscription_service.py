@@ -88,7 +88,7 @@ class SubscriptionService:
                                                             tier.price * 100 * create_random_subscription.number)))
             date = datetime.today() + relativedelta(months=+1)
             for to_be_subscribed_user in to_be_subscribed:
-                SubscriptionRepository.create_subscription(database, user_to_be_subscribed.id, to_be_subscribed_user.id,
+                SubscriptionRepository.create_subscription(database, user_to_be_subscribed.id, to_be_subscribed_user.follower_id,
                                                            tier.tier, date, user.id)
         except NoPaymentMethodException:
             raise NoPaymentMethodException()
