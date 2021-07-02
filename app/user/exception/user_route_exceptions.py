@@ -66,4 +66,4 @@ class EmailAlreadyExistsException(Exception):
 class UserNotPartnerException(Exception):
 
     def __str__(self):
-        return f"User used for this request is not partner."
+        return "User used for this request is not partner."
