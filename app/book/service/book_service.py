@@ -7,7 +7,7 @@ from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
 from app.book.exception.book_service_exception import BookIdNotFoundException, UniqueIdDoesNotMatch, \
-    CannotModifyOthersPeopleBookException, AlreadyHaveBookException
+    CannotModifyOthersPeopleBookException, AlreadyHaveBookException, BookNumberLimitReachedException
 from app.book.repository.book_purchase_repository import BookPurchaseRepository
 from app.book.repository.book_recipe_repository import BookRecipeRepository
 from app.book.repository.book_repository import BookRepository
@@ -26,6 +26,7 @@ from app.recipe.repository.media.media_repository import MediaRepository
 from app.recipe.repository.recipe.recipe_repository import RecipeRepository
 from app.recipe.schema.media.media_schema import MediaSchema
 from app.recipe.schema.recipe.recipe_simple_schema import RecipeSimpleSchema
+from app.user.exception.user_route_exceptions import UserNotPartnerException
 from app.user.repository.user_repository import UserRepository
 from app.user.schema.user.user_schema import UserSchema
 
@@ -68,6 +69,16 @@ class BookService:
 
     @staticmethod
     def create_book(database: Session, create_book_schema: CreateBookSchema, current_user: UserSchema) -> BookSchema:
+
+        books = BookRepository.get_book_by_creator_id(database, current_user.id)
+        creator = UserRepository.get_user_by_id(current_user.id)
+
+        if len(books) >= 30:
+            raise BookNumberLimitReachedException()
+
+        if not creator.is_partner:
+            raise UserNotPartnerException()
+
         broker = get_broker_manager_service()
         u_id = str(uuid.uuid4())
         book_model = BookRepository.create_book(database, create_book_schema, current_user.id, u_id)
