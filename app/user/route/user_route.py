@@ -22,6 +22,7 @@ from app.user.schema.user.user_auth_schema import UserAuthSchema
 from app.user.schema.user.user_create_schema import UserCreateSchema
 from app.user.schema.user.user_detailed_schema import UserDetailedSchema
 from app.user.schema.user.user_schema import UserSchema
+from app.user.schema.user.user_shortened_schema import UserShortenedSchema
 from app.user.schema.user.user_update_schema import UserUpdateSchema
 from app.user.service.dashboard_service import DashboardService
 from app.user.service.follow_service import FollowService
@@ -272,6 +273,17 @@ async def get_recipes_from_username(username: str, per_page: int = 20, page: int
         return RecipeService.get_all_recipe_for_specific_user(database, current_user, username, per_page, page)
     except UsernameNotFound as exception:
         raise HTTPException(status_code=404, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/highlight', response_model=List[UserShortenedSchema], tags=['users'])
+async def get_highlights(database: Session = Depends(get_database),
+                         _: UserSchema = Depends(UserService.get_current_active_user)) \
+        -> List[UserShortenedSchema]:
+    try:
+        return UserService.get_highlighted(database)
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

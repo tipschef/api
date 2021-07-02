@@ -4,6 +4,12 @@ class BookIdNotFoundException(Exception):
         return 'The given book ID cannot be found'
 
 
+class AlreadyHaveBookException(Exception):
+
+    def __str__(self):
+        return 'You already bought this book'
+
+
 class UniqueIdDoesNotMatch(Exception):
 
     def __str__(self):

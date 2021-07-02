@@ -7,10 +7,12 @@ from fastapi import UploadFile
 from sqlalchemy.orm import Session
 
 from app.book.exception.book_service_exception import BookIdNotFoundException, UniqueIdDoesNotMatch, \
-    CannotModifyOthersPeopleBookException
+    CannotModifyOthersPeopleBookException, AlreadyHaveBookException
+from app.book.repository.book_purchase_repository import BookPurchaseRepository
 from app.book.repository.book_recipe_repository import BookRecipeRepository
 from app.book.repository.book_repository import BookRepository
 from app.book.schema.book_broker_schema import BookBrokerSchema
+from app.book.schema.book_purchase_schema import BookPurchaseSchema
 from app.book.schema.book_schema import BookSchema
 from app.book.schema.create_book_schema import CreateBookSchema
 from app.book.schema.template_list_schema import TemplateListSchema
@@ -18,6 +20,8 @@ from app.book.schema.template_schema import TemplateSchema
 from app.common.model.pdf import PDF
 from app.common.service.broker_manager_service import get_broker_manager_service
 from app.common.service.bucket_manager_service import get_bucket_manager_service
+from app.payment.schema.payment_intent_schema import PaymentIntentSchema
+from app.payment.service.payment_service import get_payment_service
 from app.recipe.repository.media.media_repository import MediaRepository
 from app.recipe.repository.recipe.recipe_repository import RecipeRepository
 from app.recipe.schema.media.media_schema import MediaSchema
@@ -151,6 +155,32 @@ class BookService:
 
         recipes = [i[0] for i in RecipeRepository.get_recipe_by_book_id(database, book.id)]
 
-        recipe_schemas = [RecipeSimpleSchema.from_recipe_model_with_thumbnail(i, MediaSchema.from_media_model(MediaRepository.get_media_by_id(database, i.thumbnail_id))) for i in recipes]
+        recipe_schemas = [RecipeSimpleSchema.from_recipe_model_with_thumbnail(i, MediaSchema.from_media_model(
+            MediaRepository.get_media_by_id(database, i.thumbnail_id))) for i in recipes]
 
         return BookSchema.from_book_model_and_recipes(book, recipe_schemas)
+
+    @staticmethod
+    def buy_book_by_id(database: Session, book_id: int, user: UserSchema) -> None:
+        book = BookRepository.get_book_by_id(database, book_id)
+
+        if book is None:
+            raise BookIdNotFoundException()
+        purchase = BookPurchaseRepository.find_purchase_by_user_id_and_book_id(database, user.id, book_id)
+        if purchase is not None:
+            raise AlreadyHaveBookException()
+
+        get_payment_service().create_payment_intent(database, user,
+                                                    PaymentIntentSchema(amount=int(book.price_euro * 100)))
+        BookPurchaseRepository.create_purchase(database, book_id, user.id)
+
+    @staticmethod
+    def get_book_purchase_history_by_user(database: Session, user: UserSchema) -> List[BookPurchaseSchema]:
+        response = (BookPurchaseRepository.get_purchase_by_user_id(database, user.id))
+
+        return [BookPurchaseSchema.from_model(x[0], x[1], UserRepository.get_user_by_id(x[0].user_id)) for x in response]
+
+    @staticmethod
+    def check_already_bought(database: Session, user: UserSchema, book_id: int) -> bool:
+        purchase = BookPurchaseRepository.find_purchase_by_user_id_and_book_id(database, user.id, book_id)
+        return purchase is not None

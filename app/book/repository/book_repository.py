@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from sqlalchemy.orm import Session
 
@@ -27,7 +27,7 @@ class BookRepository:
         return db_book
 
     @staticmethod
-    def get_book_by_id(database: Session, book_id: int) -> BookModel:
+    def get_book_by_id(database: Session, book_id: int) -> Optional[BookModel]:
         return database.query(BookModel).filter(BookModel.id == book_id, BookModel.is_deleted.is_(False)).first()
 
     @staticmethod
