@@ -5,7 +5,6 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from requests import Session
 
-from app.payment.exception.payment_service_exceptions import NoPaymentMethodException
 from app.payment.schema.payment_intent_schema import PaymentIntentSchema
 from app.payment.service.payment_service import get_payment_service
 from app.user.exception.subscription_service_exceptions import UserNotPartnerException, AlreadySubscribedToUser, \
@@ -41,14 +40,11 @@ class SubscriptionService:
         if tier is None:
             raise TierDoesNotExist(str(create_subscription.tier))
 
-        try:
-            get_payment_service().create_payment_intent(database, user,
-                                                        PaymentIntentSchema(amount=int(
-                                                            tier.price * 100 * create_subscription.number_month)))
-            date = datetime.today() + relativedelta(months=+create_subscription.number_month)
-            SubscriptionRepository.create_subscription(database, user_to_be_subscribed.id, user.id, tier.tier, date)
-        except NoPaymentMethodException:
-            raise NoPaymentMethodException()
+        get_payment_service().create_payment_intent(database, user,
+                                                    PaymentIntentSchema(amount=int(
+                                                        tier.price * 100 * create_subscription.number_month)))
+        date = datetime.today() + relativedelta(months=+create_subscription.number_month)
+        SubscriptionRepository.create_subscription(database, user_to_be_subscribed.id, user.id, tier.tier, date)
 
     @staticmethod
     def gist_random_subscription(database: Session, user: UserSchema,
@@ -82,16 +78,13 @@ class SubscriptionService:
         if tier is None:
             raise TierDoesNotExist(str(create_random_subscription.tier))
 
-        try:
-            get_payment_service().create_payment_intent(database, user,
-                                                        PaymentIntentSchema(amount=int(
-                                                            tier.price * 100 * create_random_subscription.number)))
-            date = datetime.today() + relativedelta(months=+1)
-            for to_be_subscribed_user in to_be_subscribed:
-                SubscriptionRepository.create_subscription(database, user_to_be_subscribed.id, to_be_subscribed_user.follower_id,
-                                                           tier.tier, date, user.id)
-        except NoPaymentMethodException:
-            raise NoPaymentMethodException()
+        get_payment_service().create_payment_intent(database, user,
+                                                    PaymentIntentSchema(amount=int(
+                                                        tier.price * 100 * create_random_subscription.number)))
+        date = datetime.today() + relativedelta(months=+1)
+        for to_be_subscribed_user in to_be_subscribed:
+            SubscriptionRepository.create_subscription(database, user_to_be_subscribed.id, to_be_subscribed_user.follower_id,
+                                                       tier.tier, date, user.id)
 
     @staticmethod
     def count_user_available_followers(database: Session, username: str) -> int:
