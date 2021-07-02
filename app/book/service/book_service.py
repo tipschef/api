@@ -92,7 +92,7 @@ class BookService:
             raise UniqueIdDoesNotMatch()
 
         filename = get_bucket_manager_service().save_file(
-            f'{book.creator_id}/book/{book.id}_pdf.pdf', file.file)
+            f'{book.creator_id}/book/{book.id}{uuid.uuid4()}_pdf.pdf', file.file)
 
         BookRepository.update_book_by_id(database, book_id, filename)
 
