@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from app.admin.exception.admin_service_exceptions import UserNotAdminException
 from app.admin.service.admin_service import AdminService
 from app.database.service.database_instance import get_database
+from app.payment.exception.payment_service_exceptions import NoAccountIdException
+from app.payment.service.payment_service import get_payment_service
 from app.user.schema.user.user_schema import UserSchema
 from app.user.service.user_service import UserService
 
@@ -21,6 +23,8 @@ async def set_user_as_partner(user_id: int, database: Session = Depends(get_data
     try:
         AdminService.set_user_to_partner(database, user_id, current_user)
         return {'status': 'Done'}
+    except NoAccountIdException as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
     except UserNotAdminException as exception:
         raise HTTPException(status_code=403, detail=str(exception))
     except Exception as exception:
@@ -62,6 +66,20 @@ async def remove_highlighted_people(user_id: int, database: Session = Depends(ge
         return {'status': 'Done'}
     except UserNotAdminException as exception:
         raise HTTPException(status_code=403, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.post('/payment', response_model=dict, tags=['admin', 'payment', 'payslip'])
+async def pay_user_by_id(database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+    try:
+        get_payment_service().pay_every_partner(database, current_user)
+        return {'status': 'Done'}
+    except UserNotAdminException as exception:
+        raise HTTPException(status_code=403, detail=str(exception))
+    except NoAccountIdException as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

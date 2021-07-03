@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from stripe import Account
@@ -9,6 +11,7 @@ from app.payment.schema.bank_account_schema import BankAccountSchema
 from app.payment.schema.card_schema import CardSchema
 from app.payment.schema.payment_intent_schema import PaymentIntentSchema
 from app.payment.schema.payment_schema import PaymentSchema
+from app.payment.schema.payslip_schema import PayslipSchema
 from app.payment.service.payment_service import get_payment_service
 from app.user.schema.user.user_auth_schema import UserAuthSchema
 from app.user.service.user_service import UserService
@@ -138,6 +141,21 @@ async def delete_my_account(database: Session = Depends(get_database),
         raise HTTPException(status_code=403, detail=str(exception))
     except NoAccountIdException as exception:
         raise HTTPException(status_code=404, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/payslip/', response_model=List[PayslipSchema], tags=['payment', 'payslip', 'partner'])
+async def get_my_payslips(database: Session = Depends(get_database),
+                          current_user: UserAuthSchema = Depends(
+                              UserService.get_current_active_user)) -> List[PayslipSchema]:
+    try:
+        if current_user.is_partner is True:
+            return get_payment_service().get_my_payslips(database, current_user)
+        raise UserNotCookException()
+    except UserNotCookException as exception:
+        raise HTTPException(status_code=403, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

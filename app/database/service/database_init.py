@@ -28,6 +28,7 @@ from app.book.model.book_purchase_model import BookPurchaseModel
 from app.book.model.book_recipe_model import BookRecipeModel
 
 from app.payment.model.payment_model import PaymentModel
+from app.payment.model.payslip_model import PayslipModel
 
 
 def init_database() -> None:

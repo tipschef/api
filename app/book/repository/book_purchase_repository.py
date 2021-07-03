@@ -27,8 +27,17 @@ class BookPurchaseRepository:
             .all()
 
     @staticmethod
-    def find_purchase_by_user_id_and_book_id(database: Session, user_id: int, book_id) -> Optional[BookPurchaseModel]:
+    def find_purchase_by_user_id_and_book_id(database: Session, user_id: int, book_id: int)\
+            -> Optional[BookPurchaseModel]:
         return database.query(BookPurchaseModel) \
             .filter(BookPurchaseModel.user_id == user_id) \
             .filter(BookPurchaseModel.book_id == book_id) \
             .first()
+
+    @staticmethod
+    def get_purchase_by_book_id(database: Session, user_id: int) -> List[Tuple[BookPurchaseModel, BookModel]]:
+        sub_query = database.query(BookModel.id).filter(BookModel.creator_id == user_id, BookModel.is_deleted.is_(False))
+        return database.query(BookPurchaseModel, BookModel)\
+            .join(BookModel, BookModel.id == BookPurchaseModel.book_id)\
+            .filter(BookPurchaseModel.book_id.in_(sub_query)) \
+            .all()
