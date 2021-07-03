@@ -223,3 +223,15 @@ class UserService:
     @staticmethod
     def get_highlighted(database: Session) -> List[UserShortenedSchema]:
         return [UserShortenedSchema(username=i[0].username, profile_picture=i[1].path, is_partner=i[0].is_partner) for i in UserRepository.get_highlighted(database)]
+
+    @staticmethod
+    def get_subscription_tier(database, current_user, username):
+        user = UserRepository.get_user_by_username(username)
+
+        subscription = SubscriptionRepository.get_ongoing_subscription(database, user.id, current_user.id)
+
+        if subscription is None:
+            return 0
+
+        return subscription.tier
+

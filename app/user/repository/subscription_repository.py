@@ -30,7 +30,9 @@ class SubscriptionRepository:
 
     @staticmethod
     def get_count_subscriber_by_subscribed_id(database: Session, subscribed_id: int) -> int:
-        return database.query(SubscriptionModel).filter(SubscriptionModel.subscribed_id == subscribed_id).count()
+        return database.query(SubscriptionModel).filter(SubscriptionModel.subscribed_id == subscribed_id)\
+            .filter(datetime.utcnow() <= SubscriptionModel.date_end) \
+            .filter(datetime.utcnow() >= SubscriptionModel.created_date).count()
 
     @staticmethod
     def get_ongoing_subscriber_by_subscribed_id(database: Session, subscribed_id: int) -> List[SubscriptionModel]:
@@ -63,9 +65,3 @@ class SubscriptionRepository:
         database.commit()
         database.refresh(db_subscribe)
         return db_subscribe
-
-    @staticmethod
-    def unsubscribe(database: Session, subscribed_id: int, subscriber_id: int) -> None:
-        database.query(SubscriptionModel).filter(SubscriptionModel.subscribed_id == subscribed_id,
-                                                 SubscriptionModel.subscriber_id == subscriber_id).delete()
-        database.commit()
