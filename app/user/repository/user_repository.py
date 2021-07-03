@@ -30,7 +30,6 @@ class UserRepository:
     def get_all_users(database: Session) -> List[UserModel]:
         return database.query(UserModel).all()
 
-
     @staticmethod
     def get_user_by_username(username: str) -> Optional[UserModel]:
         for database in get_database():
