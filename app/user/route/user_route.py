@@ -75,6 +75,19 @@ async def get_user_information(database: Session = Depends(get_database),
         raise HTTPException(status_code=500, detail='Server exception')
 
 
+@router.get('/subscription_tier/{username}', response_model=dict, tags=['users'])
+async def get_subscription_tier(username: str, database: Session = Depends(get_database),
+                                current_user: UserSchema = Depends(
+                                    UserService.get_current_active_user)) -> dict:
+    try:
+        return {'subscription_tier': UserService.get_subscription_tier(database, current_user, username)}
+    except UsernameNotFoundException as exception:
+        raise HTTPException(status_code=404, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
 @router.get('/search', response_model=List[UserDetailedSchema], tags=['users'])
 async def search_user(username: str, database: Session = Depends(get_database),
                       current_user: UserSchema = Depends(UserService.get_current_active_user)) \
@@ -118,7 +131,9 @@ async def subscribe_by_username(create_subscription: CreateSubscriptionSchema,
 
 
 @router.get('/subscribe/on_going', response_model=List[GetSubscriptionSchema], tags=['subscribe'])
-async def get_ongoing_subscriptions(database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[GetSubscriptionSchema]:
+async def get_ongoing_subscriptions(database: Session = Depends(get_database),
+                                    current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
+    GetSubscriptionSchema]:
     try:
         return SubscriptionService.get_ongoing_subscriptions(database, current_user)
     except Exception as exception:
@@ -127,7 +142,9 @@ async def get_ongoing_subscriptions(database: Session = Depends(get_database), c
 
 
 @router.get('/subscribe/gifted', response_model=List[GetSubscriptionSchema], tags=['subscribe'])
-async def get_gifted_subscriptions(database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[GetSubscriptionSchema]:
+async def get_gifted_subscriptions(database: Session = Depends(get_database),
+                                   current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
+    GetSubscriptionSchema]:
     try:
         return SubscriptionService.get_gifted_subscriptions(database, current_user)
     except Exception as exception:
@@ -136,7 +153,9 @@ async def get_gifted_subscriptions(database: Session = Depends(get_database), cu
 
 
 @router.get('/subscribe/expired', response_model=List[GetSubscriptionSchema], tags=['subscribe'])
-async def get_expired_subscriptions(database: Session = Depends(get_database), current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[GetSubscriptionSchema]:
+async def get_expired_subscriptions(database: Session = Depends(get_database),
+                                    current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
+    GetSubscriptionSchema]:
     try:
         return SubscriptionService.get_expired_subscriptions(database, current_user)
     except Exception as exception:

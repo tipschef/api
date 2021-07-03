@@ -8,7 +8,7 @@ secret_manager_service = get_secret_manager_service()
 secret_content = secret_manager_service.get_secret_json()
 
 DATABASE_NAME = 'tipschef'
-SQLALCHEMY_DATABASE_URL = f'mysql+pymysql://{secret_content.get("mysql_account")}:{secret_content.get("mysql_password")}@{secret_content.get("mysql_hostname")}/{DATABASE_NAME}'
+SQLALCHEMY_DATABASE_URL = f'mysql+pymysql://{secret_content.get("mysql_account")}:{secret_content.get("mysql_password")}@{secret_content.get("mysql_hostname")}:{secret_content.get("mysql_port")}/{DATABASE_NAME}'
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
