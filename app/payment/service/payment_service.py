@@ -1,20 +1,29 @@
 from dataclasses import dataclass
+from typing import List
 
 import stripe
 from fastapi import UploadFile
 from sqlalchemy.orm import Session
 from stripe import Account, Token, Customer, File
 
+from app.admin.exception.admin_service_exceptions import UserNotAdminException
+from app.book.repository.book_purchase_repository import BookPurchaseRepository
 from app.common.service.secret_manager_service import get_secret_manager_service
 from app.payment.exception.payment_service_exceptions import NoAccountIdException, NoPaymentMethodException
 from app.payment.repository.payment_repository import PaymentRepository
+from app.payment.repository.payslip_repository import PayslipRepository
 from app.payment.schema.bank_account_schema import BankAccountSchema
 from app.payment.schema.card_schema import CardSchema
 from app.payment.schema.customer_schema import CustomerSchema
 from app.payment.schema.payment_intent_schema import PaymentIntentSchema
 from app.payment.schema.payment_schema import PaymentSchema
+from app.payment.schema.payslip_schema import PayslipSchema
+from app.user.repository.subscription_repository import SubscriptionRepository
 from app.user.repository.user_repository import UserRepository
 from app.user.schema.user.user_schema import UserSchema
+
+PART_SUB = 0.4
+PART_BOOK = 0.6
 
 
 @dataclass
@@ -118,7 +127,7 @@ class PaymentService:
         if payment is None:
             PaymentRepository.create_payment(database, user.id, account.stripe_id, '')
         elif payment.account_id == '':
-            PaymentRepository.update_payment_customer_id(database, user.id, account.stripe_id)
+            PaymentRepository.update_payment_account_id(database, user.id, account.stripe_id)
 
         return account
 
@@ -216,6 +225,38 @@ class PaymentService:
         PaymentRepository.update_payment_account_id(database, user.id, '')
 
         return response
+
+    @staticmethod
+    def pay_every_partner(database: Session, user: UserSchema):
+        is_admin = UserRepository.get_user_by_id(user.id).is_admin
+        if not is_admin:
+            raise UserNotAdminException()
+        partners_to_pay = UserRepository.get_partners(database)
+        for partner_to_pay in partners_to_pay:
+            PaymentService._transfer_to_account(database, partner_to_pay.id)
+
+    @staticmethod
+    def _transfer_to_account(database: Session, user_to_pay_id: int):
+        payment = PaymentRepository.get_payment_by_user_id(database, user_to_pay_id)
+        if payment is None or payment.account_id == '':
+            raise NoAccountIdException()
+
+        subs = SubscriptionRepository.get_all_subscription_for_a_partner(database, user_to_pay_id)
+        total_cost_subs = sum([sub[1].price for sub in subs]) * PART_SUB
+
+        books = BookPurchaseRepository.get_purchase_by_book_id(database, user_to_pay_id)
+        total_cost_books = sum([book[1].price_euro for book in books]) * PART_BOOK
+        total = round((total_cost_subs + total_cost_books) * 100)
+        stripe.Transfer.create(amount=total,
+                               currency="eur",
+                               destination=payment.account_id)
+
+        PayslipRepository.create_payslip(database, user_to_pay_id, total)
+
+    @staticmethod
+    def get_my_payslips(database: Session, user: UserSchema) -> List[PayslipSchema]:
+        payslips = PayslipRepository.get_all_payslip_from_user_id(database, user.id)
+        return [PayslipSchema(user_id=x.user_id, amount=x.amount, created_date=x.created_date) for x in payslips]
 
 
 def get_payment_service() -> PaymentService:
