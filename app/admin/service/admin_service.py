@@ -1,10 +1,13 @@
 from dataclasses import dataclass
+from typing import List
 
 from sqlalchemy.orm import Session
 
 from app.admin.exception.admin_service_exceptions import UserNotAdminException
+from app.admin.schema.user_admin_schema import UserAdminSchema
 from app.payment.exception.payment_service_exceptions import NoAccountIdException
 from app.payment.repository.payment_repository import PaymentRepository
+from app.payment.service.payment_service import get_payment_service
 from app.user.repository.user_repository import UserRepository
 from app.user.schema.user.user_schema import UserSchema
 
@@ -34,12 +37,21 @@ class AdminService:
         return True
 
     @staticmethod
-    def highlight_user_by_id(database: Session, user_to_partner_id: int, user: UserSchema) -> bool:
+    def highlight_user_by_id(database: Session, user_to_highlight_id: int, user: UserSchema) -> bool:
         is_admin = UserRepository.get_user_by_id(user.id).is_admin
         if not is_admin:
             raise UserNotAdminException()
 
-        UserRepository.highlight_user_by_id(database, user_to_partner_id)
+        UserRepository.highlight_user_by_id(database, user_to_highlight_id)
+        return True
+
+    @staticmethod
+    def add_admin_user_by_id(database: Session, user_to_admin_id: int, user: UserSchema) -> bool:
+        is_admin = UserRepository.get_user_by_id(user.id).is_admin
+        if not is_admin:
+            raise UserNotAdminException()
+
+        UserRepository.add_admin_by_user_by_id(database, user_to_admin_id)
         return True
 
     @staticmethod
@@ -50,3 +62,18 @@ class AdminService:
 
         UserRepository.remove_highlight_user_by_id(database, user_to_partner_id)
         return True
+
+    @staticmethod
+    def get_users(database: Session, current_user: UserSchema) -> List[UserAdminSchema]:
+        is_admin = UserRepository.get_user_by_id(current_user.id).is_admin
+        if not is_admin:
+            raise UserNotAdminException()
+        user_admin_schema_list = []
+        users = UserRepository.get_all_users(database)
+
+        for user in users:
+            bank_information_is_filled = get_payment_service().has_payment_method(database, UserSchema.from_user_model(user))
+
+            user_admin_schema_list.append(UserAdminSchema.from_model(user, bank_information_is_filled))
+
+        return user_admin_schema_list
