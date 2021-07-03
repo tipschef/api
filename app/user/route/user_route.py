@@ -132,8 +132,7 @@ async def subscribe_by_username(create_subscription: CreateSubscriptionSchema,
 
 @router.get('/subscribe/on_going', response_model=List[GetSubscriptionSchema], tags=['subscribe'])
 async def get_ongoing_subscriptions(database: Session = Depends(get_database),
-                                    current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
-    GetSubscriptionSchema]:
+                                    current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[GetSubscriptionSchema]:
     try:
         return SubscriptionService.get_ongoing_subscriptions(database, current_user)
     except Exception as exception:
@@ -143,8 +142,7 @@ async def get_ongoing_subscriptions(database: Session = Depends(get_database),
 
 @router.get('/subscribe/gifted', response_model=List[GetSubscriptionSchema], tags=['subscribe'])
 async def get_gifted_subscriptions(database: Session = Depends(get_database),
-                                   current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
-    GetSubscriptionSchema]:
+                                   current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[GetSubscriptionSchema]:
     try:
         return SubscriptionService.get_gifted_subscriptions(database, current_user)
     except Exception as exception:
@@ -154,8 +152,7 @@ async def get_gifted_subscriptions(database: Session = Depends(get_database),
 
 @router.get('/subscribe/expired', response_model=List[GetSubscriptionSchema], tags=['subscribe'])
 async def get_expired_subscriptions(database: Session = Depends(get_database),
-                                    current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[
-    GetSubscriptionSchema]:
+                                    current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[GetSubscriptionSchema]:
     try:
         return SubscriptionService.get_expired_subscriptions(database, current_user)
     except Exception as exception:

@@ -68,7 +68,8 @@ class UserService:
         follow = FollowRepository.get_follow(database, followed_id=user.id, follower_id=current_user.id)
         following = follow is not None
 
-        subscription = SubscriptionRepository.get_ongoing_subscription(database, subscribed_id=user.id, subscriber_id=current_user.id)
+        subscription = SubscriptionRepository.get_ongoing_subscription(database, subscribed_id=user.id,
+                                                                       subscriber_id=current_user.id)
         subscribed = subscription is not None
 
         count_follower = FollowRepository.get_count_followers_by_followed_id(database, user.id)
@@ -234,4 +235,3 @@ class UserService:
             return 0
 
         return subscription.tier
-
