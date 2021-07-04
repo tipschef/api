@@ -14,6 +14,7 @@ class BookPurchaseSchema(BaseModel):
     path: str
     price_euro: float
     creator: str
+    is_partner: bool
 
     @staticmethod
     def from_model(book_purchase_model: BookPurchaseModel, book_model: BookModel, user_model: UserModel):
@@ -22,4 +23,5 @@ class BookPurchaseSchema(BaseModel):
                                   path=book_model.path,
                                   price_euro=book_model.price_euro,
                                   creator=user_model.username,
-                                  book_id=book_purchase_model.book_id)
+                                  book_id=book_purchase_model.book_id,
+                                  is_partner=user_model.is_partner)
