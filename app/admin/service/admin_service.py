@@ -72,7 +72,7 @@ class AdminService:
         users = UserRepository.get_all_users(database)
 
         for user in users:
-            bank_information_is_filled = get_payment_service().has_payment_method(database, UserSchema.from_user_model(user))
+            bank_information_is_filled = PaymentRepository.get_payment_by_user_id(database, user.id).account_id != ''
 
             user_admin_schema_list.append(UserAdminSchema.from_model(user, bank_information_is_filled))
 
