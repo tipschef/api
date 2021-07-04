@@ -27,6 +27,10 @@ class UserRepository:
         return database.query(UserModel).filter(UserModel.is_partner.is_(True)).all()
 
     @staticmethod
+    def get_all_users(database: Session) -> List[UserModel]:
+        return database.query(UserModel).all()
+
+    @staticmethod
     def get_user_by_username(username: str) -> Optional[UserModel]:
         for database in get_database():
             return database.query(UserModel).filter(UserModel.username == username).first()
@@ -123,6 +127,13 @@ class UserRepository:
     def highlight_user_by_id(database: Session, user_id: int) -> None:
         database.query(UserModel).filter(UserModel.id == user_id).update(
             {UserModel.is_highlighted: True}
+        )
+        database.commit()
+
+    @staticmethod
+    def add_admin_by_user_by_id(database: Session, user_id: int) -> None:
+        database.query(UserModel).filter(UserModel.id == user_id).update(
+            {UserModel.is_admin: True}
         )
         database.commit()
 

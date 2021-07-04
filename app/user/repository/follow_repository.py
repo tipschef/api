@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 from sqlalchemy.orm import Session
 
 from app.user.model.follow_model import FollowModel
+from app.user.model.user_model import UserModel
 
 
 @dataclass
@@ -37,5 +38,9 @@ class FollowRepository:
         database.commit()
 
     @staticmethod
-    def get_follow_by_follower_username(database: Session, follower_id: int) -> List[FollowModel]:
-        return database.query(FollowModel).filter(FollowModel.follower_id == follower_id).all()
+    def get_follow_by_follower_id(database: Session, follower_id: int) -> List[Tuple[FollowModel, UserModel]]:
+        return database.query(FollowModel, UserModel)\
+            .join(UserModel, UserModel.id == FollowModel.followed_id)\
+            .filter(FollowModel.follower_id == follower_id) \
+            .order_by(FollowModel.created_date.desc()) \
+            .all()

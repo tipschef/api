@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
+from app.admin.exception.admin_service_exceptions import UserNotAdminException
 from app.database.service.database_init import init_data
 from app.database.service.database_instance import get_database
 from app.recipe.exception.recipe_service_exceptions import RecipeIdNotFoundException, \
@@ -92,11 +93,14 @@ async def add_video_media_to_recipe(recipe_id: int, video: UploadFile = File(...
 
 
 @router.post('/init', response_model=dict, tags=['recipes', 'admin'])
-async def init_database(database: Session = Depends(get_database)) -> dict:
+async def init_database(database: Session = Depends(get_database),
+                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     # TODO : Vérifier que l'utilsateur courant est un administrateur
     try:
-        init_data(database)
+        init_data(database, current_user)
         return {'message': 'Done'}
+    except UserNotAdminException as exception:
+        raise HTTPException(status_code=403, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

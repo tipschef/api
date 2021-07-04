@@ -16,6 +16,7 @@ from app.user.exception.user_route_exceptions import UserAlreadyExistsException,
 from app.user.schema.create_random_subscription_schema import CreateRandomSubscriptionSchema
 from app.user.schema.create_subscription_schema import CreateSubscriptionSchema
 from app.user.schema.dashboard_schema import DashboardSchema
+from app.user.schema.follow_schema import FollowSchema
 from app.user.schema.get_subscription_schema import GetSubscriptionSchema
 from app.user.schema.tier_schema import TierSchema
 from app.user.schema.user.user_auth_schema import UserAuthSchema
@@ -52,7 +53,9 @@ async def create_user_route(user: UserCreateSchema, database: Session = Depends(
 
 
 @router.get('/id/{user_id}', response_model=UserDetailedSchema, tags=['users'])
-async def get_user_by_user_id(user_id: int, database: Session = Depends(get_database)) -> UserDetailedSchema:
+async def get_user_by_user_id(user_id: int, database: Session = Depends(get_database),
+                              _: UserSchema = Depends(UserService.get_current_active_user))\
+        -> UserDetailedSchema:
     try:
         return UserService.get_user_by_user_id(database, user_id)
     except UserIdNotFoundException as exception:
@@ -100,7 +103,8 @@ async def search_user(username: str, database: Session = Depends(get_database),
 
 
 @router.get('/subscribe/tier', response_model=List[TierSchema], tags=['subscribe'])
-async def get_tiers(database: Session = Depends(get_database)) -> List[TierSchema]:
+async def get_tiers(database: Session = Depends(get_database),
+                    _: UserSchema = Depends(UserService.get_current_active_user)) -> List[TierSchema]:
     try:
         return UserService.get_tiers(database)
     except Exception as exception:
@@ -162,7 +166,8 @@ async def get_expired_subscriptions(database: Session = Depends(get_database),
 
 @router.get('/subscribe/available/{username}', response_model=dict, tags=['subscribe'])
 async def count_user_available_followers(username: str,
-                                         database: Session = Depends(get_database)) -> dict:
+                                         database: Session = Depends(get_database),
+                                         _: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
         return {'available_followers': SubscriptionService.count_user_available_followers(database, username)}
     except Exception as exception:
@@ -192,6 +197,16 @@ async def gift_a_subscription_by_username(create_random_subscription: CreateRand
         raise HTTPException(status_code=400, detail=str(exception))
     except NotEnoughFollowersException as exception:
         raise HTTPException(status_code=400, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/follow', response_model=List[FollowSchema], tags=['users', 'follow'])
+async def get_my_follow(database: Session = Depends(get_database),
+                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[FollowSchema]:
+    try:
+        return FollowService.get_my_follows(database, current_user)
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')

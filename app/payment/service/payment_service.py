@@ -258,6 +258,11 @@ class PaymentService:
         payslips = PayslipRepository.get_all_payslip_from_user_id(database, user.id)
         return [PayslipSchema(user_id=x.user_id, amount=x.amount, created_date=x.created_date) for x in payslips]
 
+    @staticmethod
+    def has_payment_method(database: Session, user: UserSchema) -> bool:
+        customer = PaymentService.get_or_create_customer(database, user)
+        return customer.invoice_settings.default_payment_method is not None
+
 
 def get_payment_service() -> PaymentService:
     return PaymentService()
