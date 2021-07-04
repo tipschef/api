@@ -24,11 +24,7 @@ async def create_account_payment(payment: PaymentSchema, database: Session = Dep
                                  current_user: UserAuthSchema = Depends(
                                      UserService.get_current_active_user)) -> Account:
     try:
-        if current_user.is_partner is True:
-            return get_payment_service().create_account(database, payment, current_user)
-        raise UserNotCookException()
-    except UserNotCookException as exception:
-        raise HTTPException(status_code=403, detail=str(exception))
+        return get_payment_service().create_account(database, payment, current_user)
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
@@ -39,12 +35,8 @@ async def get_my_account_information(database: Session = Depends(get_database),
                                      current_user: UserAuthSchema = Depends(
                                          UserService.get_current_active_user)) -> PaymentSchema:
     try:
-        if current_user.is_partner is True:
-            account = get_payment_service().get_account_by_id(database, current_user)
-            return PaymentSchema.from_account(account)
-        raise UserNotCookException()
-    except UserNotCookException as exception:
-        raise HTTPException(status_code=403, detail=str(exception))
+        account = get_payment_service().get_account_by_id(database, current_user)
+        return PaymentSchema.from_account(account)
     except NoAccountIdException as exception:
         raise HTTPException(status_code=404, detail=str(exception))
     except Exception as exception:
@@ -56,11 +48,7 @@ async def get_my_account_information(database: Session = Depends(get_database),
 async def create_bank_account(bank_account: BankAccountSchema, database: Session = Depends(get_database),
                               current_user: UserAuthSchema = Depends(UserService.get_current_active_user)) -> Account:
     try:
-        if current_user.is_partner is True:
-            return get_payment_service().create_bank_account(database, current_user, bank_account)
-        raise UserNotCookException()
-    except UserNotCookException as exception:
-        raise HTTPException(status_code=403, detail=str(exception))
+        return get_payment_service().create_bank_account(database, current_user, bank_account)
     except NoAccountIdException as exception:
         raise HTTPException(status_code=404, detail=str(exception))
     except Exception as exception:
