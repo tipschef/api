@@ -189,7 +189,7 @@ class BookService:
     def get_book_purchase_history_by_user(database: Session, user: UserSchema) -> List[BookPurchaseSchema]:
         response = (BookPurchaseRepository.get_purchase_by_user_id(database, user.id))
 
-        return [BookPurchaseSchema.from_model(x[0], x[1], UserRepository.get_user_by_id(x[0].user_id)) for x in response]
+        return [BookPurchaseSchema.from_model(x[0], x[1], UserRepository.get_user_by_id(x[1].creator_id)) for x in response]
 
     @staticmethod
     def check_already_bought(database: Session, user: UserSchema, book_id: int) -> bool:
