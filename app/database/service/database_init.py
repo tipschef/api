@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+from app.admin.exception.admin_service_exceptions import UserNotAdminException
 from app.database.service.database import Base, engine
 from app.recipe.repository.recipe.recipe_category_repository import RecipeCategoryRepository
 from app.recipe.repository.recipe.recipe_cooking_type_repository import RecipeCookingTypeRepository
@@ -29,13 +30,19 @@ from app.book.model.book_recipe_model import BookRecipeModel
 
 from app.payment.model.payment_model import PaymentModel
 from app.payment.model.payslip_model import PayslipModel
+from app.user.repository.user_repository import UserRepository
+from app.user.schema.user.user_schema import UserSchema
 
 
 def init_database() -> None:
     Base.metadata.create_all(bind=engine)
 
 
-def init_data(database: Session) -> None:
+def init_data(database: Session, user: UserSchema) -> None:
+    is_admin = UserRepository.get_user_by_id(user.id).is_admin
+    if not is_admin:
+        raise UserNotAdminException()
+
     recipe_categories = ['Entrée', 'Plat principal', 'Dessert', 'Accompagnement', 'Amuse-bouche', 'Boisson', 'Confiserie', 'Sauce']
     RecipeCategoryRepository.create_recipe_categories(database, recipe_categories)
 

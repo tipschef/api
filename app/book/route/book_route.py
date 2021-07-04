@@ -72,7 +72,8 @@ async def post_cover(cover: UploadFile = File(...),
 
 
 @router.get('/recipe/{recipe_id}', response_model=List[BookSchema], tags=['books'])
-async def get_book_by_recipe(recipe_id: int, database: Session = Depends(get_database)) -> List[BookSchema]:
+async def get_book_by_recipe(recipe_id: int, database: Session = Depends(get_database),
+                             _: UserSchema = Depends(UserService.get_current_active_user)) -> List[BookSchema]:
     try:
         return BookService.get_book_by_recipe(database, recipe_id)
     except Exception as exception:
@@ -81,7 +82,8 @@ async def get_book_by_recipe(recipe_id: int, database: Session = Depends(get_dat
 
 
 @router.get('/user/{username}', response_model=List[BookSchema], tags=['books'])
-async def get_book_by_creator(username: str, database: Session = Depends(get_database)) -> List[BookSchema]:
+async def get_book_by_creator(username: str, database: Session = Depends(get_database),
+                              _: UserSchema = Depends(UserService.get_current_active_user)) -> List[BookSchema]:
     try:
         return BookService.get_book_by_creator(database, username)
     except Exception as exception:
@@ -128,7 +130,8 @@ async def buy_book_by_id(book_id: int, database: Session = Depends(get_database)
 
 
 @router.get('/{book_id}', response_model=BookSchema, tags=['books'])
-async def get_book_by_id(book_id: int, database: Session = Depends(get_database)) -> BookSchema:
+async def get_book_by_id(book_id: int, database: Session = Depends(get_database),
+                         _: UserSchema = Depends(UserService.get_current_active_user)) -> BookSchema:
     try:
         return BookService.get_book_by_id(database, book_id)
     except Exception as exception:
