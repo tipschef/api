@@ -14,7 +14,7 @@ class BrokerManagerService:
         self.publisher_client = pubsub_v1.PublisherClient()
         self.topic_name = 'projects/{project_id}/topics/{topic}'.format(
             project_id=os.getenv('PROJECT_ID'),
-            topic='topic-queue-dev-gcf-generate-book',
+            topic=f'topic-queue-{self.env}-gcf-generate-book',
         )
 
     def publish(self, message: str):
