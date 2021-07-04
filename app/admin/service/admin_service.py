@@ -7,7 +7,6 @@ from app.admin.exception.admin_service_exceptions import UserNotAdminException
 from app.admin.schema.user_admin_schema import UserAdminSchema
 from app.payment.exception.payment_service_exceptions import NoAccountIdException
 from app.payment.repository.payment_repository import PaymentRepository
-from app.payment.service.payment_service import get_payment_service
 from app.user.repository.user_repository import UserRepository
 from app.user.schema.user.user_schema import UserSchema
 
