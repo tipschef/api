@@ -1,3 +1,5 @@
+import os
+
 import uvicorn
 from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
@@ -6,8 +8,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_utils.tasks import repeat_every
 
+from app.admin.route.admin_route import router as admin_router
 from app.authentication.route.authentication_route import router as authentication_router
 from app.book.route.book_route import router as book_router
+from app.common.exception.exceptions import EnvironmentalVariableNotSetException
 from app.common.route.home_router import router as home_router
 from app.database.service.database_init import init_database
 from app.payment.route.payment_route import router as payment_router
@@ -16,24 +20,14 @@ from app.recipe.route.recipe_category_route import router as recipe_category_rou
 from app.recipe.route.recipe_cooking_type_route import router as recipe_cooking_type_route
 from app.recipe.route.recipe_route import router as recipe_route
 from app.user.route.user_route import router as user_router
-from app.admin.route.admin_route import router as admin_router
 from app.user.service.dashboard_service import DashboardService
 
-app = FastAPI()
 
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(_: Request, exc: RequestValidationError):
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=jsonable_encoder({'detail': exc.errors(), 'body': exc.body}),
-    )
-
-
-@app.on_event("startup")
-@repeat_every(seconds=60 * 60)  # 1 hour
-def get_partner_data() -> None:
-    DashboardService.create_dashboard_data()
+def check_env_variable() -> None:
+    if os.getenv('PROJECT_ID') is None:
+        raise EnvironmentalVariableNotSetException('PROJECT_ID')
+    if os.getenv('PROJECT_ENV') is None:
+        raise EnvironmentalVariableNotSetException('PROJECT_ENV')
 
 
 def setup_router() -> None:
@@ -53,15 +47,37 @@ def setup_database() -> None:
     init_database()
 
 
-def check_env_variable() -> None:
-    # TODO : CHECK ENV VARIABLE
-    pass
-
-
 def configure() -> None:
     check_env_variable()
     setup_database()
     setup_router()
+
+
+check_env_variable()
+
+DEBUG = bool(os.getenv('PROJECT_ENV') != 'prod')
+
+app = FastAPI(
+    version='1.0.0',
+    debug=DEBUG,
+    openapi_url='/openapi.json' if DEBUG else None,
+    docs_url='/docs' if DEBUG else None,
+    redoc_url='/redoc' if DEBUG else None,
+)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(_: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=jsonable_encoder({'detail': exc.errors(), 'body': exc.body}),
+    )
+
+
+@app.on_event("startup")
+@repeat_every(seconds=60 * 60)  # 1 hour
+def get_partner_data() -> None:
+    DashboardService.create_dashboard_data()
 
 
 configure()

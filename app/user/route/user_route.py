@@ -53,7 +53,9 @@ async def create_user_route(user: UserCreateSchema, database: Session = Depends(
 
 
 @router.get('/id/{user_id}', response_model=UserDetailedSchema, tags=['users'])
-async def get_user_by_user_id(user_id: int, database: Session = Depends(get_database)) -> UserDetailedSchema:
+async def get_user_by_user_id(user_id: int, database: Session = Depends(get_database),
+                              _: UserSchema = Depends(UserService.get_current_active_user))\
+        -> UserDetailedSchema:
     try:
         return UserService.get_user_by_user_id(database, user_id)
     except UserIdNotFoundException as exception:
@@ -101,7 +103,8 @@ async def search_user(username: str, database: Session = Depends(get_database),
 
 
 @router.get('/subscribe/tier', response_model=List[TierSchema], tags=['subscribe'])
-async def get_tiers(database: Session = Depends(get_database)) -> List[TierSchema]:
+async def get_tiers(database: Session = Depends(get_database),
+                    _: UserSchema = Depends(UserService.get_current_active_user)) -> List[TierSchema]:
     try:
         return UserService.get_tiers(database)
     except Exception as exception:
@@ -163,7 +166,8 @@ async def get_expired_subscriptions(database: Session = Depends(get_database),
 
 @router.get('/subscribe/available/{username}', response_model=dict, tags=['subscribe'])
 async def count_user_available_followers(username: str,
-                                         database: Session = Depends(get_database)) -> dict:
+                                         database: Session = Depends(get_database),
+                                         _: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
         return {'available_followers': SubscriptionService.count_user_available_followers(database, username)}
     except Exception as exception:
