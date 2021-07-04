@@ -16,6 +16,7 @@ from app.user.exception.user_route_exceptions import UserAlreadyExistsException,
 from app.user.schema.create_random_subscription_schema import CreateRandomSubscriptionSchema
 from app.user.schema.create_subscription_schema import CreateSubscriptionSchema
 from app.user.schema.dashboard_schema import DashboardSchema
+from app.user.schema.follow_schema import FollowSchema
 from app.user.schema.get_subscription_schema import GetSubscriptionSchema
 from app.user.schema.tier_schema import TierSchema
 from app.user.schema.user.user_auth_schema import UserAuthSchema
@@ -192,6 +193,16 @@ async def gift_a_subscription_by_username(create_random_subscription: CreateRand
         raise HTTPException(status_code=400, detail=str(exception))
     except NotEnoughFollowersException as exception:
         raise HTTPException(status_code=400, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.get('/follow', response_model=List[FollowSchema], tags=['users', 'follow'])
+async def get_my_follow(database: Session = Depends(get_database),
+                        current_user: UserSchema = Depends(UserService.get_current_active_user)) -> List[FollowSchema]:
+    try:
+        return FollowService.get_my_follows(database, current_user)
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
