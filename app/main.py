@@ -74,12 +74,6 @@ async def validation_exception_handler(_: Request, exc: RequestValidationError):
     )
 
 
-@app.on_event("startup")
-@repeat_every(seconds=60 * 60)  # 1 hour
-def get_partner_data() -> None:
-    DashboardService.create_dashboard_data()
-
-
 configure()
 
 app.add_middleware(
