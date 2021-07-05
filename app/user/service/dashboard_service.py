@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from sqlalchemy.orm import Session
 
 from app.admin.exception.admin_service_exceptions import UserNotAdminException
-from app.database.service.database_instance import get_database
 from app.recipe.repository.like_repository import LikeRepository
 from app.user.model.dashboard_model import DashboardModel
 from app.user.repository.dashboard_repository import DashboardRepository
@@ -23,8 +22,8 @@ class DashboardService:
         return [DashboardSchema.from_model(x) for x in elements]
 
     @staticmethod
-    def create_dashboard_data(database: Session, user: UserSchema):
-        is_admin = UserRepository.get_user_by_id(user.id).is_admin
+    def create_dashboard_data(database: Session, current_user: UserSchema):
+        is_admin = UserRepository.get_user_by_id(current_user.id).is_admin
         if not is_admin:
             raise UserNotAdminException()
         for user in UserRepository.get_partners(database):

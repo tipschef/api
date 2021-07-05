@@ -6,7 +6,6 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi_utils.tasks import repeat_every
 
 from app.admin.route.admin_route import router as admin_router
 from app.authentication.route.authentication_route import router as authentication_router
@@ -20,7 +19,6 @@ from app.recipe.route.recipe_category_route import router as recipe_category_rou
 from app.recipe.route.recipe_cooking_type_route import router as recipe_cooking_type_route
 from app.recipe.route.recipe_route import router as recipe_route
 from app.user.route.user_route import router as user_router
-from app.user.service.dashboard_service import DashboardService
 
 
 def check_env_variable() -> None:
