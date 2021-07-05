@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
-from app.database.service.database_instance import get_database
+from app.admin.exception.admin_service_exceptions import UserNotAdminException
 from app.recipe.repository.like_repository import LikeRepository
 from app.user.model.dashboard_model import DashboardModel
 from app.user.repository.dashboard_repository import DashboardRepository
@@ -22,11 +22,13 @@ class DashboardService:
         return [DashboardSchema.from_model(x) for x in elements]
 
     @staticmethod
-    def create_dashboard_data():
-        for database in get_database():
-            for user in UserRepository.get_partners(database):
-                like = LikeRepository.get_count_like_by_user_id(database, user.id)
-                sub = SubscriptionRepository.get_count_subscriber_by_subscribed_id(database, user.id)
-                follower = FollowRepository.get_count_followers_by_followed_id(database, user.id)
-                dashboard_element = DashboardModel(user_id=user.id, sub=sub, like=like, follower=follower)
-                DashboardRepository.create_entry(database, dashboard_element)
+    def create_dashboard_data(database: Session, current_user: UserSchema):
+        is_admin = UserRepository.get_user_by_id(current_user.id).is_admin
+        if not is_admin:
+            raise UserNotAdminException()
+        for user in UserRepository.get_partners(database):
+            like = LikeRepository.get_count_like_by_user_id(database, user.id)
+            sub = SubscriptionRepository.get_count_subscriber_by_subscribed_id(database, user.id)
+            follower = FollowRepository.get_count_followers_by_followed_id(database, user.id)
+            dashboard_element = DashboardModel(user_id=user.id, sub=sub, like=like, follower=follower)
+            DashboardRepository.create_entry(database, dashboard_element)

@@ -10,6 +10,7 @@ from app.database.service.database_instance import get_database
 from app.payment.exception.payment_service_exceptions import NoAccountIdException
 from app.payment.service.payment_service import get_payment_service
 from app.user.schema.user.user_schema import UserSchema
+from app.user.service.dashboard_service import DashboardService
 from app.user.service.user_service import UserService
 
 router = APIRouter(prefix='/admin')
@@ -109,6 +110,19 @@ async def pay_user_by_id(database: Session = Depends(get_database),
         raise HTTPException(status_code=403, detail=str(exception))
     except NoAccountIdException as exception:
         raise HTTPException(status_code=404, detail=str(exception))
+    except Exception as exception:
+        print(exception)
+        raise HTTPException(status_code=500, detail='Server exception')
+
+
+@router.post('/dashboard/generate', response_model=dict, tags=['admin', 'dashboard'])
+async def generate_dashboard_data(database: Session = Depends(get_database),
+                                  current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
+    try:
+        DashboardService.create_dashboard_data(database, current_user)
+        return {'status': 'Done'}
+    except UserNotAdminException as exception:
+        raise HTTPException(status_code=403, detail=str(exception))
     except Exception as exception:
         print(exception)
         raise HTTPException(status_code=500, detail='Server exception')
