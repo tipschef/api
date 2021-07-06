@@ -78,3 +78,19 @@ class AuthenticationService:
         if user is None:
             raise Exception
         return user
+
+    @staticmethod
+    def get_current_user_token(token: str) -> Optional[UserAuthSchema]:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            user_id = payload.get('sub')
+            if user_id is None:
+                return None
+        except ExpiredSignatureError:
+            return None
+        except JWTError as exception:
+            return None
+        user = UserAuthSchema.from_user_model(AuthenticationService.get_user_by_id(user_id))
+        if user is None:
+            raise Exception
+        return user
