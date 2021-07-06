@@ -71,8 +71,11 @@ class AdminService:
         users = UserRepository.get_all_users(database)
 
         for user in users:
-            bank_information_is_filled = PaymentRepository.get_payment_by_user_id(database, user.id).account_id != ''
-
+            banking_information = PaymentRepository.get_payment_by_user_id(database, user.id)
+            if banking_information is None or banking_information.account_id == '':
+                bank_information_is_filled = False
+            else:
+                bank_information_is_filled = True
             user_admin_schema_list.append(UserAdminSchema.from_model(user, bank_information_is_filled))
 
         return user_admin_schema_list
