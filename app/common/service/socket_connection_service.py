@@ -17,12 +17,10 @@ class SocketConnectionService:
         self.active_connections.remove(websocket)
 
     async def send_personal_message(self, message: str, websocket: WebSocket):
-        print(websocket.url)
         await websocket.send_text(message)
 
     async def send_to_received(self, message: SendMessageSchema):
         for connection in self.active_connections:
-            print(connection.url)
             if connection.url.__str__().split('/')[-2] == str(message.receiver_id):
                 await connection.send_text(message.json())
 
