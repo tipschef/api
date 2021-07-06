@@ -95,7 +95,6 @@ async def add_video_media_to_recipe(recipe_id: int, video: UploadFile = File(...
 @router.post('/init', response_model=dict, tags=['recipes', 'admin'])
 async def init_database(database: Session = Depends(get_database),
                         current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
-    # TODO : Vérifier que l'utilsateur courant est un administrateur
     try:
         init_data(database, current_user)
         return {'message': 'Done'}
@@ -202,7 +201,6 @@ async def update_a_recipe(recipe_id: int, recipe: RecipeSchema, database: Sessio
 async def like_a_recipe(recipe_id: int, database: Session = Depends(get_database),
                         current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
-        print('6')
         if LikeService.like_someone_by_id(database, current_user, recipe_id):
             return {'Status': 'Done'}
         return {'Status': 'You already Liked this recipe'}

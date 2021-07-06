@@ -9,7 +9,6 @@ from app.payment.exception.payment_service_exceptions import UserNotCookExceptio
     NoPaymentMethodException
 from app.payment.schema.bank_account_schema import BankAccountSchema
 from app.payment.schema.card_schema import CardSchema
-from app.payment.schema.payment_intent_schema import PaymentIntentSchema
 from app.payment.schema.payment_schema import PaymentSchema
 from app.payment.schema.payslip_schema import PayslipSchema
 from app.payment.service.payment_service import get_payment_service
@@ -84,20 +83,6 @@ async def detach_payment_method(database: Session = Depends(get_database),
                                 current_user: UserAuthSchema = Depends(UserService.get_current_active_user)) -> dict:
     try:
         get_payment_service().delete_payment_method(database, current_user)
-        return {'status': 'done'}
-    except NoPaymentMethodException as exception:
-        raise HTTPException(status_code=404, detail=str(exception))
-    except Exception as exception:
-        print(exception)
-        raise HTTPException(status_code=500, detail='Server exception')
-
-
-@router.post('/payment_intent/create', response_model=dict, tags=['payment'])
-async def create_payment_intent(payment_intent: PaymentIntentSchema, database: Session = Depends(get_database),
-                                current_user: UserAuthSchema = Depends(
-                                    UserService.get_current_active_user)) -> dict:
-    try:
-        get_payment_service().create_payment_intent(database, current_user, payment_intent)
         return {'status': 'done'}
     except NoPaymentMethodException as exception:
         raise HTTPException(status_code=404, detail=str(exception))

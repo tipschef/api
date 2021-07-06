@@ -49,16 +49,6 @@ async def get_my_books(database: Session = Depends(get_database),
         raise HTTPException(status_code=500, detail='Server exception')
 
 
-@router.post('/preview', response_model=dict, tags=['books'])
-async def preview(preview_schema: PreviewSchema,
-                  current_user: UserSchema = Depends(UserService.get_current_active_user)) -> dict:
-    try:
-        return {'url': BookService.preview_html(preview_schema.html, current_user)}
-    except Exception as exception:
-        print(exception)
-        raise HTTPException(status_code=500, detail='Server exception')
-
-
 @router.post('/cover', response_model=dict, tags=['books'])
 async def post_cover(cover: UploadFile = File(...),
                      current_user: UserSchema = Depends(

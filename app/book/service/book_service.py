@@ -1,6 +1,5 @@
 import uuid
 from dataclasses import dataclass
-from io import BytesIO
 from typing import List
 
 from fastapi import UploadFile
@@ -17,7 +16,6 @@ from app.book.schema.book_schema import BookSchema
 from app.book.schema.create_book_schema import CreateBookSchema
 from app.book.schema.template_list_schema import TemplateListSchema
 from app.book.schema.template_schema import TemplateSchema
-from app.common.model.pdf import PDF
 from app.common.service.broker_manager_service import get_broker_manager_service
 from app.common.service.bucket_manager_service import get_bucket_manager_service
 from app.payment.schema.payment_intent_schema import PaymentIntentSchema
@@ -51,15 +49,6 @@ class BookService:
             files_content.append(TemplateSchema.from_content_and_filename(file.download_as_text(), file.name))
 
         return files_content[1:]
-
-    @staticmethod
-    def preview_html(html: str, user: UserSchema) -> str:
-        pdf = PDF()
-        pdf.add_page()
-        pdf.write_html(html)
-        bucket = get_bucket_manager_service()
-        filename = bucket.save_file(f'preview/{user.id}_{uuid.uuid4()}.pdf', BytesIO(bytes(pdf.output())))
-        return filename
 
     @staticmethod
     def post_cover(user_id: int, cover: UploadFile) -> str:

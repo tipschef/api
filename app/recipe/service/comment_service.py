@@ -16,7 +16,7 @@ class CommentService:
 
     @staticmethod
     def get_comments_by_recipe_id(database: Session, recipe_id: int) -> List[CommentOutputBaseSchema]:
-        return[CommentOutputBaseSchema.from_comment_tuple(comment[0], comment[1], MediaRepository.get_media_by_id(database, comment[1].profile_media_id)) for comment in CommentRepository.get_all_comment_from_recipe(database, recipe_id)]
+        return [CommentOutputBaseSchema.from_comment_tuple(comment[0], comment[1], MediaRepository.get_media_by_id(database, comment[1].profile_media_id)) for comment in CommentRepository.get_all_comment_from_recipe(database, recipe_id)]
 
     @staticmethod
     def delete_comment_by_id(database: Session, user: UserSchema, comment_id: int, recipe_id: int) -> bool:
