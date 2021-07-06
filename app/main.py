@@ -86,10 +86,13 @@ configure()
 @app.websocket("/message/{user_id}/{token}")
 async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str, database: Session = Depends(get_database)):
     user = AuthenticationService.get_current_user_token(token)
+    print(user)
     if user is None or user.id != user_id:
         return
+    print('user checked')
     await manager.connect(websocket)
     try:
+        print('in try')
         while True:
             data = await websocket.receive_text()
             print(data)
