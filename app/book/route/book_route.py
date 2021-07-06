@@ -8,7 +8,6 @@ from app.book.exception.book_service_exception import BookIdNotFoundException, U
 from app.book.schema.book_purchase_schema import BookPurchaseSchema
 from app.book.schema.book_schema import BookSchema
 from app.book.schema.create_book_schema import CreateBookSchema
-from app.book.schema.preview_schema import PreviewSchema
 from app.book.schema.template_list_schema import TemplateListSchema
 from app.book.service.book_service import BookService
 from app.database.service.database_instance import get_database
