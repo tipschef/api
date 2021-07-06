@@ -88,7 +88,7 @@ class AuthenticationService:
                 return None
         except ExpiredSignatureError:
             return None
-        except JWTError as exception:
+        except JWTError:
             return None
         user = UserAuthSchema.from_user_model(AuthenticationService.get_user_by_id(user_id))
         if user is None:

@@ -3,6 +3,7 @@ import os
 
 import uvicorn
 from fastapi import FastAPI, Request, status, Depends
+from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +16,7 @@ from app.authentication.service.authentication_service import AuthenticationServ
 from app.book.route.book_route import router as book_router
 from app.common.exception.exceptions import EnvironmentalVariableNotSetException
 from app.common.route.home_router import router as home_router
+from app.common.service.socket_connection_service import manager
 from app.database.service.database_init import init_database
 from app.database.service.database_instance import get_database
 from app.payment.route.payment_route import router as payment_router
@@ -24,10 +26,6 @@ from app.recipe.route.recipe_cooking_type_route import router as recipe_cooking_
 from app.recipe.route.recipe_route import router as recipe_route
 from app.user.route.user_route import router as user_router
 from app.user.schema.received_message_schema import ReceivedMessageSchema
-
-from app.common.service.socket_connection_service import manager
-from fastapi import WebSocket, WebSocketDisconnect
-
 from app.user.service.discussion_service import DiscussionService
 
 
@@ -90,21 +88,17 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str, dat
     user = AuthenticationService.get_current_user_token(token)
     if user is None or user.id != user_id:
         return
-    else:
-        await manager.connect(websocket)
-        try:
-            while True:
-                data = await websocket.receive_text()
-                json_load = json.loads(json.loads(data))
-                received_message = ReceivedMessageSchema.from_json(json_load)
-                send_message = DiscussionService.add_message_to_discussion(database, received_message)
-                await manager.send_personal_message(send_message.json(), websocket)
-                await manager.send_to_received(send_message)
-        except WebSocketDisconnect:
-            manager.disconnect(websocket)
-            await manager.broadcast(f"Client #{user_id} left the chat")
-
-
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            json_load = json.loads(json.loads(data))
+            received_message = ReceivedMessageSchema.from_json(json_load)
+            send_message = DiscussionService.add_message_to_discussion(database, received_message)
+            await manager.send_personal_message(send_message.json(), websocket)
+            await manager.send_to_received(send_message)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
 
 app.add_middleware(
     CORSMiddleware,

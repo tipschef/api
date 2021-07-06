@@ -81,7 +81,7 @@ class DiscussionService:
         if discussion is None:
             raise NotFoundDiscussionException()
 
-        if current_user.id != discussion.first_user_id and current_user.id != discussion.second_user_id :
+        if current_user.id != discussion.first_user_id and current_user.id != discussion.second_user_id:
             raise CantReachOthersDiscussionException()
 
         if current_user.id == discussion.first_user_id:
@@ -89,7 +89,7 @@ class DiscussionService:
         if current_user.id == discussion.second_user_id:
             DiscussionRepository.update_second_user_date(database, discussion.id, datetime.datetime.now())
 
-        for messages in messages:
-            receiver_id = discussion.first_user_id if messages.id == discussion.second_user_id else discussion.second_user_id
-            message_schema.append(SendMessageSchema.from_data(receiver_id, messages.sender_id, messages.content, messages.created_date))
+        for message in messages:
+            receiver_id = discussion.first_user_id if message.id == discussion.second_user_id else discussion.second_user_id
+            message_schema.append(SendMessageSchema.from_data(receiver_id, message.sender_id, message.content, message.created_date))
         return message_schema
