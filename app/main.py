@@ -92,9 +92,13 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str, dat
     try:
         while True:
             data = await websocket.receive_text()
+            print(data)
             json_load = json.loads(json.loads(data))
+            print(json_load)
             received_message = ReceivedMessageSchema.from_json(json_load)
+            print(received_message)
             send_message = DiscussionService.add_message_to_discussion(database, received_message)
+            print(send_message)
             await manager.send_personal_message(send_message.json(), websocket)
             await manager.send_to_received(send_message)
     except WebSocketDisconnect:
